@@ -56,3 +56,72 @@ function covariance(d::Matrix{Float64}, L::Float64)
 	# add 1e-3 to ensure we are positive definite
 	return [c_xx+1e-3 c_xy; c_xy c_yy+1e-3]
 end
+
+# unscaled
+# g_f1 = grad_1 f
+# g_f2 = grad_2 f
+# u1, u2 are components of direction
+# basically,
+# [g_f1, g_f2]' * [u1, u2]'
+function directional_derivative(g_f1::VV_F, g_f2::VV_F, u1::VV_F, u2::VV_F)
+	N = length(g_f1)
+	dd = 0.0
+	for i = 1:N
+		dd += dot(g_f1[i], u1[i]) + dot(g_f2[i], u2[i])
+	end
+	return dd
+end
+function directional_derivative(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::VV_F, u2::VV_F)
+	#N = length(g_f1)
+	N = size(g_f1, 2)
+	dd = 0.0
+	for i = 1:N
+		#dd += dot(g_f1[i], u1[i]) + dot(g_f2[i], u2[i])
+		dd += g_f1[1,i]*u1[i][1] + g_f1[2,i]*u1[i][2]
+		dd += g_f2[1,i]*u2[i][1] + g_f2[2,i]*u2[i][2]
+	end
+	return dd
+end
+# TODO: turn this one into somepin correct for matrix{Float64} version
+function directional_derivative(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::Matrix{Float64}, u2::Matrix{Float64})
+	#N = length(g_f1)
+	N = size(g_f1, 2)
+	dd = 0.0
+	for i = 1:N
+		#dd += dot(g_f1[i], u1[i]) + dot(g_f2[i], u2[i])
+		dd += g_f1[1,i]*u1[1,i] + g_f1[2,i]*u1[2,i]
+		dd += g_f2[1,i]*u2[1,i] + g_f2[2,i]*u2[2,i]
+	end
+	return dd
+end
+# like above, but scales the direction first
+function scaled_dd(g_f1::VV_F, g_f2::VV_F, u1::VV_F, u2::VV_F)
+	dd = directional_derivative(g_f1, g_f2, u1, u2)
+	norm_factor = sqrt( dot(u1,u1) + dot(u2,u2) )
+	return dd / norm_factor
+end
+
+function scaled_dd(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::VV_F, u2::VV_F)
+	dd = directional_derivative(g_f1, g_f2, u1, u2)
+	norm_factor = sqrt( dot(u1,u1) + dot(u2,u2) )
+	return dd / norm_factor
+end
+
+function scaled_dd(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::Matrix{Float64}, u2::Matrix{Float64})
+	dd = directional_derivative(g_f1, g_f2, u1, u2)
+	norm_factor = sqrt( sum(u1.*u1) + sum(u2.*u2) )
+	return dd / norm_factor
+end
+
+
+# normalizes zd and vd
+# recall that zd and vd are together a direction, we normalize em both
+function normalizer!(zd::VV_F, vd::VV_F)
+	norm_factor = sqrt(dot(zd,zd) + dot(vd,vd))
+	for i = 1:length(zd)
+		zd[i][1] /= norm_factor
+		zd[i][2] /= norm_factor
+		vd[i][1] /= norm_factor
+		vd[i][2] /= norm_factor
+	end
+end

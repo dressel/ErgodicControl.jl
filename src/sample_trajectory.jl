@@ -8,23 +8,36 @@ using StatsBase: WeightVec, sample
 # creates a sample_trajectory
 function sample_trajectory(em::ErgodicManager, x0::T2F, h::Float64, N::Int)
 	xd = Array(Vector{Float64}, N+1)
+	points = Array(Vector{Float64}, N)
 	xd[1] = [x0[1], x0[2]]
 	ud = Array(Vector{Float64}, N+1)
 	bin_size = (em.bins, em.bins)
 
 	# first sample N points from e.phi
 	weights = WeightVec(vec(em.phi))
-
-	# if we don't use x0 and want slightly more randomness
-	#xi, yi = ind2sub(bin_size, sample(weights))
-	#xd[1] = [em.cell_size*(xi-.5), em.cell_size*(yi-.5)]
-
 	for n = 1:N
 		xi, yi = ind2sub(bin_size, sample(weights))
-		xd[n+1] = [em.cell_size*(xi-.5), em.cell_size*(yi-.5)]
-		ud[n] = (xd[n+1] - xd[n]) / h
+		points[n] = [em.cell_size*(xi-.5), em.cell_size*(yi-.5)]
 	end
-	ud[N+1] = ud[N]		# this one doesn't matter
+
+	# find a short path heuristically
+	#tsp_rand!(xd, points)
+	tsp_nn!(xd, points)
+
+	# compute controls
+	ud = compute_controls(xd, h)
 
 	return xd, ud
+end
+
+
+
+# simply takes the points as they are
+# this creates a shitty trajectory
+function tsp_rand!(xd::VV_F, points::VV_F)
+	n = 1
+	for p in points
+		xd[n+1] = p
+		n += 1
+	end
 end

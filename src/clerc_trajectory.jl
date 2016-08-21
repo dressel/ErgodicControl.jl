@@ -11,8 +11,9 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose=tru
 	clerc_trajectory(em, tm, xd0, ud0; verbose=verbose,max_iters=max_iters)
 end
 
-function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud0::VV_F; verbose::Bool=true, max_iters::Int=30)
+function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud0::VV_F; verbose::Bool=true, max_iters::Int=30, es_crit::Float64=0.003)
 
+	# let's not overwrite the initial trajectories
 	xd = deepcopy(xd0)
 	ud = deepcopy(ud0)
 	N = tm.N
@@ -30,40 +31,72 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, 
 		push!(c, z[:,n+1+1] == tm.A*z[:,n+1] + tm.B*v[:,n+1])
 	end
 
-	# TODO: really a termination condition
-	for i = 1:max_iters
+	if verbose; print_header(); end
+	i = 1
+	not_finished = true
+	es = 0.; cs = 0.; ts = 0.; dd = 0.; step_size = 0.
+	while not_finished
+
+		# Find gradients, descent step, and step size. Then descend!
 		gradients!(ad, bd, em, tm, xd, ud)
-
 		zd, vd = convex_descent(ad, bd, N, z, v, c)
-
-		#step_size = 1.0 / i
-		#step_size = 101.50 / sqrt(i)
 		step_size = .15 / sqrt(i)
+		descend!(xd, ud, zd, vd, step_size, N)
 
-		# printing statistics for testing
-		if verbose
-			iteration_report(i,ad,bd,zd,vd,xd,ud,step_size,em,tm)
-		end
+		# compute statistics and report
+		es, cs, ts = all_scores(em, tm, xd, ud)
+		dd = directional_derivative(ad, bd, zd, vd)
+		#sdd = scaled_dd(ad, bd, zd, vd)
+		if verbose; step_report(i, es, cs, ts, dd, step_size); end
 
-		simple_project!(xd, ud, zd, vd, step_size, N)
+		# check convergence
+		i += 1
+		not_finished = check_convergence(es,es_crit,i,max_iters,verbose)
 	end
+
+	# now that we are done, print a special finished report
+	if verbose
+		print_header()
+		if verbose; step_report(i-1, es, cs, ts, dd, step_size); end
+	end
+
 	return xd, ud
 end
 
-function iteration_report(i::Int,ad::Matrix{Float64},bd::Matrix{Float64},zd::Matrix{Float64},vd::Matrix{Float64},xd::VV_F,ud::VV_F, step_size::Float64, em::ErgodicManager, tm::TrajectoryManager)
-	println("i = ",i) 
-	dd = directional_derivative(ad, bd, zd, vd)
-	sdd = scaled_dd(ad, bd, zd, vd)
-	es = ergodic_score(em, xd)
-	ts = total_score(em, xd, ud, tm.T)
-	cs = control_score(ud, tm.R, tm.h)
-	println("es = ", es)
-	println("ts = ", ts)
-	println("cs = ", cs)
-	println("dd = ", dd)
-	println("scaled_dd = ", sdd)
-	println("alpha = ", step_size)
-	println("##################################")
+function check_convergence(es::Float64, es_crit::Float64, i::Int, max_iters::Int, verbose::Bool)
+	not_finished = true
+	if es < es_crit
+		not_finished = false
+		if verbose
+			println("reached ergodic criterion...")
+		end
+	end
+	if i > max_iters
+		not_finished = false
+		if verbose
+			println("max iterations reached...")
+		end
+	end
+	return not_finished
+end
+
+function step_report(i::Int, es::Float64, cs::Float64, ts::Float64, dd::Float64, step_size::Float64)
+	@printf " %-7i" i
+	@printf " %-14.7f" es
+	@printf " %-14.7f" cs
+	@printf " %-12.7f" ts
+	@printf " %-12.7f" dd
+	@printf " %-7.5f" step_size
+	println()
+end
+
+function print_header()
+	print_dashes()
+	println(" iter  |ergodic score |control score |total score |direc deriv |step size")
+	print_dashes()
+end
+function print_dashes()
+	println("--------------------------------------------------------------------------")
 end
 
 function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)
@@ -139,7 +172,8 @@ function convex_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Varia
 end
 
 
-function simple_project!(xd::VV_F, ud::VV_F, zd::Matrix{Float64}, vd::Matrix{Float64}, step_size::Float64, N::Int)
+# modifies (xd,ud) by moving step_size in direction (zd,vd)
+function descend!(xd::VV_F, ud::VV_F, zd::Matrix{Float64}, vd::Matrix{Float64}, step_size::Float64, N::Int)
 	for i = 0:(N-1)
 		ud[i+1][1] += step_size*vd[1,i+1]
 		ud[i+1][2] += step_size*vd[2,i+1]

@@ -65,121 +65,100 @@ function dynamics!(tm::TrajectoryManager, A::Matrix{Float64}, B::Matrix{Float64}
 end
 
 
-"""
-`decompose(em, traj::VV_F)`
-
-`decompose(em, traj::V_T2F)`
-
-Decomposes a set of positions into a set of `ck` Fourier coefficients.
-"""
-function decompose(em::ErgodicManager, traj::VV_F)
-	traj2 = [(traj[i][1], traj[i][2]) for i = 1:length(traj)]
-	return decompose(em, traj2)
+function initialize(em::ErgodicManager, tm::TrajectoryManager)
+	initialize(tm.initializer, em, tm)
 end
-function decompose(em::ErgodicManager, traj::V_T2F)
-	K = em.K
-	N = length(traj)-1
-	ck = zeros(K+1, K+1)
-	for k1 = 0:K
-		kpiL1 = k1 * pi / em.L
-		for k2 = 0:K
-			kpiL2 = k2 * pi / em.L
-			hk = em.hk[k1+1, k2+1]
-			fk_sum = 0.0
-			# now loop over time
-			for n = 0:N-1
-				xn = traj[n+1]
-				fk_sum += cos(kpiL1 * xn[1])  * cos(kpiL2 * xn[2])
-			end
-			ck[k1+1, k2+1] = fk_sum / (hk * N)
-		end
+
+# TODO: change rand() call so we can account for various
+function initialize(ri::RandomInitializer, em::ErgodicManager, tm::TrajectoryManager)
+	xd = [[tm.x0[1], tm.x0[2]] for i = 1:tm.N+1]
+	points = Array(Vector{Float64}, tm.N)
+	for i = 1:tm.N
+		points[i] = [rand(), rand()]
 	end
-	return ck
+
+	tsp_nn!(xd, points)
+
+	ud = compute_controls(xd, tm.h)
+
+	return xd, ud
 end
 
 
-"""
-`ergodic_score(em, traj::V_T2F)`
 
-First breaks down the trajectory into components ck.
-"""
-function ergodic_score(em::ErgodicManager, traj::V_T2F)
-	ck = decompose(em, traj)
-	return ergodic_score(em, ck)
-end
-function ergodic_score(em::ErgodicManager, traj::VV_F)
-	ck = decompose(em, traj)
-	return ergodic_score(em, ck)
-end
-function ergodic_score(em::ErgodicManager, ck::Matrix{Float64})
-	val = 0.0
-	for k1 = 0:em.K
-		for k2 = 0:em.K
-			d = em.phik[k1+1,k2+1] - ck[k1+1,k2+1]
-			val += em.Lambdak[k1+1,k2+1] * d * d
-		end
+# Assumes we our domain is 2d
+# corner 1 = 0,0
+# corner 2 = 1,0
+# corner 3 = 0,1
+# corner 4 = 1,1
+#function initialize(ci::CornerInitializer, em::ErgodicManager, x0::Vector{Float64}, h::Float64, N::Int)
+function initialize(ci::CornerInitializer, em::ErgodicManager, tm::TrajectoryManager)
+
+	# dimensionality of state space
+	x0 = tm.x0
+	n = length(x0)
+
+	# first corner: 0,0
+	dx1 = 0.0 - x0[1]
+	dy1 = 0.0 - x0[2]
+	dc1 = sqrt(dx1*dx1 + dy1*dy1)
+
+	# second corner: 1,0
+	dx2 = 1.0 - x0[1]
+	dy2 = 0.0 - x0[2]
+	dc2 = sqrt(dx2*dx2 + dy2*dy2)
+
+	# third corner: 0,1
+	dx3 = 0.0 - x0[1]
+	dy3 = 1.0 - x0[2]
+	dc3 = sqrt(dx3*dx3 + dy3*dy3)
+
+	# fourth corner: 1,1
+	dx4 = 1.0 - x0[1]
+	dy4 = 1.0 - x0[2]
+	dc4 = sqrt(dx4*dx4 + dy4*dy4)
+
+	bi = indmax([dc1,dc2,dc3,dc4])
+
+	bc = [0.,0.]
+	if bi == 2
+		bc = [1.,0.]
+	elseif bi == 3
+		bc = [0.,1.]
+	elseif bi == 4
+		bc = [1.,1.]
 	end
-	return val
-end
 
-"""
-`control_score(ud::VV_F, R, h)`
+	x_step = (bc[1] - x0[1]) / tm.N
+	y_step = (bc[2] - x0[2]) / tm.N
 
-Assumes only non-zero elements of `R` are corners.
-"""
-function control_score(ud::VV_F, R::Matrix{Float64}, h::Float64)
-	N = length(ud) - 1
-	cs = 0.0
-	for ui in ud[1:end-1]
-		cs += R[1,1] * ui[1] * ui[1]
-		cs += R[2,2] * ui[2] * ui[2]
+	xd = Array(Vector{Float64}, tm.N+1)
+	for i = 0:tm.N
+		xd[i+1] = zeros(n)
+		xd[i+1][1] = x0[1] + i*x_step
+		xd[i+1][2] = x0[2] + i*y_step
 	end
-	return 0.5 * h * cs
+
+	ud = compute_controls(xd, tm.h)
+
+	return xd, ud
 end
-control_score(ud::VV_F) = control_score(ud, eye(2), 1.0)
 
 
-"""
-`total_score(em, xd::VV_F, ud::VV_F, T::Float64)`
-
-Computes the total score `q*ergodic_score + sum_n h/2 un'Rn un`
-
-Currently assumes `q = 1.0` and `R = 0.01 * eye(2)`
-"""
-function total_score(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)
-	return q * ergodic_score(em, xd) + control_score(ud, tm.R, tm.h)
-end
-# TODO: actually get q and R from the correct place 
-function total_score(em::ErgodicManager, xd::VV_F, ud::VV_F, T::Float64)
-	q = 1.0
-	R = 0.01 * eye(2)
-	N = length(xd) - 1
-	h = T/N
-	return q * ergodic_score(em, xd) + control_score(ud, R, h)
-end
-# TODO: let's not make this so shitty...
-function total_score(em::ErgodicManager, xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, alpha::Float64, T::Float64)
-	xd2 = deepcopy(xd)
-	ud2 = deepcopy(ud)
-	for i = 1:length(xd2)
-		xd2[i][1] += alpha * zd[i][1]
-		xd2[i][2] += alpha * zd[i][2]
-
-		ud2[i][1] += alpha * vd[i][1]
-		ud2[i][2] += alpha * vd[i][2]
+#function initialize(ci::ConstantInitializer, em::ErgodicManager, x0::Vector{Float64}, h::Float64, N::Int)
+function initialize(ci::ConstantInitializer, em::ErgodicManager, tm::TrajectoryManager)
+	xd = Array(Vector{Float64}, tm.N+1)
+	ud = Array(Vector{Float64}, tm.N+1)
+	xd[1] = deepcopy(tm.x0)
+	ud[1] = ci.action
+	for i = 1:tm.N
+		xd[i+1] = tm.A*xd[i] + tm.B*ud[i]
+		ud[i+1] = deepcopy(ci.action)
 	end
-	return total_score(em, xd2, ud2, T)
+
+	return xd, ud
 end
 
-"""
-`all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)`
-"""
-function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)
-	es = ergodic_score(em, xd)
-	cs = control_score(ud, tm.R, tm.h)
-	ts = tm.q*es + cs
-	return es, cs, ts
-end
 
 
 # currently, I just move in a random direction
@@ -234,76 +213,3 @@ function tsp_nn!(xd::VV_F, points::VV_F)
 	end
 end
 
-
-
-"""
-`collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64)`
-
-`collect_info(em::ErgodicManager, traj::VV_F)`
-
-modifies em.phi according to some submodular.
-we don't use the last point in the trajectory
-
-decreases at rate `D/T`
-If you spend `h` time there, it is equivalent to `h*D/(h*N) = D/N`
-
-Returns total info picked up (a scalar value).
-"""
-function collect_info(em::ErgodicManager, traj::VV_F; steps=0)
-	N = length(traj) - 1
-	D = sum(em.phi)
-	d_rate = D/N
-	collect_info(em, traj, d_rate, steps=steps)
-end
-
-function collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64; steps=0)
-	N = length(traj) - 1
-	total_info = 0.0
-	if steps != 0
-		N = steps
-	end
-	for n = 0:(N-1)
-		xi,yi = find_cell(em, traj[n+1])
-
-		# if there is enough info, grab that shit yo
-		info_value = min(em.phi[xi,yi], d_rate)
-		em.phi[xi,yi] -= info_value
-		total_info += info_value
-	end
-	return total_info
-end
-export collect_info
-
-function find_cell(em::ErgodicManager, x::Vector{Float64})
-	x1 = round(Int, x[1] / em.cell_size, RoundDown) + 1
-	x2 = round(Int, x[2] / em.cell_size, RoundDown) + 1
-	if x1 > em.bins; x1 -= 1; end
-	if x2 > em.bins; x2 -= 1; end
-	return x1, x2
-end
-
-# 
-function optimal_info(em::ErgodicManager, N::Int)
-	d_rate = sum(em.phi)/N
-	num_cells = em.bins*em.bins
-	total_info = 0.0
-	for n = 1:N
-		best_i = 0
-		for i = 1:num_cells
-			if em.phi[i] > d_rate
-				best_i = i
-				total_info += d_rate
-				em.phi[best_i] -= d_rate
-				break
-			end
-		end
-		if best_i == 0  # we didn't find a good enough cell,
-			# loop over and find max
-			best_i = indmax(em.phi)
-			total_info += em.phi[best_i]
-			em.phi[best_i] = 0.0
-		end
-	end
-	return total_info
-end
-export optimal_info

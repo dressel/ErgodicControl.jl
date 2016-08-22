@@ -26,6 +26,9 @@ type TrajectoryManager
 	B::Matrix{Float64}
 
 	function TrajectoryManager(x0::Vector{Float64}, h::Float64, N::Int)
+		return TrajectoryManager(x0, h, N, RandomInitializer())
+	end
+	function TrajectoryManager(x0::Vector{Float64}, h::Float64, N::Int, i::Initializer)
 		tm = new()
 
 		# needed for all trajectories
@@ -39,7 +42,7 @@ type TrajectoryManager
 		tm.R = 0.01 * eye(2)
 		tm.q = 1.0
 		tm.max_iters = 30
-		tm.initializer = RandomInitializer()
+		tm.initializer = i
 
 		# dynamics stuff
 		tm.n = 2

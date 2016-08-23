@@ -7,8 +7,8 @@
 using Reel
 
 export gif
-function gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true)
-	frames = Frames(MIME("image/png"), fps=20)
+function gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true, fps::Int=20)
+	frames = Frames(MIME("image/png"), fps=fps)
 
 	# ok, loop through all xd
 	num_rows, n = size(trajectories)

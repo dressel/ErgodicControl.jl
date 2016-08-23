@@ -81,6 +81,41 @@ function hk_ij(em::ErgodicManager, k1::Int, k2::Int)
 	return sqrt(val)
 end
 
+
+######################################################################
+# Setting and computing phi
+######################################################################
+function phi!(em::ErgodicManager, dm::Vector{Float64}, ds::Matrix{Float64})
+	# first, generate d
+	half_size = em.cell_size / 2.0
+	d = zeros(em.bins, em.bins)
+	d_sum = 0.0
+	for xi = 1:em.bins
+		x = (xi-1)*em.cell_size + half_size
+		for yi = 1:em.bins
+			y = (yi-1)*em.cell_size + half_size
+			d[xi,yi] = my_pdf((x,y), dm, ds)
+			d_sum += d[xi,yi]
+		end
+	end
+	em.phi = d
+end
+
+function phi!(em::ErgodicManager, dm1::Vector{Float64}, ds1::Matrix{Float64}, dm2::Vector{Float64}, ds2::Matrix{Float64})
+	half_size = em.cell_size / 2.0
+	d = zeros(em.bins, em.bins)
+	d_sum = 0.0
+	for xi = 1:em.bins
+		x = (xi-1)*em.cell_size + half_size
+		for yi = 1:em.bins
+			y = (yi-1)*em.cell_size + half_size
+			d[xi,yi] = .5*my_pdf((x,y), dm1, ds1)+.5*my_pdf((x,y), dm2, ds2)
+			d_sum += d[xi,yi]
+		end
+	end
+	em.phi = d
+end
+
 ######################################################################
 # Computing Fourier coefficients
 ######################################################################
@@ -97,21 +132,13 @@ function phik!(em::ErgodicManager, d::Matrix{Float64})
 end
 
 function phik!(em::ErgodicManager, dm::Vector{Float64}, ds::Matrix{Float64})
-	# first, generate d
-	half_size = em.cell_size / 2.0
-	d = zeros(em.bins, em.bins)
-	d_sum = 0.0
-	for xi = 1:em.bins
-		x = (xi-1)*em.cell_size + half_size
-		for yi = 1:em.bins
-			y = (yi-1)*em.cell_size + half_size
-			#d[xi,yi] = my_pdf([x,y], dm, ds)
-			d[xi,yi] = my_pdf((x,y), dm, ds)
-			d_sum += d[xi,yi]
-		end
-	end
+	phi!(em, dm, ds)
+	phik!(em)
+end
 
-	phik!(em, d)
+function phik!(em::ErgodicManager, dm1::Vector{Float64}, ds1::Matrix{Float64}, dm2::Vector{Float64}, ds2::Matrix{Float64})
+	phi!(em, dm1, ds1, dm2, ds2)
+	phik!(em)
 end
 
 phik!(em::ErgodicManager) = phik!(em, em.phi)

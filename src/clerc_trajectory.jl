@@ -6,12 +6,12 @@
 
 using Convex, SCS
 
-function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose=true, max_iters::Int=30)
+function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=30)
 	xd0, ud0 = initialize(tm.initializer, em, tm)
-	clerc_trajectory(em, tm, xd0, ud0; verbose=verbose,max_iters=max_iters)
+	clerc_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters)
 end
 
-function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud0::VV_F; verbose::Bool=true, max_iters::Int=30, es_crit::Float64=0.003)
+function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud0::VV_F; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es_crit::Float64=0.003)
 
 	# let's not overwrite the initial trajectories
 	xd = deepcopy(xd0)
@@ -31,6 +31,12 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, 
 		push!(c, z[:,n+1+1] == tm.A*z[:,n+1] + tm.B*v[:,n+1])
 	end
 
+	# prepare for logging if need be 
+	if logging
+		outfile = open("temp.csv", "a")
+		save(outfile, xd)
+	end
+
 	if verbose; print_header(); end
 	i = 1
 	not_finished = true
@@ -48,6 +54,7 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, 
 		dd = directional_derivative(ad, bd, zd, vd)
 		#sdd = scaled_dd(ad, bd, zd, vd)
 		if verbose; step_report(i, es, cs, ts, dd, step_size); end
+		if logging; save(outfile, xd); end
 
 		# check convergence
 		i += 1
@@ -59,6 +66,8 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, 
 		print_header()
 		if verbose; step_report(i-1, es, cs, ts, dd, step_size); end
 	end
+
+	if logging; close(outfile); end
 
 	return xd, ud
 end
@@ -181,4 +190,15 @@ function descend!(xd::VV_F, ud::VV_F, zd::Matrix{Float64}, vd::Matrix{Float64}, 
 		xd[i+1][2] += step_size*zd[2,i+1]
 	end
 	ud[N+1] = ud[N]
+end
+
+function save(outfile::IOStream, xd::VV_F)
+	n = length(xd[1])
+	for xi in xd
+		for i = 1:(n-1)
+			wi = xi[i]
+			write(outfile,"$(xi[i]),")
+		end
+		write(outfile,"$(xi[n])\n")
+	end
 end

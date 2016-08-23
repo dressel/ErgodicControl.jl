@@ -1,6 +1,7 @@
 ######################################################################
 # max_trajectory.jl
 # tries to maximize phi(x) collected
+# TODO: this is a wreck. clean it so it looks like clerc_trajectory.
 ######################################################################
 
 function max_trajectory(mu::Vector{Float64}, Sigma::Matrix{Float64}, N::Int, h::Float64, x0::T2F)

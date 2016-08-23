@@ -6,6 +6,10 @@
 using StatsBase: WeightVec, sample
 
 # creates a sample_trajectory
+function sample_trajectory(em::ErgodicManager, tm::TrajectoryManager)
+	x0 = (tm.x0[1], tm.x0[2])
+	return sample_trajectory(em, x0, tm.h, tm.N)
+end
 function sample_trajectory(em::ErgodicManager, x0::T2F, h::Float64, N::Int)
 	xd = Array(Vector{Float64}, N+1)
 	points = Array(Vector{Float64}, N)

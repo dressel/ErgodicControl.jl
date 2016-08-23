@@ -45,8 +45,9 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, 
 
 		# Find gradients, descent step, and step size. Then descend!
 		gradients!(ad, bd, em, tm, xd, ud)
-		zd, vd = convex_descent(ad, bd, N, z, v, c)
+		zd, vd = convex_descent(ad, bd, N, z, v, c, tm.R[1,1])
 		step_size = .15 / sqrt(i)
+		#step_size = .01 / sqrt(i)
 		descend!(xd, ud, zd, vd, step_size, N)
 
 		# compute statistics and report
@@ -109,7 +110,7 @@ function print_dashes()
 end
 
 function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)
-	for n = (tm.N-1):-1:0
+	for n = 0:(tm.N-1)
 		an_x, an_y = compute_ans(em, xd, tm, n)
 		ad[1,n+1] = an_x
 		ad[2,n+1] = an_y
@@ -157,10 +158,10 @@ function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int
 end
 
 # descent direction using convex optimization
-function convex_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Variable, v::Variable, c::Vector{Constraint})
+function convex_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Variable, v::Variable, c::Vector{Constraint}, r::Float64)
 
 	# create the problem
-	problem = minimize(vecdot(a,z[:,1:N]) + vecdot(b,v) + sumsquares(z) + .01*sumsquares(v), c)
+	problem = minimize(vecdot(a,z[:,1:N]) + vecdot(b,v) + sumsquares(z) + r*sumsquares(v), c)
 
 	# solve the problem
 	solve!(problem, SCSSolver(verbose=0,max_iters=100000))

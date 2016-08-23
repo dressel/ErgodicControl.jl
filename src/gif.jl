@@ -5,8 +5,21 @@
 ######################################################################
 
 using Reel
-
 export gif
+
+"""
+`gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true, fps::Int=20)`
+
+Below is an example of how you might use this:
+
+`xd, ud = clerc_trajectory(em, tm, max_iters=100, logging=true)`
+
+`trajectories = readcsv("temp.csv")`
+
+`gif(em, trajectories, 101, fps=17)`
+
+The gif will be saved at `temp.gif`.
+"""
 function gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true, fps::Int=20)
 	frames = Frames(MIME("image/png"), fps=fps)
 

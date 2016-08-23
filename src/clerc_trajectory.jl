@@ -190,7 +190,9 @@ function descend!(xd::VV_F, ud::VV_F, zd::Matrix{Float64}, vd::Matrix{Float64}, 
 		xd[i+1][1] += step_size*zd[1,i+1]
 		xd[i+1][2] += step_size*zd[2,i+1]
 	end
-	ud[N+1] = ud[N]
+	xd[N+1][1] += step_size*zd[1,N+1]
+	xd[N+1][2] += step_size*zd[2,N+1]
+	#ud[N+1] = ud[N]
 end
 
 function save(outfile::IOStream, xd::VV_F)

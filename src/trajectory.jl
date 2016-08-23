@@ -151,30 +151,15 @@ end
 #function initialize(ci::ConstantInitializer, em::ErgodicManager, x0::Vector{Float64}, h::Float64, N::Int)
 function initialize(ci::ConstantInitializer, em::ErgodicManager, tm::TrajectoryManager)
 	xd = Array(Vector{Float64}, tm.N+1)
-	ud = Array(Vector{Float64}, tm.N+1)
+	ud = Array(Vector{Float64}, tm.N)
 	xd[1] = deepcopy(tm.x0)
-	ud[1] = ci.action
-	for i = 1:tm.N
+	ud[1] = deepcopy(ci.action)
+	for i = 1:(tm.N-1)
 		xd[i+1] = tm.A*xd[i] + tm.B*ud[i]
 		ud[i+1] = deepcopy(ci.action)
 	end
+	xd[N+1] = tm.A*xd[N] + tm.B*ud[N]
 
-	return xd, ud
-end
-
-
-
-# currently, I just move in a random direction
-# perhaps find direction to mean and move towards it
-function initialize_trajectory(N::Int, h::Float64, x0::T2F)
-	xd = [[x0[1], x0[2]] for i = 1:N+1]
-	#ud = [.01*ones(2) for i = 1:N+1]
-	#ud = [[.01,0.] for i = 1:N+1]
-	ud = [[.001,0.001] for i = 1:N+1]
-	for i = 2:N+1
-		xd[i][1] = xd[i-1][1] + h*ud[i-1][1]
-		xd[i][2] = xd[i-1][2] + h*ud[i-1][2]
-	end
 	return xd, ud
 end
 
@@ -184,11 +169,10 @@ end
 #  it should really go somewhere else
 function compute_controls(xd::VV_F, h::Float64)
 	N = length(xd) - 1
-	ud = Array(Vector{Float64}, N+1)
+	ud = Array(Vector{Float64}, N)
 	for n = 1:N
 		ud[n] = (xd[n+1] - xd[n]) / h
 	end
-	ud[N+1] = ud[N]   # this one doesn't matter
 	
 	return ud
 end

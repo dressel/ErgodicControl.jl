@@ -66,9 +66,10 @@ end
 Assumes only non-zero elements of `R` are corners.
 """
 function control_score(ud::VV_F, R::Matrix{Float64}, h::Float64)
-	N = length(ud) - 1
+	#N = length(ud) - 1
 	cs = 0.0
-	for ui in ud[1:end-1]
+	#for ui in ud[1:end-1]
+	for ui in ud
 		cs += R[1,1] * ui[1] * ui[1]
 		cs += R[2,2] * ui[2] * ui[2]
 	end

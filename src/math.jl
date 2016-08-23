@@ -125,3 +125,18 @@ function normalizer!(zd::VV_F, vd::VV_F)
 		vd[i][2] /= norm_factor
 	end
 end
+
+"""
+`mat2traj(mat::Matrix{Float64})`
+
+Converts a matrix to a vector of Float64 vectors (VV_F's).
+Assumes the matrix is `N x n`, where `n` is the dimensionality of the state space and `N` is the number of points in the trajectory.
+"""
+function mat2traj(mat::Matrix{Float64})
+	N,n = size(mat)
+	traj = Array(Vector{Float64}, N)
+	for i = 1:N
+		traj[i] = vec(mat[i,:])
+	end
+	return traj
+end

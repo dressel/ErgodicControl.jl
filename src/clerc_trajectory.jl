@@ -6,7 +6,7 @@
 
 using Convex, SCS
 
-function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es:crit::Float64=0.003)
+function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es_crit::Float64=0.003)
 	xd0, ud0 = initialize(tm.initializer, em, tm)
 	clerc_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit)
 end

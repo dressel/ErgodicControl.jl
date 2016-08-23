@@ -6,9 +6,9 @@
 
 using Convex, SCS
 
-function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=30)
+function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es:crit::Float64=0.003)
 	xd0, ud0 = initialize(tm.initializer, em, tm)
-	clerc_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters)
+	clerc_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit)
 end
 
 function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud0::VV_F; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es_crit::Float64=0.003)
@@ -166,18 +166,6 @@ function convex_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Varia
 	# solve the problem
 	solve!(problem, SCSSolver(verbose=0,max_iters=100000))
 
-	# put z and v into vec of vec format
-	#vd = Array(Vector{Float64}, N+1)
-	#zd = Array(Vector{Float64}, N+1)
-	#for i = 1:N
-	#	zd[i] = [z.value[1,i], z.value[2,i]]
-	#	vd[i] = [v.value[1,i], v.value[2,i]]
-	#end
-	## just repeat last control, it technically doesn't matter
-	#zd[N+1] = [z.value[1,N+1], z.value[2,N+1]]
-	#vd[N+1] = [v.value[1,N], v.value[2,N]]
-
-	#return zd, vd
 	return z.value, v.value
 end
 
@@ -192,9 +180,9 @@ function descend!(xd::VV_F, ud::VV_F, zd::Matrix{Float64}, vd::Matrix{Float64}, 
 	end
 	xd[N+1][1] += step_size*zd[1,N+1]
 	xd[N+1][2] += step_size*zd[2,N+1]
-	#ud[N+1] = ud[N]
 end
 
+# called if logging, not meant for general use
 function save(outfile::IOStream, xd::VV_F)
 	n = length(xd[1])
 	for xi in xd

@@ -162,7 +162,7 @@ function collect_info(em::ErgodicManager, traj::VV_F; steps=0, right::Bool=false
 	collect_info(em, traj, d_rate, steps=steps, right=right)
 end
 
-function collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64; steps=0; right::Bool=false)
+function collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64; steps=0, right::Bool=false)
 	N = length(traj) - 1
 	total_info = 0.0
 	if steps != 0

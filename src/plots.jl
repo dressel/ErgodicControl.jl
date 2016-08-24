@@ -14,12 +14,13 @@ The "gray" cmap option is light where there is most density.
 
 An `alpha` value closest to 1.0 is darker; less is more transparent.
 """
-function plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score::Bool=true)
+function plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score::Bool=true, right::Bool=false)
 	plot_trajectory(xd)
 	hold(true)
 	plot(em, alpha=alpha, cmap=cmap)
 	if show_score
-		es = ergodic_score(em, xd)
+		start_idx = right ? 1 : 0
+		es = ergodic_score(em, xd, start_idx)
 		title_string = "es = $(round(es,5))"
 		title(title_string)
 	end

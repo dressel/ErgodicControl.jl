@@ -6,17 +6,18 @@
 
 using Convex, SCS
 
-function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es_crit::Float64=0.003)
+function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es_crit::Float64=0.003,right::Bool=false)
 	xd0, ud0 = initialize(tm.initializer, em, tm)
-	clerc_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit)
+	clerc_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit,right=right)
 end
 
-function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud0::VV_F; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es_crit::Float64=0.003)
+function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud0::VV_F; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es_crit::Float64=0.003, right::Bool=false)
 
 	# let's not overwrite the initial trajectories
 	xd = deepcopy(xd0)
 	ud = deepcopy(ud0)
 	N = tm.N
+	start_idx = right ? 1 : 0
 
 	# matrices for gradients
 	ad = zeros(tm.n, N)
@@ -44,14 +45,14 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, 
 	while not_finished
 
 		# Find gradients, descent step, and step size. Then descend!
-		gradients!(ad, bd, em, tm, xd, ud)
-		zd, vd = convex_descent(ad, bd, N, z, v, c, tm.R[1,1])
+		gradients!(ad, bd, em, tm, xd, ud, start_idx)
+		zd, vd = convex_descent(ad, bd, N, z, v, c, tm.R[1,1], start_idx)
 		step_size = .15 / sqrt(i)
 		#step_size = .01 / sqrt(i)
 		descend!(xd, ud, zd, vd, step_size, N)
 
 		# compute statistics and report
-		es, cs, ts = all_scores(em, tm, xd, ud)
+		es, cs, ts = all_scores(em, tm, xd, ud, start_idx)
 		dd = directional_derivative(ad, bd, zd, vd)
 		#sdd = scaled_dd(ad, bd, zd, vd)
 		if verbose; step_report(i, es, cs, ts, dd, step_size); end
@@ -109,27 +110,30 @@ function print_dashes()
 	println("--------------------------------------------------------------------------")
 end
 
-function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)
+function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int)
+	ni =  1
 	for n = 0:(tm.N-1)
-		an_x, an_y = compute_ans(em, xd, tm, n)
-		ad[1,n+1] = an_x
-		ad[2,n+1] = an_y
+		an_x, an_y = compute_ans(em, xd, tm, n, start_idx)
+		ad[1,ni] = an_x
+		ad[2,ni] = an_y
 		# assume that only the first two state variables matter
 		# in fact, this isn't necessary if it's been initalized to zeros...
 		for i = 3:tm.n
-			ad[i,n+1] = 0.0
+			ad[i,ni] = 0.0
 		end
 
 		#bd[n+1] = tm.h * tm.R * ud[n+1]
 		# TODO: allow for different tm.m
-		bd[1,n+1] = tm.h * (tm.R[1,1]*ud[n+1][1] + tm.R[1,2]*ud[n+1][2])
-		bd[2,n+1] = tm.h * (tm.R[2,1]*ud[n+1][1] + tm.R[2,2]*ud[n+1][2])
+		bd[1,ni] = tm.h * (tm.R[1,1]*ud[ni][1] + tm.R[1,2]*ud[ni][2])
+		bd[2,ni] = tm.h * (tm.R[2,1]*ud[ni][1] + tm.R[2,2]*ud[ni][2])
+
+		ni += 1
 	end
 end
 
-function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int)
-	xnx = xd[n+1][1]
-	xny = xd[n+1][2]
+function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int)
+	xnx = xd[n + start_idx + 1][1]
+	xny = xd[n + start_idx + 1][2]
 	L = em.L
 
 	an_x = 0.0
@@ -143,8 +147,8 @@ function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int
 			dFk_dxn2 = -k2*pi*cos(k1*pi*xnx/L)*sin(k2*pi*xny/L) / (hk*L)
 
 			fk = 0.0
-			for i = 0:(tm.N-1)
-				x = xd[i+1]
+			for i in 0:(tm.N-1)
+				x = xd[i + start_idx + 1]
 				fk += cos(k1*pi*x[1]/L) * cos(k2*pi*x[2]/L) / hk
 			end
 			c = em.Lambdak[k1+1,k2+1] * (tm.h*fk/tm.T - em.phik[k1+1,k2+1])
@@ -158,10 +162,11 @@ function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int
 end
 
 # descent direction using convex optimization
-function convex_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Variable, v::Variable, c::Vector{Constraint}, r::Float64)
+function convex_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Variable, v::Variable, c::Vector{Constraint}, r::Float64, start_idx::Int)
 
 	# create the problem
-	problem = minimize(vecdot(a,z[:,1:N]) + vecdot(b,v) + sumsquares(z) + r*sumsquares(v), c)
+	N_range = (0:N-1) + start_idx + 1
+	problem = minimize(vecdot(a,z[:,N_range]) + vecdot(b,v) + sumsquares(z) + r*sumsquares(v), c)
 
 	# solve the problem
 	solve!(problem, SCSSolver(verbose=0,max_iters=100000))

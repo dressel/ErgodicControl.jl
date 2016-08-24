@@ -158,7 +158,7 @@ function initialize(ci::ConstantInitializer, em::ErgodicManager, tm::TrajectoryM
 		xd[i+1] = tm.A*xd[i] + tm.B*ud[i]
 		ud[i+1] = deepcopy(ci.action)
 	end
-	xd[N+1] = tm.A*xd[N] + tm.B*ud[N]
+	xd[tm.N+1] = tm.A*xd[tm.N] + tm.B*ud[tm.N]
 
 	return xd, ud
 end

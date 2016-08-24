@@ -6,15 +6,36 @@
 """
 `decompose(em, traj::VV_F)`
 
-`decompose(em, traj::V_T2F)`
-
 Decomposes a set of positions into a set of `ck` Fourier coefficients.
 """
-function decompose(em::ErgodicManager, traj::VV_F)
-	traj2 = [(traj[i][1], traj[i][2]) for i = 1:length(traj)]
-	return decompose(em, traj2)
-end
-function decompose(em::ErgodicManager, traj::V_T2F)
+#function decompose(em::ErgodicManager, traj::VV_F, start_idx::Int=0)
+#	traj2 = [(traj[i][1], traj[i][2]) for i = 1:length(traj)]
+#	return decompose(em, traj2, start_idx)
+#end
+#function decompose(em::ErgodicManager, traj::V_T2F)
+#	K = em.K
+#	N = length(traj)-1
+#	ck = zeros(K+1, K+1)
+#	for k1 = 0:K
+#		kpiL1 = k1 * pi / em.L
+#		for k2 = 0:K
+#			kpiL2 = k2 * pi / em.L
+#			hk = em.hk[k1+1, k2+1]
+#			fk_sum = 0.0
+#			# now loop over time
+#			for n = 0:N-1
+#				xn = traj[n+1]
+#				fk_sum += cos(kpiL1 * xn[1])  * cos(kpiL2 * xn[2])
+#			end
+#			ck[k1+1, k2+1] = fk_sum / (hk * N)
+#		end
+#	end
+#	return ck
+#end
+
+
+#function decompose(em::ErgodicManager, traj::V_T2F, start_idx::Int=0)
+function decompose(em::ErgodicManager, traj::VV_F, start_idx::Int=0)
 	K = em.K
 	N = length(traj)-1
 	ck = zeros(K+1, K+1)
@@ -26,7 +47,7 @@ function decompose(em::ErgodicManager, traj::V_T2F)
 			fk_sum = 0.0
 			# now loop over time
 			for n = 0:N-1
-				xn = traj[n+1]
+				xn = traj[n + start_idx + 1]
 				fk_sum += cos(kpiL1 * xn[1])  * cos(kpiL2 * xn[2])
 			end
 			ck[k1+1, k2+1] = fk_sum / (hk * N)
@@ -41,12 +62,8 @@ end
 
 First breaks down the trajectory into components ck.
 """
-function ergodic_score(em::ErgodicManager, traj::V_T2F)
-	ck = decompose(em, traj)
-	return ergodic_score(em, ck)
-end
-function ergodic_score(em::ErgodicManager, traj::VV_F)
-	ck = decompose(em, traj)
+function ergodic_score(em::ErgodicManager, traj::VV_F, start_idx::Int=0)
+	ck = decompose(em, traj, start_idx)
 	return ergodic_score(em, ck)
 end
 function ergodic_score(em::ErgodicManager, ck::Matrix{Float64})
@@ -66,9 +83,7 @@ end
 Assumes only non-zero elements of `R` are corners.
 """
 function control_score(ud::VV_F, R::Matrix{Float64}, h::Float64)
-	#N = length(ud) - 1
 	cs = 0.0
-	#for ui in ud[1:end-1]
 	for ui in ud
 		cs += R[1,1] * ui[1] * ui[1]
 		cs += R[2,2] * ui[2] * ui[2]
@@ -113,8 +128,14 @@ end
 """
 `all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)`
 """
-function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)
-	es = ergodic_score(em, xd)
+#function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, N_range::UnitRange{Int})
+#	es = ergodic_score(em, xd, N_range)
+#	cs = control_score(ud, tm.R, tm.h)
+#	ts = tm.q*es + cs
+#	return es, cs, ts
+#end
+function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int=0)
+	es = ergodic_score(em, xd, start_idx)
 	cs = control_score(ud, tm.R, tm.h)
 	ts = tm.q*es + cs
 	return es, cs, ts

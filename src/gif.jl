@@ -8,7 +8,7 @@ using Reel
 export gif
 
 """
-`gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true, fps::Int=20)`
+`gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true, fps::Int=20, right::Bool=false)`
 
 Below is an example of how you might use this:
 
@@ -20,7 +20,7 @@ Below is an example of how you might use this:
 
 The gif will be saved at `temp.gif`.
 """
-function gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true, fps::Int=20)
+function gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true, fps::Int=20, right::Bool=false)
 	frames = Frames(MIME("image/png"), fps=fps)
 
 	# ok, loop through all xd
@@ -29,7 +29,7 @@ function gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories
 
 	# start with the first trajectory...
 	xd = mat2traj(trajectories[1:N, :])
-	plot(em, xd, show_score=true)
+	plot(em, xd, show_score=show_score, right=right)
 	push!(frames, gcf())
 	close()
 

@@ -9,6 +9,7 @@ export kmeans_trajectory, random_trajectory
 export assign_step, mean_step
 export Initializer, RandomInitializer, CornerInitializer, ConstantInitializer, initialize
 export clerc_trajectory
+export example
 
 # to make some things easier
 typealias VV_F   Vector{Vector{Float64}}   # vector of vector of floats
@@ -28,5 +29,6 @@ include("sample_trajectory.jl")
 include("kmeans_trajectory.jl")
 include("plots.jl")
 include("gif.jl")
+include("example.jl")
 
 end # module

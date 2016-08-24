@@ -14,7 +14,7 @@ function sample_trajectory(em::ErgodicManager, x0::T2F, h::Float64, N::Int)
 	xd = Array(Vector{Float64}, N+1)
 	points = Array(Vector{Float64}, N)
 	xd[1] = [x0[1], x0[2]]
-	ud = Array(Vector{Float64}, N+1)
+	ud = Array(Vector{Float64}, N)
 	bin_size = (em.bins, em.bins)
 
 	# first sample N points from e.phi

@@ -35,7 +35,7 @@ Decomposes a set of positions into a set of `ck` Fourier coefficients.
 
 
 #function decompose(em::ErgodicManager, traj::V_T2F, start_idx::Int=0)
-function decompose(em::ErgodicManager, traj::VV_F, start_idx::Int=0)
+function decompose(em::ErgodicManager, traj::VV_F, start_idx::Int=1)
 	K = em.K
 	N = length(traj)-1
 	ck = zeros(K+1, K+1)
@@ -62,7 +62,7 @@ end
 
 First breaks down the trajectory into components ck.
 """
-function ergodic_score(em::ErgodicManager, traj::VV_F, start_idx::Int=0)
+function ergodic_score(em::ErgodicManager, traj::VV_F, start_idx::Int=1)
 	ck = decompose(em, traj, start_idx)
 	return ergodic_score(em, ck)
 end
@@ -134,7 +134,7 @@ end
 #	ts = tm.q*es + cs
 #	return es, cs, ts
 #end
-function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int=0)
+function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int=1)
 	es = ergodic_score(em, xd, start_idx)
 	cs = control_score(ud, tm.R, tm.h)
 	ts = tm.q*es + cs

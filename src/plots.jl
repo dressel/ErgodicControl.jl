@@ -5,7 +5,7 @@ using PyPlot
 
 export plot, plot_trajectory
 """
-`plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score=true)`
+`plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score=true, right=true)`
 
 `plot(em::ErgodicManager; alpha=1.0, cmap="Greys")`
 
@@ -14,7 +14,7 @@ The "gray" cmap option is light where there is most density.
 
 An `alpha` value closest to 1.0 is darker; less is more transparent.
 """
-function plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score::Bool=true, right::Bool=false)
+function plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score::Bool=true, right::Bool=true)
 	plot_trajectory(xd)
 	hold(true)
 	plot(em, alpha=alpha, cmap=cmap)

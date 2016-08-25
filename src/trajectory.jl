@@ -4,6 +4,8 @@
 # handles the generation of ergodic trajectories
 ######################################################################
 
+using StatsBase: WeightVec, sample
+
 type TrajectoryManager
 
 	# needed for all trajectories
@@ -86,6 +88,7 @@ function initialize(ri::RandomInitializer, em::ErgodicManager, tm::TrajectoryMan
 
 	return xd, ud
 end
+export compute_controls
 
 
 
@@ -94,7 +97,6 @@ end
 # corner 2 = 1,0
 # corner 3 = 0,1
 # corner 4 = 1,1
-#function initialize(ci::CornerInitializer, em::ErgodicManager, x0::Vector{Float64}, h::Float64, N::Int)
 function initialize(ci::CornerInitializer, em::ErgodicManager, tm::TrajectoryManager)
 
 	# dimensionality of state space
@@ -148,7 +150,6 @@ function initialize(ci::CornerInitializer, em::ErgodicManager, tm::TrajectoryMan
 end
 
 
-#function initialize(ci::ConstantInitializer, em::ErgodicManager, x0::Vector{Float64}, h::Float64, N::Int)
 function initialize(ci::ConstantInitializer, em::ErgodicManager, tm::TrajectoryManager)
 	xd = Array(Vector{Float64}, tm.N+1)
 	ud = Array(Vector{Float64}, tm.N)
@@ -159,6 +160,31 @@ function initialize(ci::ConstantInitializer, em::ErgodicManager, tm::TrajectoryM
 		ud[i+1] = deepcopy(ci.action)
 	end
 	xd[tm.N+1] = tm.A*xd[tm.N] + tm.B*ud[tm.N]
+
+	return xd, ud
+end
+
+
+function initialize(si::SampleInitializer, em::ErgodicManager, tm::TrajectoryManager)
+	xd = Array(Vector{Float64}, tm.N+1)
+	points = Array(Vector{Float64}, tm.N)
+	xd[1] = [x0[1], x0[2]]
+	ud = Array(Vector{Float64}, tm.N)
+	bin_size = (em.bins, em.bins)
+
+	# first sample N points from e.phi
+	weights = WeightVec(vec(em.phi))
+	for n = 1:tm.N
+		xi, yi = ind2sub(bin_size, sample(weights))
+		points[n] = [em.cell_size*(xi-.5), em.cell_size*(yi-.5)]
+	end
+
+	# find a short path heuristically
+	#tsp_rand!(xd, points)
+	tsp_nn!(xd, points)
+
+	# compute controls
+	ud = compute_controls(xd, tm.h)
 
 	return xd, ud
 end
@@ -200,3 +226,18 @@ function tsp_nn!(xd::VV_F, points::VV_F)
 	end
 end
 
+
+# simply takes the points as they are
+# this creates a shitty trajectory
+function tsp_rand!(xd::VV_F, points::VV_F)
+	n = 1
+	for p in points
+		xd[n+1] = p
+		n += 1
+	end
+end
+
+# creates a sample_trajectory
+function sample_trajectory(em::ErgodicManager, tm::TrajectoryManager)
+	return initialize(SampleInitializer(), em, tm)
+end

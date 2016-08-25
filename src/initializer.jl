@@ -6,11 +6,19 @@
 abstract Initializer
 
 """
-`ri = CornerInitializer()`
+`ri = RandomInitializer()`
 
-Takes a trajectory to the farthest corner.
+Random selection of points.
 """
 type RandomInitializer <: Initializer end
+
+
+"""
+`si = SampleInitializer()`
+
+Samples points from a distribution.
+"""
+type SampleInitializer <: Initializer end
 
 
 """

@@ -8,7 +8,7 @@ export TrajectoryManager, dynamics!, make_trajectory, sample_trajectory
 export kmeans_trajectory, random_trajectory
 export assign_step, mean_step
 export Initializer, initialize
-export RandomInitializer, CornerInitializer, ConstantInitializer, SampleInitializer, GreedyInitialier
+export RandomInitializer, CornerInitializer, ConstantInitializer, SampleInitializer, GreedyInitializer
 export clerc_trajectory
 export example
 

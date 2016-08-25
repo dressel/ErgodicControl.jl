@@ -29,6 +29,5 @@ include("max_trajectory.jl")
 include("kmeans_trajectory.jl")
 include("plots.jl")
 include("gif.jl")
-include("example.jl")
 
 end # module

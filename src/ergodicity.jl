@@ -6,6 +6,16 @@
 
 # kpixl is a (K+1 x bins) matrix, each entry storing cos(k*pi*x / L)
 #  this assumes some discretization
+"""
+`ErgodicManager(L::Float64, K::Int, bins::Int)`
+
+`ErgodicManager(example_name::ASCIIString; K::Int=5, bins::Int=100)`
+
+Valid `example_name` entries are:
+
+* "single gaussian"
+* "double gaussian"
+"""
 type ErgodicManager
 	K::Int
 	bins::Int				# number of bins per side
@@ -29,6 +39,27 @@ type ErgodicManager
 		Lambdak!(em)
 		kpixl!(em)
 		hk!(em)
+		return em
+	end
+
+	function ErgodicManager(example_name::ASCIIString; K::Int=5, bins::Int=100)
+		L = 1.0
+		em = ErgodicManager(L, K, bins)
+
+		if example_name == "single gaussian"
+			mu = [L/2.0, L/2.0]
+			Sigma = 0.03 * eye(2)
+			phik!(em, mu, Sigma)
+		elseif example_name == "double gaussian"
+			# Create Gaussian distribution and its coefficients
+			mu1 = [0.3, 0.7]
+			Sigma1 = 0.025* eye(2)
+			mu2 = [0.7, 0.3]
+			Sigma2 = 0.025* eye(2)
+			phik!(em, mu1, Sigma1, mu2, Sigma2)
+		else
+			error("example name not recognized")
+		end
 		return em
 	end
 end

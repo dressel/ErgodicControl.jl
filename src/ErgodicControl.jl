@@ -10,7 +10,6 @@ export assign_step, mean_step
 export Initializer, initialize
 export RandomInitializer, CornerInitializer, ConstantInitializer, SampleInitializer, GreedyInitializer
 export clerc_trajectory
-export example
 
 # to make some things easier
 typealias VV_F   Vector{Vector{Float64}}   # vector of vector of floats

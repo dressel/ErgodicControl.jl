@@ -59,14 +59,29 @@ end
 """
 `dynamics!(tm::TrajectoryManager, A::Matrix{Float64}, B::Matrix{Float64})`
 
+`dynamics!(tm::TrajectoryManager, d_type::ASCIIString)`
+
 Sets the dynamics for `tm`.
 This includes fields `tm.A`, `tm.B`, `tm.n` and `tm.m`.
 Dynamics are assumed to be linear and constant.
+
+User can optionally pass in string `d_type`.
+If this string is "double integrator", double integrator dynamics will be made.
 """
 function dynamics!(tm::TrajectoryManager, A::Matrix{Float64}, B::Matrix{Float64})
 	tm.n, tm.m = size(B)
 	tm.A = deepcopy(A)
 	tm.B = deepcopy(B)
+end
+
+function dynamics!(tm::TrajectoryManager, d_type::ASCIIString)
+	if d_type == "double integrator"
+		A = [1 0 tm.h 0; 0 1 0 tm.h; 0 0 1 0; 0 0 0 1]
+		B = [0 0; 0 0; tm.h 0; 0 tm.h]
+		dynamics!(tm, A, B)
+	else
+		error("Invalid d_type provided!")
+	end
 end
 
 

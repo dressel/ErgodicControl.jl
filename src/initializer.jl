@@ -37,3 +37,11 @@ Just takes a constant action.
 type ConstantInitializer <: Initializer
 	action::Vector{Float64}
 end
+
+"""
+`gi = GreedyInitializer()`
+
+Greedily goes to spot with maximum phi.
+Assumes phi decreases at a constant rate.
+"""
+type GreedyInitializer <: Initializer end

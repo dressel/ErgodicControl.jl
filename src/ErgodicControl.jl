@@ -7,7 +7,8 @@ export centroid, covariance
 export TrajectoryManager, dynamics!, make_trajectory, sample_trajectory
 export kmeans_trajectory, random_trajectory
 export assign_step, mean_step
-export Initializer, RandomInitializer, CornerInitializer, ConstantInitializer, initialize
+export Initializer, initialize
+export RandomInitializer, CornerInitializer, ConstantInitializer, SampleInitializer, GreedyInitialier
 export clerc_trajectory
 export example
 

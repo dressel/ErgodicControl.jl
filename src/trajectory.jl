@@ -256,3 +256,26 @@ end
 function sample_trajectory(em::ErgodicManager, tm::TrajectoryManager)
 	return initialize(SampleInitializer(), em, tm)
 end
+
+
+export greedy_trajectory
+function greedy_trajectory(em::ErgodicManager, tm::TrajectoryManager)
+	return initialize(GreedyInitializer(), em, tm)
+end
+function initialize(gi::GreedyInitializer, em::ErgodicManager, tm::TrajectoryManager)
+	d_rate = sum(em.phi)/tm.N
+	num_cells = em.bins*em.bins
+	total_info = 0.0
+	xd = Array(Vector{Float64}, tm.N+1)
+	xd[1] = deepcopy(tm.x0)
+	temp_phi = deepcopy(em.phi)
+	size_tuple = (em.bins, em.bins)
+	for n = 1:tm.N
+		bi = indmax(temp_phi)
+		xi, yi = ind2sub(size_tuple, bi)
+		xd[n+1] = [(xi-0.5)*em.cell_size, (yi-0.5)*em.cell_size]
+		temp_phi[bi] -= min(temp_phi[bi], d_rate)
+	end
+	ud = compute_controls(xd, tm.h)
+	return xd,ud
+end

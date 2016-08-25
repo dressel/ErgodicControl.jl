@@ -168,7 +168,7 @@ end
 function initialize(si::SampleInitializer, em::ErgodicManager, tm::TrajectoryManager)
 	xd = Array(Vector{Float64}, tm.N+1)
 	points = Array(Vector{Float64}, tm.N)
-	xd[1] = [x0[1], x0[2]]
+	xd[1] = deepcopy(tm.x0)
 	ud = Array(Vector{Float64}, tm.N)
 	bin_size = (em.bins, em.bins)
 

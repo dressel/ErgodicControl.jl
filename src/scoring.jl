@@ -4,9 +4,12 @@
 ######################################################################
 
 """
-`decompose(em, traj::VV_F)`
+`decompose(em, traj::VV_F, start_idx=1)`
 
 Decomposes a set of positions into a set of `ck` Fourier coefficients.
+
+If `start_idx` is 1, then the right Riemann sum is used.
+If `start_idx` is 0, then the left Riemann sum is used.
 """
 #function decompose(em::ErgodicManager, traj::VV_F, start_idx::Int=0)
 #	traj2 = [(traj[i][1], traj[i][2]) for i = 1:length(traj)]
@@ -54,6 +57,11 @@ function decompose(em::ErgodicManager, traj::VV_F, start_idx::Int=1)
 		end
 	end
 	return ck
+end
+
+function reconstruct(em::ErgodicManager, xd::VV_F, start_idx::Int=1)
+	ck = decompose(em, xd, start_idx)
+	return reconstruct(em, ck)
 end
 
 

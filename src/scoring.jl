@@ -194,8 +194,8 @@ function collect_info(phi::Matrix{Float64}, cell_size::Float64, traj::VV_F, d_ra
 		xi,yi = find_cell(bins, cell_size, traj[n+1])
 
 		# if there is enough info, grab that shit yo
-		info_value = min(em.phi[xi,yi], d_rate)
-		em.phi[xi,yi] -= info_value
+		info_value = min(phi[xi,yi], d_rate)
+		phi[xi,yi] -= info_value
 		total_info += info_value
 	end
 	return total_info

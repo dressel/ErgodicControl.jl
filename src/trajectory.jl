@@ -67,11 +67,17 @@ Dynamics are assumed to be linear and constant.
 
 User can optionally pass in string `d_type`.
 If this string is "double integrator", double integrator dynamics will be made.
+
+If the new `tm.n` (number of state dimensions) is greater than the length of `tm.x0`, `tm.x0` will be padded with zeros until it is of length `tm.n`.
+
 """
 function dynamics!(tm::TrajectoryManager, A::Matrix{Float64}, B::Matrix{Float64})
 	tm.n, tm.m = size(B)
 	tm.A = deepcopy(A)
 	tm.B = deepcopy(B)
+	while length(tm.x0) < tm.n
+		push!(tm.x0, 0.)
+	end
 end
 
 function dynamics!(tm::TrajectoryManager, d_type::ASCIIString)

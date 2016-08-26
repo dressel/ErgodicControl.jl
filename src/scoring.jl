@@ -163,14 +163,14 @@ If you spend `h` time there, it is equivalent to `h*D/(h*N) = D/N`
 
 Returns total info picked up (a scalar value).
 """
-function collect_info(em::ErgodicManager, traj::VV_F; steps=0, right::Bool=false)
+function collect_info(em::ErgodicManager, traj::VV_F; steps=0, right::Bool=true)
 	N = length(traj) - 1
 	D = sum(em.phi)
 	d_rate = D/N
 	collect_info(em, traj, d_rate, steps=steps, right=right)
 end
 
-function collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64; steps=0, right::Bool=false)
+function collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64; steps=0, right::Bool=true)
 	N = length(traj) - 1
 	total_info = 0.0
 	if steps != 0

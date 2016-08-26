@@ -89,6 +89,10 @@ end
 `control_score(ud::VV_F, R, h)`
 
 Assumes only non-zero elements of `R` are corners.
+
+`control_score(ud::VV_F, N::Int)`
+
+Computes sum_i=1^N dot(u,u). Does not divide by 2 or do anything else.
 """
 function control_score(ud::VV_F, R::Matrix{Float64}, h::Float64)
 	cs = 0.0
@@ -99,6 +103,14 @@ function control_score(ud::VV_F, R::Matrix{Float64}, h::Float64)
 	return 0.5 * h * cs
 end
 control_score(ud::VV_F) = control_score(ud, eye(2), 1.0)
+function control_score(ud::VV_F, N::Int)
+	cs = 0.0
+	for n = 1:N
+		cs += ud[n][1] * ud[n][1]
+		cs += ud[n][2] * ud[n][2]
+	end
+	return cs
+end
 
 
 """

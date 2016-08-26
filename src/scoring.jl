@@ -167,10 +167,20 @@ function collect_info(em::ErgodicManager, traj::VV_F; steps=0, right::Bool=true)
 	N = length(traj) - 1
 	D = sum(em.phi)
 	d_rate = D/N
-	collect_info(em, traj, d_rate, steps=steps, right=right)
+	collect_info(em.phi, em.cell_size, traj,d_rate,steps=steps, right=right)
+end
+function collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64; steps=0, right::Bool=true)
+	collect_info(em.phi, em.cell_size, traj,d_rate,steps=steps, right=right)
 end
 
-function collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64; steps=0, right::Bool=true)
+function collect_info(phi::Matrix{Float64}, cell_size::Float64, traj::VV_F; steps=0, right::Bool=true)
+	N = length(traj) - 1
+	D = sum(phi)
+	d_rate = D/N
+	collect_info(phi, cell_size, traj, d_rate, steps=steps, right=right)
+end
+function collect_info(phi::Matrix{Float64}, cell_size::Float64, traj::VV_F, d_rate::Float64; steps=0, right::Bool=true)
+	bins, rar = size(phi)
 	N = length(traj) - 1
 	total_info = 0.0
 	if steps != 0
@@ -192,11 +202,15 @@ function collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64; steps=0, 
 end
 export collect_info
 
+
 function find_cell(em::ErgodicManager, x::Vector{Float64})
-	x1 = round(Int, x[1] / em.cell_size, RoundDown) + 1
-	x2 = round(Int, x[2] / em.cell_size, RoundDown) + 1
-	if x1 > em.bins; x1 -= 1; end
-	if x2 > em.bins; x2 -= 1; end
+	return find_cell(em.bins, em.cell_size, x)
+end
+function find_cell(bins::Int, cell_size::Float64, x::Vector{Float64})
+	x1 = round(Int, x[1] / cell_size, RoundDown) + 1
+	x2 = round(Int, x[2] / cell_size, RoundDown) + 1
+	if x1 > bins; x1 -= 1; end
+	if x2 > bins; x2 -= 1; end
 	return x1, x2
 end
 

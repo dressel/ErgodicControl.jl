@@ -185,6 +185,21 @@ function initialize(ci::ConstantInitializer, em::ErgodicManager, tm::TrajectoryM
 	return xd, ud
 end
 
+# TODO: actually finish this
+function initialize(cci::CornerConstantInitializer, em::ErgodicManager, tm::TrajectoryManager)
+	xd = Array(Vector{Float64}, tm.N+1)
+	ud = Array(Vector{Float64}, tm.N)
+	xd[1] = deepcopy(tm.x0)
+	ud[1] = deepcopy(ci.action)
+	for i = 1:(tm.N-1)
+		xd[i+1] = tm.A*xd[i] + tm.B*ud[i]
+		ud[i+1] = deepcopy(ci.action)
+	end
+	xd[tm.N+1] = tm.A*xd[tm.N] + tm.B*ud[tm.N]
+
+	return xd, ud
+end
+
 
 function initialize(si::SampleInitializer, em::ErgodicManager, tm::TrajectoryManager)
 	xd = Array(Vector{Float64}, tm.N+1)
@@ -284,4 +299,27 @@ function initialize(gi::GreedyInitializer, em::ErgodicManager, tm::TrajectoryMan
 	end
 	ud = compute_controls(xd, tm.h)
 	return xd,ud
+end
+
+
+
+# moves to a point with a constant control input
+function initialize(initializer::PointInitializer, em::ErgodicManager, tm::TrajectoryManager)
+	xd = Array(Vector{Float64}, tm.N+1)
+	ud = Array(Vector{Float64}, tm.N)
+
+	# compute the direction and action we most go towards
+	dx = initializer.xd[1] - tm.x0[1]
+	dy = initializer.xd[2] - tm.x0[2]
+	u = initializer.mag * [dx, dy] / sqrt(dx*dx + dy*dy)
+
+	xd[1] = deepcopy(tm.x0)
+	ud[1] = deepcopy(u)
+	for i = 1:(tm.N-1)
+		xd[i+1] = tm.A*xd[i] + tm.B*ud[i]
+		ud[i+1] = deepcopy(u)
+	end
+	xd[tm.N+1] = tm.A*xd[tm.N] + tm.B*ud[tm.N]
+
+	return xd, ud
 end

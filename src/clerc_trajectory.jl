@@ -34,7 +34,7 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, 
 
 	# prepare for logging if need be 
 	if logging
-		outfile = open("temp.csv", "a")
+		outfile = open("temp.csv", "w")
 		save(outfile, xd)
 	end
 

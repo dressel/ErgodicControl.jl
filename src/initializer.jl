@@ -59,11 +59,20 @@ type GreedyInitializer <: Initializer end
 
 
 """
-`poi = PointInitializer(xd::Vector{Float64}, mag::Float64)`
+`poi = PointInitializer(xd::Vector{Float64})`
+
+Moves to point `xd`.
+"""
+type PointInitializer <: Initializer
+	xd::Vector{Float64}
+end
+
+"""
+`di = DirectionInitializer(xd::Vector{Float64}, mag::Float64)`
 
 Moves in the direction of point `xd` with magnitude `mag`.
 """
-type PointInitializer <: Initializer
+type DirectionInitializer <: Initializer
 	xd::Vector{Float64}
 	mag::Float64
 end

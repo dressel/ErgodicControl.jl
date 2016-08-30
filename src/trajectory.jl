@@ -155,19 +155,8 @@ function initialize(ci::CornerInitializer, em::ErgodicManager, tm::TrajectoryMan
 		bc = [1.,1.]
 	end
 
-	x_step = (bc[1] - x0[1]) / tm.N
-	y_step = (bc[2] - x0[2]) / tm.N
-
-	xd = Array(Vector{Float64}, tm.N+1)
-	for i = 0:tm.N
-		xd[i+1] = zeros(n)
-		xd[i+1][1] = x0[1] + i*x_step
-		xd[i+1][2] = x0[2] + i*y_step
-	end
-
-	ud = compute_controls(xd, tm.h)
-
-	return xd, ud
+	# could now do point initializer to the selected corner
+	return initialize(PointInitializer(bc), em, tm)
 end
 
 
@@ -239,6 +228,23 @@ function compute_controls(xd::VV_F, h::Float64)
 	return ud
 end
 
+"""
+controls2trajectory(tm::TrajectoryManager, ud::VV_F)
+
+computes trajectory from controls (and initial position)
+"""
+function controls2trajectory(tm::TrajectoryManager, ud::VV_F)
+	N = length(ud)
+	xd = Array(Vector{Float64}, N+1)
+
+	xd[1] = deepcopy(tm.x0)
+	for i = 1:tm.N
+		xd[i+1] = tm.A*xd[i] + tm.B*ud[i]
+	end
+
+	return xd
+end
+
 # uses nearest neighbors to heuristically solve tsp
 # tsp is traveling salesman problem
 function tsp_nn!(xd::VV_F, points::VV_F)
@@ -302,9 +308,40 @@ function initialize(gi::GreedyInitializer, em::ErgodicManager, tm::TrajectoryMan
 end
 
 
-
 # moves to a point with a constant control input
 function initialize(initializer::PointInitializer, em::ErgodicManager, tm::TrajectoryManager)
+
+	# compute the direction and action we most go towards
+	dx = initializer.xd[1] - tm.x0[1]
+	dy = initializer.xd[2] - tm.x0[2]
+	#x_step = (initializer.xd[1] - tm.x0[1]) / (tm.N * tm.h)
+	#y_step = (initializer.xd[2] - tm.x0[2]) / (tm.N * tm.h)
+	#u = [x_step, y_step]
+
+	# if we are double integrator, only apply the input once
+	ud = Array(Vector{Float64}, tm.N)
+	if tm.n > 2
+		den = tm.h * tm.h * (tm.N-1)
+		ud[1] = [dx/den, dy/den]
+		for i = 1:(tm.N-1)
+			ud[i+1] = zeros(2)
+		end
+	else  # single integrator
+		# TODO: can't I just make this tm.T?
+		den = tm.h * tm.N
+		u = [dx / den, dy / den]
+		for i = 1:tm.N
+			ud[i] = deepcopy(u)
+		end
+	end
+
+	xd = controls2trajectory(tm, ud)
+
+	return xd, ud
+end
+
+# moves to a point with a constant control input
+function initialize(initializer::DirectionInitializer, em::ErgodicManager, tm::TrajectoryManager)
 	xd = Array(Vector{Float64}, tm.N+1)
 	ud = Array(Vector{Float64}, tm.N)
 

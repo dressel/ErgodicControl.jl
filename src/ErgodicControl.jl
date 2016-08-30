@@ -10,6 +10,7 @@ export assign_step, mean_step
 export Initializer, initialize
 export RandomInitializer, CornerInitializer, ConstantInitializer, CornerConstantInitializer, SampleInitializer, GreedyInitializer, PointInitializer
 export clerc_trajectory
+export controls2trajectory
 
 # to make some things easier
 typealias VV_F   Vector{Vector{Float64}}   # vector of vector of floats

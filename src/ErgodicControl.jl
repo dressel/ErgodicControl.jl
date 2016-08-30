@@ -9,6 +9,7 @@ export kmeans_trajectory, random_trajectory
 export assign_step, mean_step
 export Initializer, initialize
 export RandomInitializer, CornerInitializer, ConstantInitializer, CornerConstantInitializer, SampleInitializer, GreedyInitializer, PointInitializer
+export DirectionInitializer
 export clerc_trajectory
 export controls2trajectory
 

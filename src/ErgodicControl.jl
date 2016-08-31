@@ -3,6 +3,7 @@ module ErgodicControl
 # export functions I've made
 export ErgodicManager, phik!, reconstruct, decompose
 export ergodic_score, control_score, total_score
+export control_effort
 export centroid, covariance
 export TrajectoryManager, dynamics!, make_trajectory, sample_trajectory
 export kmeans_trajectory, random_trajectory

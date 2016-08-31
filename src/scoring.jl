@@ -112,6 +112,16 @@ function control_score(ud::VV_F, N::Int)
 	return cs
 end
 
+function control_effort(ud::VV_F, N::Int)
+	cs = 0.0
+	for n = 1:N
+		udx = ud[n][1]
+		udy = ud[n][1]
+		cs += sqrt(udx + udy)
+	end
+	return cs
+end
+
 
 """
 `total_score(em, xd::VV_F, ud::VV_F, T::Float64)`

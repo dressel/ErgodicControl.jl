@@ -117,7 +117,7 @@ function control_effort(ud::VV_F, N::Int)
 	for n = 1:N
 		udx = ud[n][1]
 		udy = ud[n][1]
-		cs += sqrt(udx + udy)
+		cs += sqrt(udx*udx + udy*udy)
 	end
 	return cs
 end

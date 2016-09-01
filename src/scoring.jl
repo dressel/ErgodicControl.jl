@@ -233,6 +233,8 @@ function find_cell(bins::Int, cell_size::Float64, x::Vector{Float64})
 	x2 = round(Int, x[2] / cell_size, RoundDown) + 1
 	if x1 > bins; x1 -= 1; end
 	if x2 > bins; x2 -= 1; end
+	if x1 < 0; x1 += 0; end
+	if x2 < 0; x2 += 0; end
 	return x1, x2
 end
 

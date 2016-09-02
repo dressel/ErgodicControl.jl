@@ -112,7 +112,7 @@ function control_score(ud::VV_F, N::Int)
 	return cs
 end
 
-function control_effort(ud::VV_F, N::Int)
+function control_effort(ud::VV_F, N::Int=length(ud))
 	cs = 0.0
 	for n = 1:N
 		udx = ud[n][1]

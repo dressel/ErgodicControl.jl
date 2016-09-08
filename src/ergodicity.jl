@@ -129,6 +129,7 @@ function phi!(em::ErgodicManager, dm::Vector{Float64}, ds::Matrix{Float64})
 			d_sum += d[xi,yi]
 		end
 	end
+	normalize!(d)
 	em.phi = d
 end
 
@@ -144,6 +145,7 @@ function phi!(em::ErgodicManager, dm1::Vector{Float64}, ds1::Matrix{Float64}, dm
 			d_sum += d[xi,yi]
 		end
 	end
+	normalize!(d)
 	em.phi = d
 end
 

@@ -126,6 +126,18 @@ function normalizer!(zd::VV_F, vd::VV_F)
 	end
 end
 
+# "normalizes" a matrix so (bins * bins) / sum(mat) = 1.0
+function normalize!(mat::Matrix{Float64})
+	bins, rar = size(mat)
+	c = (bins * bins) / sum(mat)
+	for i = 1:bins
+		for j = 1:bins
+			mat[i,j] *= c
+		end
+	end
+end
+export normalize!
+
 """
 `mat2traj(mat::Matrix{Float64})`
 

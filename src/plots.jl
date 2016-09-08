@@ -33,6 +33,15 @@ function plot(em::ErgodicManager; alpha=1.0, cmap="Greys")
 	axis(a)
 end
 
+# assumes L = 1.0
+function plot(mat::Matrix{Float64}; alpha=1.0, cmap="Greys")
+	L = 1.0
+	a = [0,L,0,L]
+	imshow(mat', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+	#labels()	# from an old package
+	axis(a)
+end
+
 # what other stuff do we need here?
 # only marks, colors, etc
 function plot_trajectory(xd::VV_F; lw::Float64=1.0, ms::Float64=6.0)

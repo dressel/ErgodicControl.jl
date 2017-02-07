@@ -18,6 +18,7 @@ export controls2trajectory
 typealias VV_F   Vector{Vector{Float64}}   # vector of vector of floats
 typealias V_T2F  Vector{NTuple{2,Float64}} # vector of tuples of 2 floats
 typealias VMF64  Vector{Matrix{Float64}}   # vector of matrix of floats
+typealias VM_F  Vector{Matrix{Float64}}   # vector of matrix of floats
 typealias T2F      NTuple{2, Float64}    # x, y
 
 include("math.jl")

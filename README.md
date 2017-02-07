@@ -7,7 +7,7 @@ In the future, I hope to add support for non-linear systems and adding additiona
 
 ## ErgodicManager
 The `ErgodicManager` type handles a lot of the stuff we care about.
-It stores the distribution phi, the coefficients phik, etc.
+It stores the distribution `phi`, the coefficients `phi_k`, etc.
 It can be constructed by providing the side length of a square `L`, the number of coefficients `K`, and the number of bins per side length used in discretization:
 ```
 ErgodicManager(L::Float64, K::Int, bins::Int)
@@ -17,6 +17,12 @@ Valid values of `example_name` are "single gaussian" and "double gaussian".
 ```
 ErgodicManager(example_name::ASCIIString; K::Int=5, bins::Int=100)
 ```
+
+## TrajectoryManager
+Before generating trajectories, you need to create a `TrajectoryManager`, which stores a lot of information used during trajectory generation.
+
+## Generating Trajectories
+
 
 ## Plotting and GIF Generation
 Plotting is done with PyPlot.jl.

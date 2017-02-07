@@ -59,7 +59,7 @@ end
 """
 `dynamics!(tm::TrajectoryManager, A::Matrix{Float64}, B::Matrix{Float64})`
 
-`dynamics!(tm::TrajectoryManager, d_type::ASCIIString)`
+`dynamics!(tm::TrajectoryManager, d_type::String)`
 
 Sets the dynamics for `tm`.
 This includes fields `tm.A`, `tm.B`, `tm.n` and `tm.m`.
@@ -80,7 +80,7 @@ function dynamics!(tm::TrajectoryManager, A::Matrix{Float64}, B::Matrix{Float64}
 	end
 end
 
-function dynamics!(tm::TrajectoryManager, d_type::ASCIIString)
+function dynamics!(tm::TrajectoryManager, d_type::String)
 	if d_type == "double integrator"
 		A = [1 0 tm.h 0; 0 1 0 tm.h; 0 0 1 0; 0 0 0 1]
 		B = [0 0; 0 0; tm.h 0; 0 tm.h]

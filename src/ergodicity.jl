@@ -9,7 +9,7 @@
 """
 `ErgodicManager(L::Float64, K::Int, bins::Int)`
 
-`ErgodicManager(example_name::ASCIIString; K::Int=5, bins::Int=100)`
+`ErgodicManager(example_name::String; K::Int=5, bins::Int=100)`
 
 Valid `example_name` entries are:
 
@@ -42,7 +42,7 @@ type ErgodicManager
 		return em
 	end
 
-	function ErgodicManager(example_name::ASCIIString; K::Int=5, bins::Int=100)
+	function ErgodicManager(example_name::String; K::Int=5, bins::Int=100)
 		L = 1.0
 		em = ErgodicManager(L, K, bins)
 

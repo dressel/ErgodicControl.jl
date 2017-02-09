@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ErgodicControl.jl documentation build configuration file, created by
-# sphinx-quickstart on Wed Feb  8 16:15:19 2017.
+# sphinx-quickstart on Wed Feb  8 16:36:49 2017.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -30,9 +30,7 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.todo',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig']
+extensions = ['sphinx.ext.mathjax']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -76,7 +74,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+todo_include_todos = False
 
 
 # -- Options for HTML output ----------------------------------------------

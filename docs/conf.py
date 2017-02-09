@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# "ErgodicControl.jl" documentation build configuration file, created by
+# ErgodicControl.jl documentation build configuration file, created by
 # sphinx-quickstart on Wed Feb  8 16:15:19 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -47,7 +47,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'"ErgodicControl.jl"'
+project = u'ErgodicControl.jl'
 copyright = u'2017, Louis Dressel'
 author = u'Louis Dressel'
 
@@ -128,7 +128,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'ErgodicControljl.tex', u'"ErgodicControl.jl" Documentation',
+    (master_doc, 'ErgodicControljl.tex', u'ErgodicControl.jl Documentation',
      u'Louis Dressel', 'manual'),
 ]
 
@@ -138,7 +138,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'ergodiccontroljl', u'"ErgodicControl.jl" Documentation',
+    (master_doc, 'ergodiccontroljl', u'ErgodicControl.jl Documentation',
      [author], 1)
 ]
 
@@ -149,7 +149,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'ErgodicControljl', u'"ErgodicControl.jl" Documentation',
+    (master_doc, 'ErgodicControljl', u'ErgodicControl.jl Documentation',
      author, 'ErgodicControljl', 'One line description of project.',
      'Miscellaneous'),
 ]

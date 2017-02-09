@@ -3,12 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ErgodicControl.jl's documentation!
-=============================================
+ErgodicControl.jl - Design of Ergodic Trajectories
+=====================================================
+
+ErgodicControl.jl is a Julia package for designing trajectories that are ergodic with respect to some spatial distribution.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+    Intallation <installation.rst>
 
 
 

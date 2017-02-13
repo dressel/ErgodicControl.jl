@@ -13,9 +13,11 @@ ErgodicControl.jl is a Julia package for designing trajectories that are ergodic
    :caption: Contents:
 
     Installation <installation.rst>
+    Ergodic Control Overview <ergodic_control.rst>
     Basic Types <basic_types.rst>
     Ergodic Manager <ergodic_manager.rst>
     Trajectory Manager <trajectory_manager.rst>
+    Generating Trajectories <generating_trajectories.rst>
     Visuals <visuals.rst>
 
 

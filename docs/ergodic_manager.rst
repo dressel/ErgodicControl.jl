@@ -35,8 +35,8 @@ The function `phik!` can be used to update the spatial distribution `phi` and Fo
     phik!(em::ErgodicManager, d::Matrix{Float64})
 
 
-Reconstrucing Spatial Distribution
-====================================
+Reconstructing Spatial Distributions
+=====================================
 Sometimes we want to reconstruct a spatial distribution from the Fourier coefficients, to see how well the Fourier coefficients capture the distribution.
 ::
 

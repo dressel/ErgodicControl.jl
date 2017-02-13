@@ -23,7 +23,8 @@ Construction
 =============
 The constructor for the ErgodicManager types is as follows:
 ::
-ErgodicManager(L::Float64, K::Int, bins::Int)
+
+    ErgodicManager(L::Float64, K::Int, bins::Int)
 
 
 Example Managers
@@ -35,5 +36,6 @@ I provide a number of pre-made ergodic managers that correspond to frequently us
 
 Currently, there are two valid values for example_name: "single gaussian" and "double gaussian". For exmaple, you could run:
 ::
-em = ErgodicManager("single gaussian, K=5, bin=100)
+
+    em = ErgodicManager("single gaussian, K=5, bin=100)
 

@@ -5,6 +5,8 @@ Currently, the distributions that ergodic trajectories are made ergodic to must 
 
 In the future, I hope to add support for non-linear systems and adding additional dimensions (at least getting to SE(2)).
 
+Check out the [complete documentation](http://ergodiccontroljl.readthedocs.io/en/latest/index.html).
+
 ## ErgodicManager
 The `ErgodicManager` type handles a lot of the stuff we care about.
 It stores the distribution `phi`, the coefficients `phi_k`, etc.
@@ -22,9 +24,17 @@ ErgodicManager(example_name::ASCIIString; K::Int=5, bins::Int=100)
 Before generating trajectories, you need to create a `TrajectoryManager`, which stores a lot of information used during trajectory generation.
 
 ## Generating Trajectories
-
+To generate an ergodic trajectory,
+```
+xd, ud = clerc_trajectory(em, tm, max_iters=500)
+```
 
 ## Plotting and GIF Generation
 Plotting is done with PyPlot.jl.
+
+You can plot an ErgodicManager `em` and a trajectory. The trajectory `xd` is a vector of a vector of floats. 
+```
+plot(em, xd)
+```
 
 [![Build Status](https://travis-ci.org/dressel/ErgodicControl.jl.svg?branch=master)](https://travis-ci.org/dressel/ErgodicControl.jl)

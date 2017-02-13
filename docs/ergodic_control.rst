@@ -13,11 +13,14 @@ If we have some domain :math:`X`, we denote the spatial distribution :math:`\phi
 
 A commonly used metric for ergodicity uses Fourier coefficients.
 The distribution is decomposed into Fourier coefficients :math:`\phi_k`:
-.. math::
-    \phi_k(x) = \int_X \phi(x) F_k(x) dx,
+
+.. math:: \phi_k(x) = \int_X \phi(x) F_k(x) dx,
 
 where :math:`k` is a wave-number vector with dimensionality equal to the spatial domain's.
 That is, if the spatial domain has two dimensions, then :math:`k` is a vector of length 2.
+
+ergodic metric :math:`\mathcal{E}`.
+.. math:: \mathcal{E} = \sum_K \Lambda_k \abs{c_k - \phi_k}^2
 
 
 Trajectory Generation

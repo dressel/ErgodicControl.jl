@@ -1,9 +1,8 @@
 ==========================
 Ergodic Control Overview
 ==========================
-
-Brief overview of ergodic control gathering.
-
+Ergodic control is concerned with the generation of ergodic trajectories.
+This section defines ergodicity and shows how many of these trajectories are generated.
 
 Ergodicity
 ===========
@@ -11,7 +10,7 @@ A trajectory is ergodic with respect to a distribution if its time-averaged stat
 In an ergodic trajectory, the time spent in a region is proportional to the distribution's density in the region.
 If we have some domain :math:`X`, we denote the spatial distribution :math:`\phi`, and :math:`\phi(x)` describes the density at a point :math:`x\in X`.
 
-A commonly used metric for ergodicity uses Fourier coefficients.
+A commonly used metric for ergodicity uses Fourier coefficients [1].
 The spatial distribution is decomposed into Fourier coefficients :math:`\phi_k`:
 
 .. math:: \phi_k(x) = \int_X \phi(x) F_k(x) dx,
@@ -23,12 +22,19 @@ If we have a trajectory :math:`x(t)`, we can find the Fourier coefficients :math
 
 .. math:: c_k = \frac{1}{T}\int_0^T F_k(x(t))dt,
 
-where `\Lambda_k` is weighted to favor low-frequency features.
+where :math:`\Lambda_k` is weighted to favor low-frequency features.
 
 The ergodic metric :math:`\mathcal{E}` is a measure of the difference between trajectory and distribution coefficients:
 
-.. math:: \mathcal{E} = \sum_K \Lambda_k \abs{c_k - \phi_k}^2.
+.. math:: \mathcal{E} = \sum_k \Lambda_k | c_k - \phi_k |^2.
+
 
 
 Trajectory Generation
 ======================
+We are interested in generating trajectories with a low ergodic score, because an ergodic score of zero implies perfect ergodicity.
+
+
+Bibliography
+==============
+[1] G. Mathew and I. Mezic, "Metrics for ergodicity and design of ergodic dynamics for multi-agent systems"

@@ -42,6 +42,21 @@ type ErgodicManager
 		return em
 	end
 
+	function ErgodicManager(L::Float64, K::Int, d::Matrix{Float64})
+		hk   = zeros(K+1,K+1)
+		phik = zeros(K+1,K+1)
+		Lambdak = zeros(K+1,K+1)
+		kpixl = zeros(K+1, bins)
+		cell_size = L / bins
+		#phi = ones(bins,bins) / (bins * bins)
+		em = new(K, bins, L, cell_size, hk, d, phik, Lambdak, kpixl)
+
+		Lambdak!(em)
+		kpixl!(em)
+		hk!(em)
+		phik!(em, d)
+	end
+
 	function ErgodicManager(example_name::String; K::Int=5, bins::Int=100)
 		L = 1.0
 		em = ErgodicManager(L, K, bins)

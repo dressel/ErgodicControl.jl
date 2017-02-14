@@ -32,7 +32,7 @@ The ergodic metric :math:`\mathcal{E}` is a measure of the difference between tr
 
 Trajectory Generation
 ======================
-We are interested in generating trajectories with a low ergodic score, because an ergodic score of zero implies perfect ergodicity.
+We want to generate trajectories with low ergodic score, because an ergodic score of zero implies perfect ergodicity.
 
 
 Bibliography

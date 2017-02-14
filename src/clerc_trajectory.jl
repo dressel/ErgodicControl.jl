@@ -20,16 +20,16 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, 
 	start_idx = right ? 1 : 0
 
 	# matrices for gradients
-	ad = zeros(tm.n, N)
-	bd = zeros(tm.m, N)
+	ad = zeros(tm.dynamics.n, N)
+	bd = zeros(tm.dynamics.m, N)
 
 	# prepare variables for convex optimization
-	z = Variable(tm.n, N+1)
-	v = Variable(tm.m, N)
+	z = Variable(tm.dynamics.n, N+1)
+	v = Variable(tm.dynamics.m, N)
 	c = Array(Constraint, 0)
 	push!(c, z[:,1] == 0)
 	for n = 0:(N-1)
-		push!(c, z[:,n+1+1] == tm.A*z[:,n+1] + tm.B*v[:,n+1])
+		push!(c, z[:,n+1+1] == tm.dynamics.A*z[:,n+1] + tm.dynamics.B*v[:,n+1])
 	end
 
 	# prepare for logging if need be 
@@ -118,14 +118,19 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 		ad[2,ni] = an_y
 		# assume that only the first two state variables matter
 		# in fact, this isn't necessary if it's been initalized to zeros...
-		for i = 3:tm.n
+		for i = 3:tm.dynamics.n
 			ad[i,ni] = 0.0
 		end
 
 		#bd[n+1] = tm.h * tm.R * ud[n+1]
 		# TODO: allow for different tm.m
-		bd[1,ni] = tm.h * (tm.R[1,1]*ud[ni][1] + tm.R[1,2]*ud[ni][2])
-		bd[2,ni] = tm.h * (tm.R[2,1]*ud[ni][1] + tm.R[2,2]*ud[ni][2])
+		if tm.dynamics.m == 2
+			bd[1,ni] = tm.h * (tm.R[1,1]*ud[ni][1] + tm.R[1,2]*ud[ni][2])
+			bd[2,ni] = tm.h * (tm.R[2,1]*ud[ni][1] + tm.R[2,2]*ud[ni][2])
+		end
+		if tm.dynamics.m == 1
+			bd[1,ni] = tm.h * (tm.R[1,1]*ud[ni][1])
+		end
 
 		ni += 1
 	end
@@ -174,17 +179,91 @@ function convex_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Varia
 	return z.value, v.value
 end
 
+#function LQ_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Variable, v::Variable, c::Vector{Constraint}, r::Float64, start_idx::Int)
+export LQ_descent
+
+
+#function LQ_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, A::Matrix{Float64}, B::Matrix{Float64}, start_idx::Int)
+#end
+
+function LQ_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, A::Matrix{Float64}, B::Matrix{Float64}, start_idx::Int)
+
+	# TODO: define Q and R correctly
+	Q = eye(2)
+	R = 0.01 * eye(2)
+
+	# TODO: get proper B, A
+	#B = eye(2)
+	#A = eye(2)
+
+	# Also needed for LQR
+	P = Array(Matrix{Float64}, N+1)
+	G = Array(Matrix{Float64}, N)
+	K = Array(Matrix{Float64}, N)
+	P[N+1] = Q
+
+	# Solely for LQ
+	r = Array(Matrix{Float64}, N+1)
+	r[N+1] = zeros(2)
+
+	# Sweep from the back
+	for n = (N-1):-1:0
+		G[n+1] = R + (B' * P[n+1+1] * B)
+		K[n+1] = inv(G[n+1]) * B * P[n+1+1] * A
+		P[n+1] = Q + (A' * P[n+1+1] * A) - (K[n+1]' * G * K[n+1])
+		r[n+1] = (A'-K[n+1]'*B')r[n+1+1] + .5*a[:,n+1] - .5*K[n+1]*b[:,n+1]
+		C[n+1] = inv(G[n+1]) * (B'*r[n+1+1] + 0.5*b[:,n+1])
+	end
+
+	# Sweep from the front
+	z[0] = 0
+	for n = 0:(N-1)
+		v[n+1] = -K[n+1] * x - C
+		z[n+1+1] = A*z[n+1] + B*v[n+1]
+	end
+
+	# create the problem
+	#N_range = (0:N-1) + start_idx + 1
+	#problem = minimize(vecdot(a,z[:,N_range]) + vecdot(b,v) + sumsquares(z) + r*sumsquares(v), c)
+
+	## solve the problem
+	#solve!(problem, SCSSolver(verbose=0,max_iters=100000))
+
+	return z.value, v.value
+end
+
 
 # modifies (xd,ud) by moving step_size in direction (zd,vd)
 function descend!(xd::VV_F, ud::VV_F, zd::Matrix{Float64}, vd::Matrix{Float64}, step_size::Float64, N::Int)
+	num_u = length(ud[1])
+	num_x = length(xd[1])
 	for i = 0:(N-1)
-		ud[i+1][1] += step_size*vd[1,i+1]
-		ud[i+1][2] += step_size*vd[2,i+1]
-		xd[i+1][1] += step_size*zd[1,i+1]
-		xd[i+1][2] += step_size*zd[2,i+1]
+		for j = 1:num_u
+			ud[i+1][j] += step_size*vd[j,i+1]
+		end
+		for j = 1:num_x
+			xd[i+1][j] += step_size*zd[j,i+1]
+		end
 	end
-	xd[N+1][1] += step_size*zd[1,N+1]
-	xd[N+1][2] += step_size*zd[2,N+1]
+	for j = 1:num_x
+		xd[N+1][j] += step_size*zd[j,N+1]
+	end
+end
+
+function descend!(xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, step_size::Float64, N::Int)
+	num_u = length(ud[1])
+	num_x = length(xd[1])
+	for i = 0:(N-1)
+		for j = 1:num_u
+			ud[i+1][j] += step_size*vd[i+1][j]
+		end
+		for j = 1:num_x
+			xd[i+1][j] += step_size*zd[i+1][j]
+		end
+	end
+	for j = 1:num_x
+		xd[N+1][j] += step_size*zd[N+1][j]
+	end
 end
 
 # called if logging, not meant for general use

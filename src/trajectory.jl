@@ -6,6 +6,7 @@
 
 using StatsBase: WeightVec, sample
 
+
 type TrajectoryManager
 
 	# needed for all trajectories
@@ -21,11 +22,11 @@ type TrajectoryManager
 	max_iters::Int
 	initializer::Initializer
 
+	# The descender determines how much to descend at each step
+	descender::Descender
+
 	# dynamics stuff
-	n::Int
-	m::Int
-	A::Matrix{Float64}
-	B::Matrix{Float64}
+	dynamics::Dynamics
 
 	function TrajectoryManager(x0::Vector{Float64}, h::Float64, N::Int)
 		return TrajectoryManager(x0, h, N, RandomInitializer())
@@ -41,20 +42,22 @@ type TrajectoryManager
 
 		# needed for ergodic trajectories
 		tm.Q = eye(2)
+		# trying a higher cost now 2/07/2017
+		#tm.R = 0.01 * eye(2)
 		tm.R = 0.01 * eye(2)
 		tm.q = 1.0
 		tm.max_iters = 30
 		tm.initializer = i
+		tm.descender = InverseRootStep(1.0)
+		# I've found InverseRootStep(0.15) to work well
 
 		# dynamics stuff
-		tm.n = 2
-		tm.m = 2
-		tm.A = eye(2)
-		tm.B = tm.h * eye(2)
+		tm.dynamics = LinearDynamics(eye(2), tm.h*eye(2))
 
 		return tm
 	end
 end
+
 
 """
 `dynamics!(tm::TrajectoryManager, A::Matrix{Float64}, B::Matrix{Float64})`
@@ -72,10 +75,9 @@ If the new `tm.n` (number of state dimensions) is greater than the length of `tm
 
 """
 function dynamics!(tm::TrajectoryManager, A::Matrix{Float64}, B::Matrix{Float64})
-	tm.n, tm.m = size(B)
-	tm.A = deepcopy(A)
-	tm.B = deepcopy(B)
-	while length(tm.x0) < tm.n
+	ld = LinearDynamics(A, B)
+	tm.dynamics = ld
+	while length(tm.x0) < ld.n
 		push!(tm.x0, 0.)
 	end
 end
@@ -85,6 +87,8 @@ function dynamics!(tm::TrajectoryManager, d_type::String)
 		A = [1 0 tm.h 0; 0 1 0 tm.h; 0 0 1 0; 0 0 0 1]
 		B = [0 0; 0 0; tm.h 0; 0 tm.h]
 		dynamics!(tm, A, B)
+	elseif d_type == "dubins"
+		tm.dynamics = DubinsDynamics(1.0, 1.0)
 	else
 		error("Invalid d_type provided!")
 	end
@@ -166,10 +170,15 @@ function initialize(ci::ConstantInitializer, em::ErgodicManager, tm::TrajectoryM
 	xd[1] = deepcopy(tm.x0)
 	ud[1] = deepcopy(ci.action)
 	for i = 1:(tm.N-1)
-		xd[i+1] = tm.A*xd[i] + tm.B*ud[i]
+		# 2/07/2017: need to compute true A
+		#A,B = linearize(tm, xd[i], ud[i])
+		#display(A)
+		#xd[i+1] = A*xd[i] + B*ud[i]
+		xd[i+1] = forward_euler(tm, xd[i], ud[i])
 		ud[i+1] = deepcopy(ci.action)
 	end
-	xd[tm.N+1] = tm.A*xd[tm.N] + tm.B*ud[tm.N]
+	A,B = linearize(tm, xd[tm.N], ud[tm.N])
+	xd[tm.N+1] = A*xd[tm.N] + B*ud[tm.N]
 
 	return xd, ud
 end
@@ -239,7 +248,7 @@ function controls2trajectory(tm::TrajectoryManager, ud::VV_F)
 
 	xd[1] = deepcopy(tm.x0)
 	for i = 1:tm.N
-		xd[i+1] = tm.A*xd[i] + tm.B*ud[i]
+		xd[i+1] = tm.dynamics.A*xd[i] + tm.dynamics.B*ud[i]
 	end
 
 	return xd
@@ -320,7 +329,7 @@ function initialize(initializer::PointInitializer, em::ErgodicManager, tm::Traje
 
 	# if we are double integrator, only apply the input once
 	ud = Array(Vector{Float64}, tm.N)
-	if tm.n > 2
+	if tm.dynamics.n > 2
 		den = tm.h * tm.h * (tm.N-1)
 		ud[1] = [dx/den, dy/den]
 		for i = 1:(tm.N-1)
@@ -359,4 +368,11 @@ function initialize(initializer::DirectionInitializer, em::ErgodicManager, tm::T
 	xd[tm.N+1] = tm.A*xd[tm.N] + tm.B*ud[tm.N]
 
 	return xd, ud
+end
+
+function linearize(tm::TrajectoryManager, x::Vector{Float64}, u::Vector{Float64})
+	return linearize(tm.dynamics, x, u, tm.h)
+end
+function forward_euler(tm::TrajectoryManager, x::Vector{Float64}, u::Vector{Float64})
+	forward_euler(tm.dynamics, x, u, tm.h)
 end

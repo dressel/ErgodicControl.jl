@@ -12,6 +12,7 @@ export Initializer, initialize
 export RandomInitializer, CornerInitializer, ConstantInitializer, CornerConstantInitializer, SampleInitializer, GreedyInitializer, PointInitializer
 export DirectionInitializer
 export clerc_trajectory
+export cerc_trajectory
 export controls2trajectory
 
 # to make some things easier
@@ -21,13 +22,27 @@ typealias VMF64  Vector{Matrix{Float64}}   # vector of matrix of floats
 typealias VM_F  Vector{Matrix{Float64}}   # vector of matrix of floats
 typealias T2F      NTuple{2, Float64}    # x, y
 
+typealias MF Matrix{Float64}
+
 include("math.jl")
 
 include("ergodicity.jl")
+
+# trajectory manager stuff
+include("dynamics.jl")
 include("initializer.jl")
+include("descender.jl")
 include("trajectory.jl")
+
+# LQR stuff
+include("lqr.jl")
+include("lq.jl")
+
+# trajectory stuff
 include("scoring.jl")
 include("clerc_trajectory.jl")
+include("cerc_trajectory.jl")
+include("new_trajectory.jl")
 include("max_trajectory.jl")
 include("kmeans_trajectory.jl")
 include("plots.jl")

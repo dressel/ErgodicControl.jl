@@ -57,3 +57,33 @@ function descend!(xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, step_size::Float64, N:
 		xd[N+1][j] += step_size*zd[N+1][j]
 	end
 end
+
+
+function check_convergence(es::Float64, es_crit::Float64, i::Int, max_iters::Int, verbose::Bool)
+	not_finished = true
+	if es < es_crit
+		not_finished = false
+		if verbose
+			println("reached ergodic criterion...")
+		end
+	end
+	if i > max_iters
+		not_finished = false
+		if verbose
+			println("max iterations reached...")
+		end
+	end
+	return not_finished
+end
+
+# called if logging, not meant for general use
+function save(outfile::IOStream, xd::VV_F)
+	n = length(xd[1])
+	for xi in xd
+		for i = 1:(n-1)
+			wi = xi[i]
+			write(outfile,"$(xi[i]),")
+		end
+		write(outfile,"$(xi[n])\n")
+	end
+end

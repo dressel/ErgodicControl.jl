@@ -74,23 +74,6 @@ function clerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, 
 	return xd, ud
 end
 
-function check_convergence(es::Float64, es_crit::Float64, i::Int, max_iters::Int, verbose::Bool)
-	not_finished = true
-	if es < es_crit
-		not_finished = false
-		if verbose
-			println("reached ergodic criterion...")
-		end
-	end
-	if i > max_iters
-		not_finished = false
-		if verbose
-			println("max iterations reached...")
-		end
-	end
-	return not_finished
-end
-
 
 
 function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int)
@@ -213,17 +196,4 @@ function LQ_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, A::Matrix{Fl
 	#solve!(problem, SCSSolver(verbose=0,max_iters=100000))
 
 	return z.value, v.value
-end
-
-
-# called if logging, not meant for general use
-function save(outfile::IOStream, xd::VV_F)
-	n = length(xd[1])
-	for xi in xd
-		for i = 1:(n-1)
-			wi = xi[i]
-			write(outfile,"$(xi[i]),")
-		end
-		write(outfile,"$(xi[n])\n")
-	end
 end

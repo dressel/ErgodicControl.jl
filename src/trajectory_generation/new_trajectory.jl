@@ -44,8 +44,10 @@ function new_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud
 
 		# determine step size and descend
 		step_size = get_step_size(tm.descender, em, tm, xd, ud, zd, vd, ad, bd, K, i)
-		# TODO: project while descending
-		descend!(xd, ud, zd, vd, step_size, N)
+
+		# descend and project
+		xd, ud = project(em, tm, K, xd, ud, zd, vd, step_size)
+		#descend!(xd, ud, zd, vd, step_size, N)
 
 		# compute statistics and report
 		es, cs, ts = all_scores(em, tm, xd, ud, start_idx)

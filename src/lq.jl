@@ -29,9 +29,6 @@ function LQ(A::MF, B::MF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 	return K, C
 end
 
-function LQ(tm::TrajectoryManager, ad::MF, bd::MF) 
-	LQ(tm.dynamics.A, tm.dynamics.B, ad, bd, tm.Q, tm.R, tm.N)
-end
 
 function apply_LQ_gains(A::MF, B::MF, K::Vector{MF}, C::VV_F)
 	N = length(K)

@@ -2,9 +2,11 @@
 # descender.jl
 # provides descent engine
 ######################################################################
-export Descender, InverseStep, InverseRootStep
+export Descender
 
-abstract Descender
+export InverseStep
+export InverseRootStep
+export ArmijoLineSearch
 
 type InverseStep <: Descender
 	alpha::Float64
@@ -19,3 +21,5 @@ end
 
 get_step_size(ir::InverseRootStep, i::Int) = ir.alpha / sqrt(i)
 
+
+include("armijo_line_search.jl")

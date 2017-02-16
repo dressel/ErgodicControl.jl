@@ -24,28 +24,26 @@ typealias T2F      NTuple{2, Float64}    # x, y
 
 typealias MF Matrix{Float64}
 
+# math-type stuff I might need
 include("math.jl")
+include("tsp.jl")
+include("lq.jl")
+include("lqr.jl")
 
+# ergodic manager
 include("ergodicity.jl")
 
 # trajectory manager stuff
-include("dynamics.jl")
-include("initializer.jl")
-include("descender.jl")
-include("trajectory.jl")
+include("trajectory_manager/trajectory_manager.jl")
+include("trajectory_manager/dynamics.jl")
+include("trajectory_manager/initializers/initializer.jl")
+include("trajectory_manager/descender.jl")
 
-# LQR stuff
-include("lqr.jl")
-include("lq.jl")
+# trajectory generation
+include("trajectory_generation/trajectory_generation.jl")
 
-# trajectory stuff
-include("scoring.jl")
-include("clerc_trajectory.jl")
-include("cerc_trajectory.jl")
-include("new_trajectory.jl")
-include("max_trajectory.jl")
-include("kmeans_trajectory.jl")
-include("plots.jl")
-include("gif.jl")
+# include visuals
+include("visuals/plots.jl")
+include("visuals/gif.jl")
 
 end # module

@@ -38,16 +38,13 @@ function new_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud
 		# determine gradients used in optimization
 		gradients!(ad, bd, em, tm, xd, ud, start_idx)
 
-		# Find optimal gains for projection operator (LQR)
-		# Technically unnecessary
-		#K = LQR(tm.dynamics.A, tm.dynamics.B, tm.Q, tm.R, tm.N)
-
-		# Find descent direction (LQ)
+		# Find gains K and descent direction (LQ)
 		K, C = LQ(tm.dynamics.A, tm.dynamics.B, ad, bd, tm.Q, tm.R, tm.N)
 		zd, vd = apply_LQ_gains(tm.dynamics.A, tm.dynamics.B, K, C)
 
 		# TODO: armijo line search instead
-		step_size = get_step_size(tm.descender, i)
+		#step_size = get_step_size(tm.descender, i)
+		step_size = get_step_size(tm.descender, em, tm, xd, ud, zd, vd, ad, bd, K, i)
 
 		# TODO: project while descending
 		descend!(xd, ud, zd, vd, step_size, N)

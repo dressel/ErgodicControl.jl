@@ -71,6 +71,7 @@ end
 First breaks down the trajectory into components ck.
 """
 function ergodic_score(em::ErgodicManager, traj::VV_F, start_idx::Int=1)
+	start_idx = 0		# TODO: temporary
 	ck = decompose(em, traj, start_idx)
 	return ergodic_score(em, ck)
 end
@@ -139,7 +140,8 @@ Computes the total score `q*ergodic_score + sum_n h/2 un'Rn un`
 Currently assumes `q = 1.0` and `R = 0.01 * eye(2)`
 """
 function total_score(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)
-	return q * ergodic_score(em, xd) + control_score(ud, tm.R, tm.h)
+	# TODO: use correct q in ergodic score
+	return ergodic_score(em, xd) + control_score(ud, tm.R, tm.h)
 end
 # TODO: actually get q and R from the correct place 
 function total_score(em::ErgodicManager, xd::VV_F, ud::VV_F, T::Float64)

@@ -4,7 +4,7 @@
 ######################################################################
 export Dynamics, LinearDynamics, DubinsDynamics, linearize
 
-abstract Dynamics
+#abstract Dynamics
 
 type LinearDynamics <: Dynamics
 	n::Int

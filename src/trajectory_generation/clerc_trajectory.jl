@@ -91,24 +91,7 @@ function check_convergence(es::Float64, es_crit::Float64, i::Int, max_iters::Int
 	return not_finished
 end
 
-function step_report(i::Int, es::Float64, cs::Float64, ts::Float64, dd::Float64, step_size::Float64)
-	@printf " %-7i" i
-	@printf " %-14.7f" es
-	@printf " %-14.7f" cs
-	@printf " %-12.7f" ts
-	@printf " %-12.7f" dd
-	@printf " %-7.5f" step_size
-	println()
-end
 
-function print_header()
-	print_dashes()
-	println(" iter  |ergodic score |control score |total score |direc deriv |step size")
-	print_dashes()
-end
-function print_dashes()
-	println("--------------------------------------------------------------------------")
-end
 
 function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int)
 	ni =  1

@@ -5,6 +5,7 @@
 #include("lqr.jl")
 #include("lq.jl")
 include("scoring.jl")
+include("printing.jl")
 include("new_trajectory.jl")
 include("clerc_trajectory.jl")
 include("cerc_trajectory.jl")

@@ -42,19 +42,14 @@ function new_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud
 		K, C = LQ(tm.dynamics.A, tm.dynamics.B, ad, bd, tm.Q, tm.R, tm.N)
 		zd, vd = apply_LQ_gains(tm.dynamics.A, tm.dynamics.B, K, C)
 
-		# TODO: armijo line search instead
-		#step_size = get_step_size(tm.descender, i)
+		# determine step size and descend
 		step_size = get_step_size(tm.descender, em, tm, xd, ud, zd, vd, ad, bd, K, i)
-
 		# TODO: project while descending
 		descend!(xd, ud, zd, vd, step_size, N)
 
 		# compute statistics and report
 		es, cs, ts = all_scores(em, tm, xd, ud, start_idx)
-		# only temporarily commented out 2/07/2017
-		#dd = directional_derivative(ad, bd, zd, vd)
-		dd = 0.05
-		#sdd = scaled_dd(ad, bd, zd, vd)
+		dd = directional_derivative(ad, bd, zd, vd)
 		if verbose; step_report(i, es, cs, ts, dd, step_size); end
 		if logging; save(outfile, xd); end
 

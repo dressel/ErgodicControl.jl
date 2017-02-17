@@ -13,6 +13,16 @@ include("sample_initializer.jl")
 include("corner_initializer.jl")
 
 
+"""
+`xd, ud = initialize(em::ErgodicManager, tm::TrajectoryManager)`
+
+Runs `tm`'s initializer to return a trajectory.
+"""
+function initialize(em::ErgodicManager, tm::TrajectoryManager)
+	initialize(tm.initializer, em, tm)
+end
+
+
 
 # TODO: finish this one
 """
@@ -141,7 +151,7 @@ function initialize(initializer::PointInitializer, em::ErgodicManager, tm::Traje
 		end
 	end
 
-	xd = controls2trajectory(tm, ud)
+	xd = forward_euler(tm, ud)
 
 	return xd, ud
 end

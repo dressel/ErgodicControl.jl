@@ -13,7 +13,6 @@ export RandomInitializer, CornerInitializer, ConstantInitializer, CornerConstant
 export DirectionInitializer
 export clerc_trajectory
 export cerc_trajectory
-export controls2trajectory
 
 # to make some things easier
 typealias VV_F   Vector{Vector{Float64}}   # vector of vector of floats

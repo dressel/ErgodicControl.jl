@@ -4,8 +4,6 @@
 ######################################################################
 export Dynamics, LinearDynamics, DubinsDynamics, linearize
 
-#abstract Dynamics
-
 type LinearDynamics <: Dynamics
 	n::Int
 	m::Int
@@ -58,6 +56,18 @@ function linearize(ld::DubinsDynamics,x::Vector{Float64},u::Vector{Float64}, h::
 	B[3] = h/ld.r
 
 	return A, B
+end
+
+function forward_euler(tm::TrajectoryManager, ud::VV_F)
+	N = length(ud)
+	xd = Array(Vector{Float64}, N+1)
+
+	xd[1] = deepcopy(tm.x0)
+	for i = 1:tm.N
+		xd[i+1] = forward_euler(tm.dynamics, x, ud[i])
+	end
+
+	return xd
 end
 
 function forward_euler(ld::LinearDynamics, x::Vector{Float64}, u::Vector{Float64}, h::Float64)

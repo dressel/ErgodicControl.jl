@@ -98,9 +98,6 @@ function dynamics!(tm::TrajectoryManager, d_type::String)
 end
 
 
-function initialize(em::ErgodicManager, tm::TrajectoryManager)
-	initialize(tm.initializer, em, tm)
-end
 
 # TODO: change rand() call so we can account for various
 export compute_controls
@@ -117,23 +114,6 @@ function compute_controls(xd::VV_F, h::Float64)
 	end
 	
 	return ud
-end
-
-"""
-controls2trajectory(tm::TrajectoryManager, ud::VV_F)
-
-computes trajectory from controls (and initial position)
-"""
-function controls2trajectory(tm::TrajectoryManager, ud::VV_F)
-	N = length(ud)
-	xd = Array(Vector{Float64}, N+1)
-
-	xd[1] = deepcopy(tm.x0)
-	for i = 1:tm.N
-		xd[i+1] = tm.dynamics.A*xd[i] + tm.dynamics.B*ud[i]
-	end
-
-	return xd
 end
 
 

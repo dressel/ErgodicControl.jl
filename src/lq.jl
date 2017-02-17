@@ -5,6 +5,10 @@
 ######################################################################
 export LQ, apply_LQ_gains
 
+# TODO:
+#  I'm pretty sure I can speed this up by removing following arrays:
+#    P, G, r
+#  I think I can just store the previous one?
 function LQ(A::MF, B::MF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 	# Also needed for LQR
 	P = Array(Matrix{Float64}, N+1)

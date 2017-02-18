@@ -97,8 +97,8 @@ Computes sum_i=1^N dot(u,u). Does not divide by 2 or do anything else.
 """
 function control_score(ud::VV_F, R::Matrix{Float64}, h::Float64)
 	cs = 0.0
+	num_u = length(ud[1])
 	for ui in ud
-		num_u = length(ui)
 		for j = 1:num_u
 			cs += R[j,j] * ui[j] * ui[j]
 		end

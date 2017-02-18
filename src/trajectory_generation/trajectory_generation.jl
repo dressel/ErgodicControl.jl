@@ -14,12 +14,12 @@ include("kmeans_trajectory.jl")
 
 # TODO: do dynamics correctly
 # returns xdn and udn, the feasible projected trajectory
-function project(em::ErgodicManager, tm::TrajectoryManager, K::Vector{MF}, xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, step_size::Float64)
+function project(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)
 	xdn = [xd[1]]
 	udn = Array(Vector{Float64}, 0)
 	for n = 1:tm.N
 		push!(udn, ud[n] + step_size*vd[n] + step_size*K[n]*zd[n])
-		push!(xdn, tm.dynamics.A*xdn[n] + tm.dynamics.B*udn[n])
+		push!(xdn, forward_euler(tm, xdn[n], udn[n]) )
 	end
 	return xdn, udn
 end

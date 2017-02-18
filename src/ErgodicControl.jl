@@ -22,6 +22,9 @@ typealias VM_F  Vector{Matrix{Float64}}   # vector of matrix of floats
 typealias T2F      NTuple{2, Float64}    # x, y
 
 typealias MF Matrix{Float64}
+typealias VMF Vector{MF}
+typealias VF   Vector{Float64}   # vector of vector of floats
+typealias VVF   Vector{VF}   # vector of vector of floats
 
 # math-type stuff I might need
 include("math.jl")

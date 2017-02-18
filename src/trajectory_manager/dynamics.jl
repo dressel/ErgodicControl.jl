@@ -42,12 +42,26 @@ type DubinsDynamics <: Dynamics
 	end
 end
 
-function linearize(ld::LinearDynamics,x::Vector{Float64},u::Vector{Float64}, h::Float64)
+
+function linearize(d::Dynamics, x::VVF, u::VVF, h::Float64)
+	N = length(u)
+	A = VMF()
+	B = VMF()
+	for n = 1:N
+		An, Bn = linearize(d, x[n], u[n], h)
+		push!(A, An)
+		push!(B, Bn)
+	end
+	return A,B
+end
+
+
+function linearize(ld::LinearDynamics, x::VF, u::VF, h::Float64)
 	return ld.A, ld.B
 end
 
 # added the 0.1 because I want one with smaller speed
-function linearize(ld::DubinsDynamics,x::Vector{Float64},u::Vector{Float64}, h::Float64)
+function linearize(ld::DubinsDynamics, x::VF, u::VF, h::Float64)
 	A = eye(3)
 	A[1,3] = -h * sin(x[3]) * ld.v0
 	A[2,3] = h * cos(x[3]) * ld.v0
@@ -58,13 +72,21 @@ function linearize(ld::DubinsDynamics,x::Vector{Float64},u::Vector{Float64}, h::
 	return A, B
 end
 
-function forward_euler(tm::TrajectoryManager, ud::VV_F)
+
+######################################################################
+# forward_euler
+######################################################################
+function forward_euler(tm::TrajectoryManager, x::VF, u::VF)
+	forward_euler(tm.dynamics, x, u, tm.h)
+end
+
+function forward_euler(tm::TrajectoryManager, ud::VVF)
 	N = length(ud)
 	xd = Array(Vector{Float64}, N+1)
 
 	xd[1] = deepcopy(tm.x0)
 	for i = 1:tm.N
-		xd[i+1] = forward_euler(tm.dynamics, x, ud[i])
+		xd[i+1] = forward_euler(tm.dynamics, x, ud[i], tm.h)
 	end
 
 	return xd

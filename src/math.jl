@@ -74,12 +74,16 @@ end
 function directional_derivative(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::VV_F, u2::VV_F)
 	#N = length(g_f1)
 	N = size(g_f1, 2)
+	#n = size(u1[1])
+	#m = size(u2[1])
 	#println("N = ", N)
 	dd = 0.0
 	for i = 1:N
-		#dd += dot(g_f1[i], u1[i]) + dot(g_f2[i], u2[i])
-		dd += g_f1[1,i]*u1[i][1] + g_f1[2,i]*u1[i][2]
-		dd += g_f2[1,i]*u2[i][1] + g_f2[2,i]*u2[i][2]
+		# old way
+		#dd += g_f1[1,i]*u1[i][1] + g_f1[2,i]*u1[i][2]
+		#dd += g_f2[1,i]*u2[i][1] + g_f2[2,i]*u2[i][2]
+
+		dd += dot(g_f1[:,i], u1[i]) + dot(g_f2[:,i], u2[i])
 	end
 	return dd
 end

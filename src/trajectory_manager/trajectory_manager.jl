@@ -99,13 +99,10 @@ end
 
 
 
-# TODO: change rand() call so we can account for various
-export compute_controls
-
-
 # computes controls from a trajectory
 # TODO: really, this is a general tool useful for other code
 #  it should go somewhere else
+export compute_controls
 function compute_controls(xd::VV_F, h::Float64)
 	N = length(xd) - 1
 	ud = Array(Vector{Float64}, N)
@@ -120,13 +117,4 @@ end
 # creates a sample_trajectory
 function sample_trajectory(em::ErgodicManager, tm::TrajectoryManager)
 	return initialize(SampleInitializer(), em, tm)
-end
-
-
-
-function linearize(tm::TrajectoryManager, x::Vector{Float64}, u::Vector{Float64})
-	return linearize(tm.dynamics, x, u, tm.h)
-end
-function forward_euler(tm::TrajectoryManager, x::Vector{Float64}, u::Vector{Float64})
-	forward_euler(tm.dynamics, x, u, tm.h)
 end

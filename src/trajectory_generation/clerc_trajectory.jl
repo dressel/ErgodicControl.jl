@@ -76,61 +76,6 @@ end
 
 
 
-function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int)
-	ni =  1
-	for n = 0:(tm.N-1)
-		an_x, an_y = compute_ans(em, xd, tm, n, start_idx)
-		ad[1,ni] = an_x
-		ad[2,ni] = an_y
-		# assume that only the first two state variables matter
-		# in fact, this isn't necessary if it's been initalized to zeros...
-		for i = 3:tm.dynamics.n
-			ad[i,ni] = 0.0
-		end
-
-		#bd[n+1] = tm.h * tm.R * ud[n+1]
-		# TODO: allow for different tm.m
-		if tm.dynamics.m == 2
-			bd[1,ni] = tm.h * (tm.R[1,1]*ud[ni][1] + tm.R[1,2]*ud[ni][2])
-			bd[2,ni] = tm.h * (tm.R[2,1]*ud[ni][1] + tm.R[2,2]*ud[ni][2])
-		end
-		if tm.dynamics.m == 1
-			bd[1,ni] = tm.h * (tm.R[1,1]*ud[ni][1])
-		end
-
-		ni += 1
-	end
-end
-
-function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int)
-	xnx = xd[n + start_idx + 1][1]
-	xny = xd[n + start_idx + 1][2]
-	L = em.L
-
-	an_x = 0.0
-	an_y = 0.0
-	 
-	for k1 = 0:em.K
-		for k2 = 0:em.K
-			hk = em.hk[k1+1,k2+1]
-
-			dFk_dxn1 = -k1*pi*sin(k1*pi*xnx/L)*cos(k2*pi*xny/L) / (hk*L)
-			dFk_dxn2 = -k2*pi*cos(k1*pi*xnx/L)*sin(k2*pi*xny/L) / (hk*L)
-
-			fk = 0.0
-			for i in 0:(tm.N-1)
-				x = xd[i + start_idx + 1]
-				fk += cos(k1*pi*x[1]/L) * cos(k2*pi*x[2]/L) / hk
-			end
-			c = em.Lambdak[k1+1,k2+1] * (tm.h*fk/tm.T - em.phik[k1+1,k2+1])
-			an_x += c*dFk_dxn1
-			an_y += c*dFk_dxn2
-		end
-	end
-	an_x *= 2.0*tm.h
-	an_y *= 2.0*tm.h
-	return an_x, an_y
-end
 
 # descent direction using convex optimization
 function convex_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Variable, v::Variable, c::Vector{Constraint}, r::Float64, start_idx::Int)
@@ -141,59 +86,6 @@ function convex_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Varia
 
 	# solve the problem
 	solve!(problem, SCSSolver(verbose=0,max_iters=100000))
-
-	return z.value, v.value
-end
-
-#function LQ_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, z::Variable, v::Variable, c::Vector{Constraint}, r::Float64, start_idx::Int)
-export LQ_descent
-
-
-#function LQ_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, A::Matrix{Float64}, B::Matrix{Float64}, start_idx::Int)
-#end
-
-function LQ_descent(a::Matrix{Float64}, b::Matrix{Float64}, N::Int, A::Matrix{Float64}, B::Matrix{Float64}, start_idx::Int)
-
-	# TODO: define Q and R correctly
-	Q = eye(2)
-	R = 0.01 * eye(2)
-
-	# TODO: get proper B, A
-	#B = eye(2)
-	#A = eye(2)
-
-	# Also needed for LQR
-	P = Array(Matrix{Float64}, N+1)
-	G = Array(Matrix{Float64}, N)
-	K = Array(Matrix{Float64}, N)
-	P[N+1] = Q
-
-	# Solely for LQ
-	r = Array(Matrix{Float64}, N+1)
-	r[N+1] = zeros(2)
-
-	# Sweep from the back
-	for n = (N-1):-1:0
-		G[n+1] = R + (B' * P[n+1+1] * B)
-		K[n+1] = inv(G[n+1]) * B * P[n+1+1] * A
-		P[n+1] = Q + (A' * P[n+1+1] * A) - (K[n+1]' * G * K[n+1])
-		r[n+1] = (A'-K[n+1]'*B')r[n+1+1] + .5*a[:,n+1] - .5*K[n+1]*b[:,n+1]
-		C[n+1] = inv(G[n+1]) * (B'*r[n+1+1] + 0.5*b[:,n+1])
-	end
-
-	# Sweep from the front
-	z[0] = 0
-	for n = 0:(N-1)
-		v[n+1] = -K[n+1] * x - C
-		z[n+1+1] = A*z[n+1] + B*v[n+1]
-	end
-
-	# create the problem
-	#N_range = (0:N-1) + start_idx + 1
-	#problem = minimize(vecdot(a,z[:,N_range]) + vecdot(b,v) + sumsquares(z) + r*sumsquares(v), c)
-
-	## solve the problem
-	#solve!(problem, SCSSolver(verbose=0,max_iters=100000))
 
 	return z.value, v.value
 end

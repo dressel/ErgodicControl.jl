@@ -51,9 +51,6 @@ function LQ(A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 	#  this is annoying so I just do n = N:-1:1
 	#for n = (N-1):-1:0
 	for n = N:-1:1
-		#println("size(B) = ", size(B[n]))
-		#println("size(R) = ", size(R))
-		#println("size(P) = ", size(P[n+1]))
 		G[n] = R + (B[n]' * P[n+1] * B[n])
 		K[n] = inv(G[n]) * B[n]' * P[n+1] * A[n]
 		P[n] = Q + (A[n]' * P[n+1] * A[n]) - (K[n]' * G[n] * K[n])

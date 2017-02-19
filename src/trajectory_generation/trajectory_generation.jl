@@ -4,6 +4,7 @@
 
 #include("lqr.jl")
 #include("lq.jl")
+include("gradients.jl")
 include("scoring.jl")
 include("printing.jl")
 include("new_trajectory.jl")

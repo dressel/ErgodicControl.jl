@@ -9,8 +9,8 @@ type ArmijoLineSearch <: Descender
 	function ArmijoLineSearch(initial_step::Float64, c::Float64,mi::Float64)
 		return new(initial_step, c, mi)
 	end
-	function ArmijoLineSearch(initial_step::Float64, c::Float64)
-		return new(initial_step, c, 50.)
+	function ArmijoLineSearch(initial_step::Real, c::Real)
+		return new(float(initial_step), float(c), 50.)
 	end
 
 	ArmijoLineSearch() = ArmijoLineSearch(0.01, 1e-6, 50.)

@@ -6,14 +6,14 @@ type ArmijoLineSearch <: Descender
 	c::Float64		# just a constant between 0 and 1
 	max_iters::Float64
 
-	function ArmijoLineSearch(initial_step::Float64, c::Float64,mi::Float64)
-		return new(initial_step, c, mi)
+	function ArmijoLineSearch(initial_step::Real, c::Real, mi::Real)
+		return new(float(initial_step), float(c), float(mi))
 	end
 	function ArmijoLineSearch(initial_step::Real, c::Real)
 		return new(float(initial_step), float(c), 50.)
 	end
 
-	ArmijoLineSearch() = ArmijoLineSearch(0.01, 1e-6, 50.)
+	ArmijoLineSearch() = ArmijoLineSearch(1, 0.9, 50.)
 
 end
 

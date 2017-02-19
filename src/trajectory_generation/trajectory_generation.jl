@@ -13,13 +13,21 @@ include("cerc_trajectory.jl")
 include("max_trajectory.jl")
 include("kmeans_trajectory.jl")
 
-# TODO: do dynamics correctly
 # returns xdn and udn, the feasible projected trajectory
 function project(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)
 	xdn = [xd[1]]
 	udn = Array(Vector{Float64}, 0)
+
+	# perform descent
+	alpha = VVF(tm.N + 1)
+	for n = 0:tm.N
+		alpha[n+1] = xd[n+1] + step_size * zd[n+1]
+	end
+
+	# perform the projection
 	for n = 1:tm.N
-		push!(udn, ud[n] + step_size*vd[n] + step_size*K[n]*zd[n])
+		#push!(udn, ud[n] + step_size*vd[n] + step_size*K[n]*zd[n])
+		push!(udn, ud[n] + step_size*vd[n] + K[n]*(alpha[n] - xd[n]))
 		push!(xdn, forward_euler(tm, xdn[n], udn[n]) )
 	end
 	return xdn, udn
@@ -78,7 +86,7 @@ function check_convergence(es::Float64, es_crit::Float64, i::Int, max_iters::Int
 end
 
 # called if logging, not meant for general use
-function save(outfile::IOStream, xd::VV_F)
+function save(outfile::IOStream, xd::VVF)
 	n = length(xd[1])
 	for xi in xd
 		for i = 1:(n-1)

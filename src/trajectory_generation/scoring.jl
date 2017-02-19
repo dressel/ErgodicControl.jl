@@ -4,41 +4,14 @@
 ######################################################################
 
 """
-`decompose(em, traj::VV_F, start_idx=1)`
+`decompose(em, traj::VVF, start_idx=1)`
 
 Decomposes a set of positions into a set of `ck` Fourier coefficients.
 
 If `start_idx` is 1, then the right Riemann sum is used.
 If `start_idx` is 0, then the left Riemann sum is used.
 """
-#function decompose(em::ErgodicManager, traj::VV_F, start_idx::Int=0)
-#	traj2 = [(traj[i][1], traj[i][2]) for i = 1:length(traj)]
-#	return decompose(em, traj2, start_idx)
-#end
-#function decompose(em::ErgodicManager, traj::V_T2F)
-#	K = em.K
-#	N = length(traj)-1
-#	ck = zeros(K+1, K+1)
-#	for k1 = 0:K
-#		kpiL1 = k1 * pi / em.L
-#		for k2 = 0:K
-#			kpiL2 = k2 * pi / em.L
-#			hk = em.hk[k1+1, k2+1]
-#			fk_sum = 0.0
-#			# now loop over time
-#			for n = 0:N-1
-#				xn = traj[n+1]
-#				fk_sum += cos(kpiL1 * xn[1])  * cos(kpiL2 * xn[2])
-#			end
-#			ck[k1+1, k2+1] = fk_sum / (hk * N)
-#		end
-#	end
-#	return ck
-#end
-
-
-#function decompose(em::ErgodicManager, traj::V_T2F, start_idx::Int=0)
-function decompose(em::ErgodicManager, traj::VV_F, start_idx::Int=1)
+function decompose(em::ErgodicManager, traj::VVF, start_idx::Int=1)
 	K = em.K
 	N = length(traj)-1
 	ck = zeros(K+1, K+1)
@@ -59,7 +32,7 @@ function decompose(em::ErgodicManager, traj::VV_F, start_idx::Int=1)
 	return ck
 end
 
-function reconstruct(em::ErgodicManager, xd::VV_F, start_idx::Int=1)
+function reconstruct(em::ErgodicManager, xd::VVF, start_idx::Int=1)
 	ck = decompose(em, xd, start_idx)
 	return reconstruct(em, ck)
 end
@@ -70,7 +43,7 @@ end
 
 First breaks down the trajectory into components ck.
 """
-function ergodic_score(em::ErgodicManager, traj::VV_F, start_idx::Int=1)
+function ergodic_score(em::ErgodicManager, traj::VVF, start_idx::Int=1)
 	start_idx = 0		# TODO: temporary
 	ck = decompose(em, traj, start_idx)
 	return ergodic_score(em, ck)
@@ -87,15 +60,15 @@ function ergodic_score(em::ErgodicManager, ck::Matrix{Float64})
 end
 
 """
-`control_score(ud::VV_F, R, h)`
+`control_score(ud::VVF, R, h)`
 
 Assumes only non-zero elements of `R` are corners.
 
-`control_score(ud::VV_F, N::Int)`
+`control_score(ud::VVF, N::Int)`
 
 Computes sum_i=1^N dot(u,u). Does not divide by 2 or do anything else.
 """
-function control_score(ud::VV_F, R::Matrix{Float64}, h::Float64)
+function control_score(ud::VVF, R::Matrix{Float64}, h::Float64)
 	cs = 0.0
 	num_u = length(ud[1])
 	for ui in ud
@@ -107,8 +80,8 @@ function control_score(ud::VV_F, R::Matrix{Float64}, h::Float64)
 	end
 	return 0.5 * h * cs
 end
-control_score(ud::VV_F) = control_score(ud, eye(2), 1.0)
-function control_score(ud::VV_F, N::Int)
+control_score(ud::VVF) = control_score(ud, eye(2), 1.0)
+function control_score(ud::VVF, N::Int)
 	cs = 0.0
 	for n = 1:N
 		num_u = length(ud[n])
@@ -121,7 +94,7 @@ function control_score(ud::VV_F, N::Int)
 	return cs
 end
 
-function control_effort(ud::VV_F, N::Int=length(ud))
+function control_effort(ud::VVF, N::Int=length(ud))
 	cs = 0.0
 	for n = 1:N
 		udx = ud[n][1]
@@ -133,48 +106,42 @@ end
 
 
 """
-`total_score(em, xd::VV_F, ud::VV_F, T::Float64)`
+`total_score(em, xd::VVF, ud::VVF, T::Float64)`
 
 Computes the total score `q*ergodic_score + sum_n h/2 un'Rn un`
 
 Currently assumes `q = 1.0` and `R = 0.01 * eye(2)`
 """
-function total_score(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)
-	# TODO: use correct q in ergodic score
-	return ergodic_score(em, xd) + control_score(ud, tm.R, tm.h)
+function total_score(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)
+	# TODO: add quadratic barrier score if need be
+	return tm.q*ergodic_score(em, xd) + control_score(ud, tm.R, tm.h)
 end
 # TODO: actually get q and R from the correct place 
-function total_score(em::ErgodicManager, xd::VV_F, ud::VV_F, T::Float64)
-	q = 1.0
-	R = 0.01 * eye(2)
-	N = length(xd) - 1
-	h = T/N
-	return q * ergodic_score(em, xd) + control_score(ud, R, h)
-end
-# TODO: let's not make this so shitty...
-function total_score(em::ErgodicManager, xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, alpha::Float64, T::Float64)
-	xd2 = deepcopy(xd)
-	ud2 = deepcopy(ud)
-	for i = 1:length(xd2)
-		xd2[i][1] += alpha * zd[i][1]
-		xd2[i][2] += alpha * zd[i][2]
-
-		ud2[i][1] += alpha * vd[i][1]
-		ud2[i][2] += alpha * vd[i][2]
-	end
-	return total_score(em, xd2, ud2, T)
-end
-
-"""
-`all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F)`
-"""
-#function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, N_range::UnitRange{Int})
-#	es = ergodic_score(em, xd, N_range)
-#	cs = control_score(ud, tm.R, tm.h)
-#	ts = tm.q*es + cs
-#	return es, cs, ts
+#function total_score(em::ErgodicManager, xd::VVF, ud::VVF, T::Float64)
+#	q = 1.0
+#	R = 0.01 * eye(2)
+#	N = length(xd) - 1
+#	h = T/N
+#	return q * ergodic_score(em, xd) + control_score(ud, R, h)
 #end
-function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int=1)
+## TODO: let's not make this so shitty...
+#function total_score(em::ErgodicManager, xd::VVF, ud::VVF, zd::VVF, vd::VVF, alpha::Float64, T::Float64)
+#	xd2 = deepcopy(xd)
+#	ud2 = deepcopy(ud)
+#	for i = 1:length(xd2)
+#		xd2[i][1] += alpha * zd[i][1]
+#		xd2[i][2] += alpha * zd[i][2]
+#
+#		ud2[i][1] += alpha * vd[i][1]
+#		ud2[i][2] += alpha * vd[i][2]
+#	end
+#	return total_score(em, xd2, ud2, T)
+#end
+
+"""
+`all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)`
+"""
+function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, start_idx::Int=1)
 	es = ergodic_score(em, xd, start_idx)
 	cs = control_score(ud, tm.R, tm.h)
 	ts = tm.q*es + cs
@@ -183,9 +150,9 @@ end
 
 
 """
-`collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64)`
+`collect_info(em::ErgodicManager, traj::VVF, d_rate::Float64)`
 
-`collect_info(em::ErgodicManager, traj::VV_F)`
+`collect_info(em::ErgodicManager, traj::VVF)`
 
 modifies em.phi according to some submodular.
 we don't use the last point in the trajectory
@@ -195,23 +162,23 @@ If you spend `h` time there, it is equivalent to `h*D/(h*N) = D/N`
 
 Returns total info picked up (a scalar value).
 """
-function collect_info(em::ErgodicManager, traj::VV_F; steps=0, right::Bool=true)
+function collect_info(em::ErgodicManager, traj::VVF; steps=0, right::Bool=true)
 	N = length(traj) - 1
 	D = sum(em.phi)
 	d_rate = D/N
 	collect_info(em.phi, em.cell_size, traj,d_rate,steps=steps, right=right)
 end
-function collect_info(em::ErgodicManager, traj::VV_F, d_rate::Float64; steps=0, right::Bool=true)
+function collect_info(em::ErgodicManager, traj::VVF, d_rate::Float64; steps=0, right::Bool=true)
 	collect_info(em.phi, em.cell_size, traj,d_rate,steps=steps, right=right)
 end
 
-function collect_info(phi::Matrix{Float64}, cell_size::Float64, traj::VV_F; steps=0, right::Bool=true)
+function collect_info(phi::Matrix{Float64}, cell_size::Float64, traj::VVF; steps=0, right::Bool=true)
 	N = length(traj) - 1
 	D = sum(phi)
 	d_rate = D/N
 	collect_info(phi, cell_size, traj, d_rate, steps=steps, right=right)
 end
-function collect_info(phi::Matrix{Float64}, cell_size::Float64, traj::VV_F, d_rate::Float64; steps=0, right::Bool=true)
+function collect_info(phi::Matrix{Float64}, cell_size::Float64, traj::VVF, d_rate::Float64; steps=0, right::Bool=true)
 	bins, rar = size(phi)
 	N = length(traj) - 1
 	total_info = 0.0

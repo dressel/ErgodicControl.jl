@@ -40,7 +40,7 @@ function new_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud
 
 		# Find gains K and descent direction (LQ)
 		A, B = linearize(tm.dynamics, xd, ud, tm.h)
-		K, C = LQ(A, B, ad, bd, tm.Q, tm.R, tm.N)
+		K, C = LQ(A, B, ad, bd, tm.Qn, tm.Rn, tm.N)
 		zd, vd = apply_LQ_gains(A, B, K, C)
 
 		# determine step size and descend

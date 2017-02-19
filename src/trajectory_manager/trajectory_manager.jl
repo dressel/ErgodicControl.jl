@@ -19,9 +19,10 @@ type TrajectoryManager
 	T::Float64
 	
 	# needed for ergodic trajectories
-	Q::Matrix{Float64}
-	R::Matrix{Float64}
 	q::Float64
+	Qn::Matrix{Float64}
+	R::Matrix{Float64}
+	Rn::Matrix{Float64}
 	max_iters::Int
 	initializer::Initializer
 
@@ -44,11 +45,10 @@ type TrajectoryManager
 		tm.x0 = deepcopy(x0)
 
 		# needed for ergodic trajectories
-		tm.Q = eye(2)
-		# trying a higher cost now 2/07/2017
-		#tm.R = 0.01 * eye(2)
-		tm.R = 0.01 * eye(2)
+		tm.Qn = eye(2)
 		tm.q = 1.0
+		tm.R = 0.01 * eye(2)
+		tm.Rn = eye(2)
 		tm.max_iters = 30
 		tm.initializer = i
 		tm.descender = InverseRootStep(1.0)

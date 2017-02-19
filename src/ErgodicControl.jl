@@ -9,7 +9,7 @@ export TrajectoryManager, dynamics!, make_trajectory, sample_trajectory
 export kmeans_trajectory, random_trajectory
 export assign_step, mean_step
 export Initializer, initialize
-export RandomInitializer, CornerInitializer, ConstantInitializer, CornerConstantInitializer, SampleInitializer, GreedyInitializer, PointInitializer
+export CornerConstantInitializer, GreedyInitializer, PointInitializer
 export DirectionInitializer
 export clerc_trajectory
 export cerc_trajectory

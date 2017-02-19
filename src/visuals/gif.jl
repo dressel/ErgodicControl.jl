@@ -8,24 +8,28 @@ using Reel
 export gif
 
 """
-`gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true, fps::Int=20, right::Bool=true)`
+`gif(em::ErgodicManager, tm::TrajectoryManager, trajectory_file::String="temp.csv"; show_score=true, fps::Int=20, right::Bool=true)`
 
-Below is an example of how you might use this:
+Below is an example of how you might use this. You `must` set `logging` to true during the trajectory generation.
 
-`xd, ud = clerc_trajectory(em, tm, max_iters=100, logging=true)`
+`xd, ud = new_trajectory(em, tm, logging=true)`
 
-`trajectories = readcsv("temp.csv")`
-
-`gif(em, trajectories, 101, fps=17)`
+`gif(em, tm, fps=15)`
 
 The gif will be saved at `temp.gif`.
 """
-function gif(em::ErgodicManager, trajectories::Matrix{Float64}, num_trajectories::Int; show_score=true, fps::Int=20, right::Bool=true)
+function gif(em::ErgodicManager, tm::TrajectoryManager, trajectory_file::String="temp.csv"; show_score=true, fps::Int=17, right::Bool=true)
+	# First, let's read the trajectories in...
+	trajectories = readcsv(trajectory_file)
+
+
 	frames = Frames(MIME("image/png"), fps=fps)
 
 	# ok, loop through all xd
 	num_rows, n = size(trajectories)
-	N = round(Int, num_rows / num_trajectories)
+	#N = round(Int, num_rows / num_trajectories)
+	N = tm.N + 1
+	num_trajectories = round(Int, num_rows / N)
 
 	# start with the first trajectory...
 	xd = mat2traj(trajectories[1:N, :])

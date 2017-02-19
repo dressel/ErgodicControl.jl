@@ -15,21 +15,31 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 		ad[2,ni] = an_y
 
 		# quadratic boundary
-		xnx = xd[n+start_idx+1][1]
-		xny = xd[n+start_idx+1][2]
-		c = 10.
-		if xnx > 1
-			ad[1,ni] += c * (2.0*xnx - 1.0)
-		elseif xnx < 0
-			ad[1,ni] += c * 2.0 * xnx
+		#if tm.barrier_cost > 0.0
+		#	xnx = xd[n+start_idx+1][1]
+		#	xny = xd[n+start_idx+1][2]
+		#	if (xnx > em.L) || (xnx < 0.0)
+		#		ad[1,ni] += tm.barrier_cost * (2.0*xnx - em.L)
+		#	end
+		#	if (xny > em.L) || (xny < 0.0)
+		#		ad[2,ni] += tm.barrier_cost * (2.0*xny - em.L)
+		#	end
+		#end
+		# alternate way...
+		if tm.barrier_cost > 0.0
+			xnx = xd[n+start_idx+1][1]
+			xny = xd[n+start_idx+1][2]
+			if (xnx > em.L)
+				ad[1,ni] += tm.barrier_cost * (2.0*xnx - 2.0*em.L)
+			elseif xnx < 0.0
+				ad[1,ni] += tm.barrier_cost * 2.0*xnx
+			end
+			if xny > em.L
+				ad[2,ni] += tm.barrier_cost * (2.0*xny - 2.0*em.L)
+			elseif xny < 0.0
+				ad[2,ni] += tm.barrier_cost * (2.0*xny)
+			end
 		end
-		if xny > 1
-			ad[2,ni] += c * (2.0*xny - 1.0)
-		elseif xny < 0
-			ad[2,ni] += c * 2.0 * xny
-		end
-		#ad[1,ni] += c * (2.0*xnx - 1.0)
-		#ad[2,ni] += c * (2.0*xny - 1.0)
 
 		# control gradients
 		bd[:,ni] = tm.h * tm.R * ud[ni]

@@ -99,6 +99,13 @@ function forward_euler(dd::DubinsDynamics, x::Vector{Float64}, u::Vector{Float64
 	xp = deepcopy(x)
 	xp[1] += cos(x[3]) * dd.v0 * h
 	xp[2] += sin(x[3]) * dd.v0 * h
-	xp[3] += u[1] / dd.r * h
+	u_val = u[1]
+	if u_val > 1.
+		u_val = 1.
+	end
+	if u_val < -1.
+		u_val = -1.
+	end
+	xp[3] += u_val / dd.r * h
 	return xp
 end

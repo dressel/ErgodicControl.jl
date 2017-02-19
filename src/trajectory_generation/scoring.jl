@@ -105,38 +105,61 @@ function control_effort(ud::VVF, N::Int=length(ud))
 end
 
 
+# if anyone is outside the domain...
+function barrier_score(em::ErgodicManager, xd::VVF, c::Float64)
+	if c == 0.0; return 0.0; end
+
+	bs = 0.0
+	for xi in xd
+		if (xi[1] > em.L) || (xi[1] < 0.0)
+			dx = (xi[1] - 0.5*em.L)
+			bs += c * dx * dx
+		end
+		if (xi[2] > em.L) || (xi[2] < 0.0)
+			dy = (xi[2] - 0.5*em.L)
+			bs += c * dy * dy
+		end
+	end
+	return bs
+end
+
+function barrier_score2(em::ErgodicManager, xd::VVF, c::Float64)
+	if c == 0.0; return 0.0; end
+
+	bs = 0.0
+	for xi in xd
+		if (xi[1] > em.L)
+			dx = xi[1] - em.L
+			bs += c * dx * dx
+		elseif (xi[1] < 0.0)
+			dx = xi[1]
+			bs += c * dx * dx
+		end
+		if (xi[2] > em.L)
+			dy = xi[2] - em.L
+			bs += c * dy * dy
+		elseif (xi[2] < 0.0)
+			dy = xi[2]
+			bs += c * dy * dy
+		end
+	end
+	return bs
+end
+
+
 """
-`total_score(em, xd::VVF, ud::VVF, T::Float64)`
+`total_score(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)`
 
 Computes the total score `q*ergodic_score + sum_n h/2 un'Rn un`
-
-Currently assumes `q = 1.0` and `R = 0.01 * eye(2)`
 """
 function total_score(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)
 	# TODO: add quadratic barrier score if need be
-	return tm.q*ergodic_score(em, xd) + control_score(ud, tm.R, tm.h)
+	es = tm.q * ergodic_score(em, xd)
+	cs = control_score(ud, tm.R, tm.h)
+	bs = barrier_score2(em, xd, tm.barrier_cost)
+	#bs = 0.0
+	return es + cs + bs
 end
-# TODO: actually get q and R from the correct place 
-#function total_score(em::ErgodicManager, xd::VVF, ud::VVF, T::Float64)
-#	q = 1.0
-#	R = 0.01 * eye(2)
-#	N = length(xd) - 1
-#	h = T/N
-#	return q * ergodic_score(em, xd) + control_score(ud, R, h)
-#end
-## TODO: let's not make this so shitty...
-#function total_score(em::ErgodicManager, xd::VVF, ud::VVF, zd::VVF, vd::VVF, alpha::Float64, T::Float64)
-#	xd2 = deepcopy(xd)
-#	ud2 = deepcopy(ud)
-#	for i = 1:length(xd2)
-#		xd2[i][1] += alpha * zd[i][1]
-#		xd2[i][2] += alpha * zd[i][2]
-#
-#		ud2[i][1] += alpha * vd[i][1]
-#		ud2[i][2] += alpha * vd[i][2]
-#	end
-#	return total_score(em, xd2, ud2, T)
-#end
 
 """
 `all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)`

@@ -13,13 +13,12 @@ type ArmijoLineSearch <: Descender
 		return new(float(initial_step), float(c), 50.)
 	end
 
-	ArmijoLineSearch() = ArmijoLineSearch(1, 0.9, 50.)
+	ArmijoLineSearch() = ArmijoLineSearch(10, 0.1, 50.)
 
 end
 
 function get_step_size(als::ArmijoLineSearch, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, ad::MF, bd::MF, K::Vector{MF}, i::Int)
 	tau = 0.5
-	c = 1e-6
 	step_size = als.initial_step
 
 	# compute m = p' * grad f(x)
@@ -32,7 +31,7 @@ function get_step_size(als::ArmijoLineSearch, em::ErgodicManager, tm::Trajectory
 	#ts_arr = Float64[]
 	#step_arr = Float64[]
 	armijo_index = 0.0
-	while (total_score(em, tm, xdn, udn) > f_x + step_size*c*m) && (armijo_index < als.max_iters)
+	while (total_score(em, tm, xdn, udn) > f_x + step_size*als.c*m) && (armijo_index < als.max_iters)
 		ts = total_score(em, tm, xdn, udn)
 		#push!(ts_arr, ts)
 		#push!(step_arr, step_size)

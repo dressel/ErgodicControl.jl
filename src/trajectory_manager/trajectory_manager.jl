@@ -18,11 +18,13 @@ type TrajectoryManager
 	x0::Vector{Float64}
 	T::Float64
 	
-	# needed for ergodic trajectories
+	# Cost functions
 	q::Float64
 	Qn::Matrix{Float64}
 	R::Matrix{Float64}
 	Rn::Matrix{Float64}
+	barrier_cost::Float64
+
 	max_iters::Int
 	initializer::Initializer
 
@@ -49,10 +51,11 @@ type TrajectoryManager
 		tm.q = 1.0
 		tm.R = 0.01 * eye(2)
 		tm.Rn = eye(2)
+		tm.barrier_cost = 0.
 		tm.max_iters = 30
 		tm.initializer = i
-		tm.descender = InverseRootStep(1.0)
-		# I've found InverseRootStep(0.15) to work well
+		#tm.descender = InverseRootStep(1.0)
+		tm.descender = ArmijoLineSearch()
 
 		# dynamics stuff
 		tm.dynamics = LinearDynamics(eye(2), tm.h*eye(2))

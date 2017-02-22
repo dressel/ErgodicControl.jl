@@ -17,11 +17,10 @@ Here is an example
 
     tm = TrajectoryManager(x0, h, N, ConstantInitializer([0.0,0.0]))
 
-    @time xd, ud = new_trajectory(em, tm, logging=true)
-    #gif(em, tm, fps=15)
+    xd, ud = new_trajectory(em, tm)
     plot(em, xd)
 
-.. image:: http://stanford.edu/~dressel/gifs/ergodic/dubins1.png
+.. image:: http://stanford.edu/~dressel/gifs/ergodic/single1.png
 
 
 
@@ -29,13 +28,36 @@ Double Integrator
 ===================
 Here is another example
 ::
-    
-    ok there
+
+    using ErgodicControl
+
+    em = ErgodicManager("double gaussian", K=5, bins=100)
+
+    x0 = [0.49,0.01,0.0,0.0]
+    N = 40
+    h = 0.5
+
+    tm = TrajectoryManager(x0, h, N, ConstantInitializer([0.0,0.0]))
+
+    # dynamics stuff
+    dynamics!(tm, "double integrator")
+    tm.Qn = eye(4)
+
+    tm.descender = ArmijoLineSearch(1,.01)
+
+    xd, ud = new_trajectory(em, tm)
+
+When doing this, the solver gets stuck. We can try another descent engine.
+::
+
+    tm.descender = ArmijoLineSearch(1,.01)
+
+.. image:: http://stanford.edu/~dressel/gifs/ergodic/double1.png
 
 
 Dubins Car
 ===================
-The Dubins car is blah blah
+The Dubins car is simple and often used to model cars.
 ::
 
     using ErgodicControl
@@ -68,6 +90,6 @@ We can overcome this by penalizing states outside the domain, using the barrier 
 
     tm.barrier_cost = 1
 
-Now look how this worked out!
+With this modification, trajectory generation reaches the directional derivative criterion after 155 iterations. The trajectory stays within the domain.
 
 .. image:: http://stanford.edu/~dressel/gifs/ergodic/dubins2.png

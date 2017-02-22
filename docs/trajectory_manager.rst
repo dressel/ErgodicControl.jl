@@ -1,7 +1,7 @@
 =========================
 Trajectory Manager
 =========================
-The `TrajectoryManager` contains information used during trajectory generation.
+The :code:`TrajectoryManager` contains information used during trajectory generation.
 
 Fields and Construction
 =========================
@@ -30,11 +30,9 @@ A `TrajectoryManager` is constructed with basic information about the trajectory
 
 	TrajectoryManager(x0::Vector{Float64}, h::Float64, N::Int, i::Initializer=RandomInitializer())
 
-The default
-
 The `barrier_cost` field is set to 0 by default, meaning no barrier cost is applied. When `barrier_cost` is positive, a quadratic barrier function is added to the objective.
 
-The `initializer`, `descedner`, and `dynamics` fields are described below.
+The `initializer`, `descender`, and `dynamics` fields are described below.
 
 
 Initializer

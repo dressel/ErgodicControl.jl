@@ -8,6 +8,10 @@ ErgodicControl.jl - Design of Ergodic Trajectories
 
 ErgodicControl.jl is a Julia package for performing ergodic control---that is, designing trajectories that are ergodic with respect to some spatial distribution.
 
+This code only generates discrete ergodic trajectories.
+
+As of Feb 22, 2017, this code is still under development. Things I need to add include variational integration and an extension to SE(2).
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

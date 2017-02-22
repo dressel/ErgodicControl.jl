@@ -25,7 +25,6 @@ type TrajectoryManager
 	Rn::Matrix{Float64}
 	barrier_cost::Float64
 
-	max_iters::Int
 	initializer::Initializer
 
 	# The descender determines how much to descend at each step
@@ -52,7 +51,6 @@ type TrajectoryManager
 		tm.R = 0.01 * eye(2)
 		tm.Rn = eye(2)
 		tm.barrier_cost = 0.
-		tm.max_iters = 30
 		tm.initializer = i
 		#tm.descender = InverseRootStep(1.0)
 		tm.descender = ArmijoLineSearch()

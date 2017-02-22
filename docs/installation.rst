@@ -1,8 +1,9 @@
 =========================
 Installation
 =========================
-It is easy to install.
+It is easy to install. Simply open up Julia and run the following:
 ::
-    https://github.com/dressel/ErgodicControl.jl
+
+    Pkg.clone("https://github.com/dressel/ErgodicControl.jl")
 
 I'll probably have more to say about requirements in the future.

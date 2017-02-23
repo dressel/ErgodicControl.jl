@@ -17,12 +17,12 @@ There are a number of optional arguments. Here they are with their default argum
     dd_crit::Float64 = 1e-6
     right::Bool = false
 
-When the `verbose` tag is set to `true`, progress is presented at each descent iteration. You can turn this to false if you are running trajectory generation as an inner component of a larger algorithm.
+When the :code:`verbose` tag is set to :code:`true`, progress is presented at each descent iteration. You can turn this to false if you are running trajectory generation as an inner component of a larger algorithm.
 
-The `logging` tag saves a file `temp.csv` that contains a copy of each trajectory (just the states, not the actions) at each descent iteration. This is mostly there for gif generation (see Visuals).
+The :code:`logging` tag saves a file :code:`temp.csv` that contains a copy of each trajectory (just the states, not the actions) at each descent iteration. This is mostly there for gif generation (see Visuals).
 
-The `max_iters` tag is the maximum number of descent iterations allowed.
+The :code:`max_iters` tag is the maximum number of descent iterations allowed.
 
-The `es_crit` and `dd_crit` tags are termination conditions based on the ergodic score and directional derivative, respectively. A lot of research suggests using a directional derivative criterion.
+The :code:`es_crit` and :code:`dd_crit` tags are termination conditions based on the ergodic score and directional derivative, respectively. A lot of research suggests using a directional derivative criterion.
 
-The `right` tag determines if right or left-Riemann sums are used when generating trajectories. Right now, only the `false` option works (that is, using left-Riemann sums).
+The :code:`right` tag determines if right or left-Riemann sums are used when generating trajectories. Right now, only the :code:`false` option works (that is, using left-Riemann sums).

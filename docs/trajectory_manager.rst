@@ -22,31 +22,34 @@ The :code:`TrajectoryManager` type has the following fields:
 	barrier_cost::Float64       # penalizes leaving domain, def = 0
 
 	initializer::Initializer
-	descender::Descender
-	dynamics::Dynamics
+	descender::Descender        # default is ArmijoLineSearch(10,.1)
+	dynamics::Dynamics          # default is single integrator
 
 A :code:`TrajectoryManager` is constructed with basic information about the trajectory and an optional initializer.
 ::
 
 	TrajectoryManager(x0::Vector{Float64}, h::Float64, N::Int, i::Initializer=RandomInitializer())
 
-The default costs are :code:`q = 1.0`
-
-The :code:`barrier_cost` field is set to 0 by default, meaning no barrier cost is applied. When :code:`barrier_cost` is positive, a quadratic barrier function is added to the objective.
+By Default,  :code:`barrier_cost=0`, meaning no barrier cost is applied. When :code:`barrier_cost` is positive, a quadratic barrier function is added to the objective. This cost penalizes the trajectory for leaving the domain specified in the :code:`ErgodicManager` during trajectory generation.
 
 The :code:`initializer`, :code:`descender`, and :code:`dynamics` fields are described below.
 
 
 Initializer
 ============
+The :code:`initializer` field must be a subtype of the abstract `Initializer` type.
+
+A good option is the :code:`ConstantInitializer`, which just sets every action to the provided value and uses a forward Euler method to determine the trajectory. Below is an example when the controls are in :math:`\mathbb{R}^n`.
 ::
     
-    ci = ConstantInitializer(action::Vector{Float64})
+    tm.initializer = ConstantInitializer([0.0,0.0])
 
 
 Descender
 ============
-The `descender`
+The :code:`descender` field must be a subtype of the :code:`Descender` abstract type.
+
+The default is an :code:`ArmijoLineSearch`, as Armijo line search has been used extensively in the literature.
 
 
 Dynamics

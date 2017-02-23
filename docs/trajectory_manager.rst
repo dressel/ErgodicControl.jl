@@ -39,7 +39,7 @@ Initializer
 ============
 The :code:`initializer` field must be a subtype of the abstract `Initializer` type.
 
-A good option is the :code:`ConstantInitializer`, which just sets every action to the provided value and uses a forward Euler method to determine the trajectory. Below is an example when the controls are in :math:`\mathbb{R}^n`.
+A good option is the :code:`ConstantInitializer`, which just sets every action to the provided value and uses a forward Euler method to determine the trajectory. Below is an example when the control inputs are in :math:`\mathbb{R}^2`.
 ::
     
     tm.initializer = ConstantInitializer([0.0,0.0])
@@ -50,6 +50,13 @@ Descender
 The :code:`descender` field must be a subtype of the :code:`Descender` abstract type.
 
 The default is an :code:`ArmijoLineSearch`, as Armijo line search has been used extensively in the literature.
+
+Simpler alternatives are shown below. They work ok, but seem to take longer than Armijo line search (which is to be expected). I'll use them when I'm troubleshooting or if Armijo line search doesn't work well in a particular problem.
+::
+
+    tm.descender = ConstantStep(0.5)        # each step is 0.5
+    tm.descender = InverseStep(0.5)         # each step is 0.5/iter
+    tm.descender = InverseRootStep(0.15)    # each step is 0.15/sqrt(iter)
 
 
 Dynamics
@@ -64,11 +71,15 @@ The Dubins car is a standard model for cars.
 
     tm.dynamics = DubinsDynamics(v0, r)
 
-If you want to implement your own dynamics, you need to subtype the abstract :code:`Dynamics` type and implement the :code:`linearize` and :code:`forward_euler` functions.
+If you want to implement your own dynamics, you need to subtype the abstract :code:`Dynamics` type and implement the :code:`linearize` and :code:`forward_euler` functions. 
 ::
 
     type MyDynamics <: Dynamics
         # fields, constructors, etc
+
+        # following fields must be included
+        n::Int      # number of state variables
+        m::Int      # number of control variables
     end
 
     function linearize(md::MyDynamics, x::VF, u::VF, h::Float64)

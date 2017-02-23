@@ -8,19 +8,20 @@ Fields and Construction
 The :code:`TrajectoryManager` type has the following fields:
 ::
 
-	# needed for all trajectories
+	# basic info
 	N::Int                      # trajectory length
 	h::Float64                  # time step
 	x0::Vector{Float64}         # initial state
 	T::Float64                  # time horizon (N * h)
 	
-	# Cost functions
+	# cost functions
 	q::Float64                  # ergodic cost multiplier, default = 1
 	Qn::Matrix{Float64}         # LQ ergodic cost, default = eye(2)
 	R::Matrix{Float64}          # control cost multiplier, def = .01*eye(2)
 	Rn::Matrix{Float64}         # LQ control cost, default = eye(2)
 	barrier_cost::Float64       # penalizes leaving domain, def = 0
 
+    # needed for trajectory generation
 	initializer::Initializer
 	descender::Descender        # default is ArmijoLineSearch(10,.1)
 	dynamics::Dynamics          # default is single integrator

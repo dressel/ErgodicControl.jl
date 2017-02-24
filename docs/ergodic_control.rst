@@ -39,6 +39,10 @@ where :math:`\Lambda_k` is weighted to favor low-frequency features. It takes th
 where :math:`n` is the number state variables in our distribution; for distributions over :math:`\mathbb{R}^2,\ n = 2`.
 
 
+Ergodicity in SE(2)
+=====================
+
+
 Trajectory Generation
 ======================
 We want to generate trajectories with low ergodic score, because an ergodic score of zero implies perfect ergodicity.

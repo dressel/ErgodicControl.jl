@@ -18,16 +18,23 @@ The spatial distribution is decomposed into Fourier coefficients :math:`\phi_k`:
 where :math:`k` is a wave-number vector with dimensionality equal to the spatial domain's.
 That is, if the spatial domain has two dimensions, then :math:`k` is a vector of length 2.
 
+The function :math:`F_k(x)` is as follows:
+
+.. math:: F_k(x) = \prod_{i=1}^n \cos \left(\frac{k_i\pi}{L_i} x_i\right)
+
 If we have a trajectory :math:`x(t)`, we can find the Fourier coefficients :math:`c_k` of the trajectory:
 
 .. math:: c_k = \frac{1}{T}\int_0^T F_k(x(t))dt,
 
-where :math:`\Lambda_k` is weighted to favor low-frequency features.
-
 The ergodic metric :math:`\mathcal{E}` is a measure of the difference between trajectory and distribution coefficients:
 
-.. math:: \mathcal{E} = \sum_k \Lambda_k | c_k - \phi_k |^2.
+.. math:: \mathcal{E} = \sum_k \Lambda_k | c_k - \phi_k |^2,
 
+where :math:`\Lambda_k` is weighted to favor low-frequency features.
+
+where 
+
+.. math:: Lambda_k = \frac{1}{1 + ||k||^2)^s}
 
 
 Trajectory Generation

@@ -32,9 +32,9 @@ The ergodic metric :math:`\mathcal{E}` is a measure of the difference between tr
 
 where :math:`\Lambda_k` is weighted to favor low-frequency features.
 
-where 
+.. math:: \Lambda_k = \frac{1}{\left(1 + ||k||^2\right)^s},
 
-.. math:: Lambda_k = \frac{1}{1 + ||k||^2)^s}
+where :math:`s = (n+1)/2` and :math:`n` is the number state variables in our distribution; for distributions over :math:`mathbb{R}^2,\ n = 2`.
 
 
 Trajectory Generation

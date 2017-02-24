@@ -30,7 +30,7 @@ type DubinsDynamics <: Dynamics
 	function DubinsDynamics()
 		DubinsDynamics(1.0, 1.0)
 	end
-	function DubinsDynamics(v0::Float64, r::Float64)
+	function DubinsDynamics(v0::Real, r::Real)
 		dd = new()
 		dd.n = 3
 		dd.m = 1
@@ -60,7 +60,6 @@ function linearize(ld::LinearDynamics, x::VF, u::VF, h::Float64)
 	return ld.A, ld.B
 end
 
-# added the 0.1 because I want one with smaller speed
 function linearize(ld::DubinsDynamics, x::VF, u::VF, h::Float64)
 	A = eye(3)
 	A[1,3] = -h * sin(x[3]) * ld.v0
@@ -92,10 +91,10 @@ function forward_euler(tm::TrajectoryManager, ud::VVF)
 	return xd
 end
 
-function forward_euler(ld::LinearDynamics, x::Vector{Float64}, u::Vector{Float64}, h::Float64)
+function forward_euler(ld::LinearDynamics, x::VF, u::VF, h::Float64)
 	return ld.A*x + ld.B*u
 end
-function forward_euler(dd::DubinsDynamics, x::Vector{Float64}, u::Vector{Float64}, h::Float64)
+function forward_euler(dd::DubinsDynamics, x::VF, u::VF, h::Float64)
 	xp = deepcopy(x)
 	xp[1] += cos(x[3]) * dd.v0 * h
 	xp[2] += sin(x[3]) * dd.v0 * h

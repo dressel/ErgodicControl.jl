@@ -26,17 +26,13 @@ type TrajectoryManager
 	barrier_cost::Float64
 
 	initializer::Initializer
-
-	# The descender determines how much to descend at each step
 	descender::Descender
-
-	# dynamics stuff
 	dynamics::Dynamics
 
-	function TrajectoryManager(x0::Vector{Float64}, h::Float64, N::Int)
-		return TrajectoryManager(x0, h, N, RandomInitializer())
-	end
-	function TrajectoryManager(x0::Vector{Float64}, h::Float64, N::Int, i::Initializer)
+	#function TrajectoryManager(x0::Vector{Float64}, h::Float64, N::Int)
+	#	return TrajectoryManager(x0, h, N, RandomInitializer())
+	#end
+	function TrajectoryManager(x0::Vector{Float64}, h::Real, N::Int, i::Initializer=RandomInitializer())
 		tm = new()
 
 		# needed for all trajectories

@@ -47,16 +47,17 @@ The basis functions are as follows:
 
 .. math:: F_{m,n,p}(x) = i^{n-m}\exp\left( i\left[m\psi + (n-m)\theta\right]\right) J_{m-n}(pr),
 
-where :math:`(m,n,p)` are the indices along each direction, :math:`J_{m-n}` is the :math:`m-n-\text{th}` order Bessel function and :math:`(r, \psi, \theta)` are the robot's state expressed in polar coordinates.
+where :math:`(m,n,p)` are the indices along each direction, :math:`J_{m-n}` is the :math:`m-n\text{th}` order Bessel function and :math:`(r, \psi, \theta)` are the robot's state expressed in polar coordinates:
 
-.. math:: r = \sqrt{x_r^2 + y_r^2}
-.. math:: \psi = \arctan(y_r / x_r)
-.. math:: \theta = \theta
+.. math:: r = \sqrt{x_r^2 + y_r^2},
+.. math:: \psi = \arctan(y_r / x_r),
+.. math:: \theta = \theta.
 
 The ergodic metric is then dexpressed
+
 .. math:: \mathcal{E} = \sum_{m,n,p=0}^{M,N,P} \Lambda_{m,n,p} || c_{m,n,p} - \phi_{m,n,p} ||^2,
 
-where :math:`\Lambda_{m,n,p}` is equivalent to :math:`Lambda_k` where our vector :math:`k=[m,n,p]`.
+where :math:`\Lambda_{m,n,p}` is equivalent to :math:`\Lambda_k` where our vector :math:`k=[m,n,p]`.
 
 
 Trajectory Generation

@@ -41,6 +41,17 @@ where :math:`n` is the number state variables in our distribution; for distribut
 
 Ergodicity in SE(2)
 =====================
+A robot in SE(2) has a state :math:`x\in\mathbb{R}^3`, where :math:`x` consists of the robot's :math:`x`-location, :math:`y`-location, and heading :math:`\theta`. We might denote this :math:`x = [x_r, y_r, \theta]`.
+
+The basis functions are as follows:
+
+.. math:: \F_{m,n,p}(x) = i^{n-m}\exp\left( i\left[m\phi + (n-m)\theta\right]\right) J_{m-n}(pr),
+
+where :math:`(m,n,p)` are the indices along each direction, :math:`J_{m-n}` is the :math:`m-n`th order Bessel function and :math:`(r, \phi, \theta)` are the robot's state expressed in polar coordinates.
+
+.. math:: r = \sqrt{x_r^2 + y_r^2}
+.. math:: \phi = arctan(y_r / x_r)
+.. math:: \theta = \theta\quad \text{robot heading same in polar coords}
 
 
 Trajectory Generation

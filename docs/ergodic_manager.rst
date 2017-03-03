@@ -2,7 +2,7 @@
 Ergodic Manager
 =========================
 
-The abstract :code:`ErgodicManager` type contains information about the spatial distribution. Currently, there are two sub-types. The type :code:`ErgodicManagerR2` manages distributions over :math:`mathbb{R}^2`, and the type `ErgodicManagerSE2` manages distributions over the special Euclidean group SE(2).
+The abstract :code:`ErgodicManager` type contains information about the spatial distribution. Currently, there are two sub-types. The type :code:`ErgodicManagerR2` manages distributions over :math:`\mathbb{R}^2`, and the type :code:`ErgodicManagerSE2` manages distributions over the special Euclidean group SE(2).
 
 Fields
 =========

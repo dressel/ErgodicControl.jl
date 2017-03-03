@@ -10,7 +10,7 @@ ErgodicControl.jl is a Julia package for performing ergodic control---that is, d
 
 This code only generates discrete ergodic trajectories.
 
-As of Feb 22, 2017, this code is still under development. Things I need to add include variational integration and the extension to SE(2).
+As of March 02, 2017, this code is still under development. I just added an extension for SE(2) but still want to add variational integration.
 
 .. toctree::
    :maxdepth: 2

@@ -26,10 +26,17 @@ function plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score:
 	end
 end
 
-function plot(em::ErgodicManager; alpha=1.0, cmap="Greys")
+function plot(em::ErgodicManagerR2; alpha=1.0, cmap="Greys")
 	a = [0,em.L,0,em.L]
 	imshow(em.phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
-	#labels()	# from an old package
+	axis(a)
+end
+
+function plot(em::ErgodicManagerSE2; alpha=1.0, cmap="Greys")
+	a = [0,em.L,0,em.L]
+	rar = size(em.phi)
+	temp_phi = reshape(sum(em.phi,3), em.bins, em.bins)
+	imshow(temp_phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
 	axis(a)
 end
 
@@ -44,7 +51,7 @@ end
 
 # what other stuff do we need here?
 # only marks, colors, etc
-function plot_trajectory(xd::VV_F; lw::Float64=1.0, ms::Float64=6.0)
+function plot_trajectory(xd::VV_F; lw::Real=1.0, ms::Real=6, onlyMarks=false)
 	N = length(xd)
 	xvals = zeros(N)
 	yvals = zeros(N)
@@ -52,5 +59,13 @@ function plot_trajectory(xd::VV_F; lw::Float64=1.0, ms::Float64=6.0)
 		xvals[i] = xd[i][1]
 		yvals[i] = xd[i][2]
 	end
-	PyPlot.plot(xvals, yvals, ".-", lw=lw, ms=ms)
+	ls = onlyMarks? "None" : "-"
+	m = onlyMarks ? "o" : "."
+	#PyPlot.plot(xvals, yvals, ".-", lw=lw, ms=ms)
+	if onlyMarks
+		PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms, mfc="none")
+	else
+		PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms)
+	end
+	#PyPlot.plot(xvals, yvals, line_style, lw=lw, ms=ms)
 end

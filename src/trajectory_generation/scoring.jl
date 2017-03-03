@@ -11,7 +11,7 @@ Decomposes a set of positions into a set of `ck` Fourier coefficients.
 If `start_idx` is 1, then the right Riemann sum is used.
 If `start_idx` is 0, then the left Riemann sum is used.
 """
-function decompose(em::ErgodicManager, traj::VVF, start_idx::Int=1)
+function decompose(em::ErgodicManagerR2, traj::VVF, start_idx::Int=1)
 	K = em.K
 	N = length(traj)-1
 	ck = zeros(K+1, K+1)
@@ -27,6 +27,26 @@ function decompose(em::ErgodicManager, traj::VVF, start_idx::Int=1)
 				fk_sum += cos(kpiL1 * xn[1])  * cos(kpiL2 * xn[2])
 			end
 			ck[k1+1, k2+1] = fk_sum / (hk * N)
+		end
+	end
+	return ck
+end
+
+function decompose(em::ErgodicManagerSE2, traj::VVF, start_idx::Int=1)
+	N = length(traj)-1
+	ck = zeros(Complex{Float64}, em.M+1, em.N+1, em.P+1)
+	for m = 0:em.M
+		for n = 0:em.N
+			for p = 0:em.P
+				fk_sum = 0.0im
+				# now loop over time
+				for i = 0:N-1
+					xi = traj[i + start_idx + 1]
+					fk_sum += F_mnp(m,n,p,xi[1],xi[2],xi[3])
+				end
+				# TODO: check that this is right
+				ck[m+1, n+1, p+1] = fk_sum / N
+			end
 		end
 	end
 	return ck
@@ -48,12 +68,27 @@ function ergodic_score(em::ErgodicManager, traj::VVF, start_idx::Int=1)
 	ck = decompose(em, traj, start_idx)
 	return ergodic_score(em, ck)
 end
-function ergodic_score(em::ErgodicManager, ck::Matrix{Float64})
+function ergodic_score(em::ErgodicManagerR2, ck::Matrix{Float64})
 	val = 0.0
 	for k1 = 0:em.K
 		for k2 = 0:em.K
 			d = em.phik[k1+1,k2+1] - ck[k1+1,k2+1]
-			val += em.Lambdak[k1+1,k2+1] * d * d
+			val += em.Lambda[k1+1,k2+1] * d * d
+		end
+	end
+	return val
+end
+
+function ergodic_score(em::ErgodicManagerSE2, ck::Array{Complex{Float64},3})
+	val = 0.0
+	for m = 0:em.M
+		for n = 0:em.N
+			for p = 0:em.P
+				d = em.phik[m+1,n+1,p+1] - ck[m+1,n+1,p+1]
+				dr = real(d)
+				di = imag(d)
+				val += em.Lambda[m+1,n+1,p+1] * (dr*dr + di*di)
+			end
 		end
 	end
 	return val

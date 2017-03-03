@@ -5,14 +5,19 @@
 
 # Only first two states matter for ergodic score and barrier penalty
 # Assumes ad has been initialized with zeros; that is, ad[3:end, ni] = 0.0
-function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int)
+function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, start_idx::Int)
 	ni =  1
+	ck = decompose(em, xd, start_idx)
 	for n = 0:(tm.N-1)
 
 		# ergodic gradients
-		an_x, an_y = compute_ans(em, xd, tm, n, start_idx)
-		ad[1,ni] = an_x
-		ad[2,ni] = an_y
+		an = compute_ans(em, xd, tm, n, start_idx, ck)
+		for i = 1:length(an)
+			ad[i,ni] = an[i]
+		end
+		#an_x, an_y = compute_ans(em, xd, tm, n, start_idx)
+		#ad[1,ni] = an_x
+		#ad[2,ni] = an_y
 
 		# quadratic boundary
 		#if tm.barrier_cost > 0.0
@@ -57,7 +62,7 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 	end
 end
 
-function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int)
+function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int, ck)
 	xnx = xd[n + start_idx + 1][1]
 	xny = xd[n + start_idx + 1][2]
 	L = em.L
@@ -72,12 +77,15 @@ function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int
 			dFk_dxn1 = -k1*pi*sin(k1*pi*xnx/L)*cos(k2*pi*xny/L) / (hk*L)
 			dFk_dxn2 = -k2*pi*cos(k1*pi*xnx/L)*sin(k2*pi*xny/L) / (hk*L)
 
+			# TODO:
+			#  I think this step is same for all indices
+			#  I think we could save some time here
 			fk = 0.0
 			for i in 0:(tm.N-1)
 				x = xd[i + start_idx + 1]
 				fk += cos(k1*pi*x[1]/L) * cos(k2*pi*x[2]/L) / hk
 			end
-			c = em.Lambdak[k1+1,k2+1] * (tm.h*fk/tm.T - em.phik[k1+1,k2+1])
+			c = em.Lambda[k1+1,k2+1] * (tm.h*fk/tm.T - em.phik[k1+1,k2+1])
 			an_x += c*dFk_dxn1
 			an_y += c*dFk_dxn2
 		end
@@ -85,4 +93,60 @@ function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int
 	an_x *= 2.0*tm.h
 	an_y *= 2.0*tm.h
 	return an_x, an_y
+end
+
+function compute_ans(em::ErgodicManagerSE2, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int, ck)
+	x = xd[n + start_idx + 1][1]
+	y = xd[n + start_idx + 1][2]
+	z = xd[n + start_idx + 1][3]
+
+	an_x = 0.0
+	an_y = 0.0
+	an_z = 0.0
+
+	i = float(im)
+
+	# polar coords
+	r2 = x*x + y*y	# range squared
+	r = sqrt(r2)
+	psi = atan2(y, x)
+	 
+	for m = 0:em.M
+		for n = 0:em.N
+			# commonly used values
+			inm = i^(n-m)
+			expi = exp(i * (m*psi + (n-m)*z) )
+			for p = 0:em.P
+
+				pr = p*r	# commonly used
+				bjmn = besselj(m-n, pr)
+				dJ_dpr = 0.5 * (besselj(m-n-1, pr) - besselj(m-n+1, pr))
+
+				# TODO: we can reuse even more of this stuff...
+				dF_dx = expi * dJ_dpr * p * (x/r)
+				dF_dx += bjmn * expi*m*i * (-y/r2)
+				dF_dx = inm * dF_dx
+
+				dF_dy = expi * dJ_dpr * p * (y/r)
+				dF_dy += bjmn * expi*m*i * (x/r2)
+				dF_dy = inm * dF_dy
+
+				dF_dz = inm * bjmn * expi * i * (n-m)
+
+
+				c = em.Lambda[m+1,n+1,p+1] * (ck[m+1,n+1,p+1] - em.phik[m+1,n+1,p+1])
+				c_r = real(c)
+				c_i = imag(c)
+
+				# recall that c is a complex number...
+				an_x += c_r*real(dF_dx) + c_i*imag(dF_dx)
+				an_y += c_r*real(dF_dy) + c_i*imag(dF_dy)
+				an_z += c_r*real(dF_dz) + c_i*imag(dF_dz)
+			end
+		end
+	end
+	an_x *= 2.0 * (tm.h / tm.T)
+	an_y *= 2.0 * (tm.h / tm.T)
+	an_z *= 2.0 * (tm.h / tm.T)
+	return an_x, an_y, an_z
 end

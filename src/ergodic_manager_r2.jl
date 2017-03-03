@@ -1,8 +1,10 @@
 ######################################################################
-# ergodicity.jl
+# ergodic_manager_r2.jl
 # handles stuff needed for ergodicity
 ######################################################################
 
+
+export ErgodicManagerR2
 
 # kpixl is a (K+1 x bins) matrix, each entry storing cos(k*pi*x / L)
 #  this assumes some discretization
@@ -16,7 +18,7 @@ Valid `example_name` entries are:
 * "single gaussian"
 * "double gaussian"
 """
-type ErgodicManager
+type ErgodicManagerR2 <: ErgodicManager
 	K::Int
 	bins::Int				# number of bins per side
 	L::Float64
@@ -24,54 +26,55 @@ type ErgodicManager
 	hk::Matrix{Float64}
 	phi::Matrix{Float64}
 	phik::Matrix{Float64}
-	Lambdak::Matrix{Float64}
+	Lambda::Matrix{Float64}
 	kpixl::Matrix{Float64}
 
-	function ErgodicManager(L::Float64, K::Int, bins::Int)
+	function ErgodicManagerR2(L::Float64, K::Int, bins::Int)
 		hk   = zeros(K+1,K+1)
 		phik = zeros(K+1,K+1)
-		Lambdak = zeros(K+1,K+1)
+		Lambda = zeros(K+1,K+1)
 		kpixl = zeros(K+1, bins)
 		cell_size = L / bins
 		phi = ones(bins,bins) / (bins * bins)
-		em = new(K, bins, L, cell_size, hk, phi, phik, Lambdak, kpixl)
+		em = new(K, bins, L, cell_size, hk, phi, phik, Lambda, kpixl)
 
-		Lambdak!(em)
+		Lambda!(em)
 		kpixl!(em)
 		hk!(em)
 		return em
 	end
 
-	function ErgodicManager(L::Float64, K::Int, d::Matrix{Float64})
+	function ErgodicManagerR2(L::Float64, K::Int, d::Matrix{Float64})
 		hk   = zeros(K+1,K+1)
 		phik = zeros(K+1,K+1)
-		Lambdak = zeros(K+1,K+1)
+		Lambda = zeros(K+1,K+1)
 		kpixl = zeros(K+1, bins)
 		cell_size = L / bins
-		#phi = ones(bins,bins) / (bins * bins)
-		em = new(K, bins, L, cell_size, hk, d, phik, Lambdak, kpixl)
+		em = new(K, bins, L, cell_size, hk, d, phik, Lambda, kpixl)
 
-		Lambdak!(em)
+		Lambda!(em)
 		kpixl!(em)
 		hk!(em)
-		phik!(em, d)
+		decompose!(em, d)
 	end
 
-	function ErgodicManager(example_name::String; K::Int=5, bins::Int=100)
+	function ErgodicManagerR2(example_name::String; K::Int=5, bins::Int=100)
 		L = 1.0
-		em = ErgodicManager(L, K, bins)
+		em = ErgodicManagerR2(L, K, bins)
 
 		if example_name == "single gaussian"
 			mu = [L/2.0, L/2.0]
 			Sigma = 0.03 * eye(2)
-			phik!(em, mu, Sigma)
+			phi!(em, mu, Sigma)
+			decompose!(em)
 		elseif example_name == "double gaussian"
 			# Create Gaussian distribution and its coefficients
 			mu1 = [0.3, 0.7]
 			Sigma1 = 0.025* eye(2)
 			mu2 = [0.7, 0.3]
 			Sigma2 = 0.025* eye(2)
-			phik!(em, mu1, Sigma1, mu2, Sigma2)
+			phi!(em, mu1, Sigma1, mu2, Sigma2)
+			decompose!(em)
 		else
 			error("example name not recognized")
 		end
@@ -79,21 +82,20 @@ type ErgodicManager
 	end
 end
 
-# fills the Alpha_{k1,k2}
-function Lambdak!(em::ErgodicManager)
+# fills each entry Lambda[k1,k2] in the Lambda matrix
+function Lambda!(em::ErgodicManagerR2)
 	for k1 = 0:em.K
 		for k2 = 0:em.K
 			den = (1.0 + k1*k1 + k2*k2) ^ 1.5
-			em.Lambdak[k1+1, k2+1] = 1.0 / den
+			em.Lambda[k1+1, k2+1] = 1.0 / den
 		end
 	end
 end
 
 # TODO: check if the row/col ordering of this is julia-efficient
-function kpixl!(em::ErgodicManager)
-	half_size = em.cell_size / 2.0
+function kpixl!(em::ErgodicManagerR2)
 	for xi = 1:em.bins
-		x = (xi-1)*em.cell_size + half_size
+		x = (xi-0.5)*em.cell_size
 		for k = 0:em.K
 			em.kpixl[k+1,xi] = cos(k*pi*x / em.L)
 		end
@@ -102,7 +104,7 @@ end
 
 # generates the hk coefficients for the ergodic manager
 # these coefficients only need to be computed once
-function hk!(em::ErgodicManager)
+function hk!(em::ErgodicManagerR2)
 	for k1 = 0:em.K
 		for k2 = 0:em.K
 			em.hk[k1+1,k2+1] = hk_ij(em, k1, k2)
@@ -112,7 +114,7 @@ end
 
 # computes the coefficients for a specific value of k1 and k2
 # called by hk!
-function hk_ij(em::ErgodicManager, k1::Int, k2::Int)
+function hk_ij(em::ErgodicManagerR2, k1::Int, k2::Int)
 	cs2 = em.cell_size * em.cell_size
 	val = 0.0
 	for xi = 1:em.bins
@@ -131,7 +133,7 @@ end
 ######################################################################
 # Setting and computing phi
 ######################################################################
-function phi!(em::ErgodicManager, dm::Vector{Float64}, ds::Matrix{Float64})
+function phi!(em::ErgodicManagerR2, dm::VF, ds::MF)
 	# first, generate d
 	half_size = em.cell_size / 2.0
 	d = zeros(em.bins, em.bins)
@@ -144,11 +146,11 @@ function phi!(em::ErgodicManager, dm::Vector{Float64}, ds::Matrix{Float64})
 			d_sum += d[xi,yi]
 		end
 	end
-	normalize!(d)
+	normalize!(d, em.cell_size * em.cell_size)
 	em.phi = d
 end
 
-function phi!(em::ErgodicManager, dm1::Vector{Float64}, ds1::Matrix{Float64}, dm2::Vector{Float64}, ds2::Matrix{Float64})
+function phi!(em::ErgodicManagerR2, dm1::VF, ds1::MF, dm2::VF, ds2::MF)
 	half_size = em.cell_size / 2.0
 	d = zeros(em.bins, em.bins)
 	d_sum = 0.0
@@ -160,11 +162,11 @@ function phi!(em::ErgodicManager, dm1::Vector{Float64}, ds1::Matrix{Float64}, dm
 			d_sum += d[xi,yi]
 		end
 	end
-	normalize!(d)
+	normalize!(d, em.cell_size * em.cell_size)
 	em.phi = d
 end
 
-function phi!(em::ErgodicManager, means::VV_F, covs::VM_F, weights::Vector{Float64})
+function phi!(em::ErgodicManagerR2, means::VVF, covs::VMF, weights::VF)
 	half_size = em.cell_size / 2.0
 	d = zeros(em.bins, em.bins)
 	d_sum = 0.0
@@ -190,35 +192,18 @@ end
 # update the Fourier coefficients based on some distribution
 # Here, I assume it is discrete, but I should change this...
 # TODO: maybe I should do some bounds checking?
-function phik!(em::ErgodicManager, d::Matrix{Float64})
+function decompose!(em::ErgodicManagerR2, d::Matrix{Float64})
 	for k1 = 0:em.K
 		for k2 = 0:em.K
-			em.phik[k1+1,k2+1] = phik_ij(em, k1, k2, d)
+			em.phik[k1+1,k2+1] = phi_ij(em, k1, k2, d)
 		end
 	end
 	em.phi = d
 end
 
-function phik!(em::ErgodicManager, dm::Vector{Float64}, ds::Matrix{Float64})
-	phi!(em, dm, ds)
-	phik!(em)
-end
-
-function phik!(em::ErgodicManager, dm1::Vector{Float64}, ds1::Matrix{Float64}, dm2::Vector{Float64}, ds2::Matrix{Float64})
-	phi!(em, dm1, ds1, dm2, ds2)
-	phik!(em)
-end
-
-function phik!(em::ErgodicManager, means::VV_F, covs::VM_F, weights::Vector{Float64})
-	phi!(em, means, covs, weights)
-	phik!(em)
-end
-
-phik!(em::ErgodicManager) = phik!(em, em.phi)
-
 
 # iterate over the state space
-function phik_ij(em::ErgodicManager, k1::Int, k2::Int, d::Matrix{Float64})
+function phi_ij(em::ErgodicManagerR2, k1::Int, k2::Int, d::Matrix{Float64})
 	val = 0.0
 	cs2 = em.cell_size * em.cell_size
 	for xi = 1:em.bins
@@ -232,27 +217,8 @@ function phik_ij(em::ErgodicManager, k1::Int, k2::Int, d::Matrix{Float64})
 end
 
 
-
-"""
-`phi = reconstruct(em)`
-
-Reconstructs distribution from Fourier coefficients `em.phik`.
-
-`phi = reconstruct(em, ck::Matrix{Float64})`
-
-Reconstructs distribution from Fourier coefficients `ck`.
-
-Both options return a distribution `phi`, a `em.bins` by `em.bins` matrix.
-The value at `phi[xi,yi]` gives the value at the cell index `xi,yi`.
-
-`phi = reconstruct(em, xd::VV_F, start_idx=1)`
-
-Reconstructs from trajectory `xd`. If `start_idx` is 1, then the right Riemann sum is used. If it is 0, the left Riemann sum is used.
-"""
-reconstruct(em::ErgodicManager) = reconstruct(em, em.phik)
-
 # reconstructs from Fourier coefficients in ck
-function reconstruct(em::ErgodicManager, ck::Matrix{Float64})
+function reconstruct(em::ErgodicManagerR2, ck::Matrix{Float64})
 	# iterate over all bins
 	half_size = em.cell_size / 2.0
 	cs2 = em.cell_size * em.cell_size

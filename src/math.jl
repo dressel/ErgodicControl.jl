@@ -4,7 +4,9 @@
 
 
 # only handles stuff in 2d
+# TODO: handle the redefinition gracefully
 function my_pdf(x::Vector{Float64}, m::Vector{Float64}, S::Matrix{Float64})
+	println("oook")
 	return my_pdf((x[1],x[2]), m, S)
 end
 
@@ -16,6 +18,15 @@ function my_pdf(x::NTuple{2,Float64},m::Vector{Float64},S::Matrix{Float64})
 	e_stuff = dx*Si[1,1]*dx + dx*Si[1,2]*dy + dy*Si[2,1]*dx + dy*Si[2,2]*dy
 	return det(sqrtm(Si)) * exp(-0.5 * e_stuff) / (2.0 * pi)
 end
+
+# for 3-d variables
+# No reason you couldn't just make this general louis...
+function my_pdf(x::VF, m::VF, S::MF)
+	k = length(x)
+	xm = x - m
+	return exp(-0.5 * dot(xm, inv(S)*xm)) / sqrt((2pi)^3 * det(S))
+end
+
 
 function centroid(d::Matrix{Float64}, L::Float64)
 	x_val = 0.0; y_val = 0.0
@@ -131,13 +142,27 @@ function normalizer!(zd::VV_F, vd::VV_F)
 	end
 end
 
+# TODO: why exactly do I do this?
 # "normalizes" a matrix so (bins * bins) / sum(mat) = 1.0
-function normalize!(mat::Matrix{Float64})
+function normalize!(mat::Matrix{Float64}, dA::Float64)
 	bins, rar = size(mat)
-	c = (bins * bins) / sum(mat)
+	#c = (bins * bins) / sum(mat)
+	c = 1.0 / (sum(mat) * dA)	# LD 3/02/2017
 	for i = 1:bins
 		for j = 1:bins
 			mat[i,j] *= c
+		end
+	end
+end
+function normalize!(mat::Array{Float64,3}, dV::Float64)
+	bins = size(mat,1)	# assume dimensions are all the same
+	#c = (bins * bins * bins) / sum(mat)
+	c = 1.0 / (sum(mat) * dV)		# LD change 3/02/2017
+	for i = 1:bins
+		for j = 1:bins
+			for k = 1:bins
+				mat[i,j,k] *= c
+			end
 		end
 	end
 end

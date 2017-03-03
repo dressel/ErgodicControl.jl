@@ -9,7 +9,7 @@ Here is an example
 
     using ErgodicControl
 
-    em = ErgodicManager("single gaussian", K=5, bins=100)
+    em = ErgodicManagerR2("single gaussian", K=5, bins=100)
 
     x0 = [0.4,0.1]
     N = 40
@@ -31,7 +31,7 @@ Here is another example
 
     using ErgodicControl
 
-    em = ErgodicManager("double gaussian", K=5, bins=100)
+    em = ErgodicManagerR2("double gaussian", K=5, bins=100)
 
     x0 = [0.49,0.01,0.0,0.0]
     N = 40
@@ -62,7 +62,7 @@ The Dubins car is simple and often used to model cars.
 
     using ErgodicControl
 
-    em = ErgodicManager("double gaussian", K=5, bins=100)
+    em = ErgodicManagerR2("double gaussian", K=5, bins=100)
 
     x0 = [0.5,0.01,pi/4]
     N = 40

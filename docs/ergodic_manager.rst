@@ -2,11 +2,11 @@
 Ergodic Manager
 =========================
 
-The ErgodicManager type keeps track of the spatial distribution.
+The abstract :code:`ErgodicManager` type contains information about the spatial distribution. Currently, there are two sub-types. The type :code:`ErgodicManagerR2` manages distributions over :math:`mathbb{R}^2`, and the type `ErgodicManagerSE2` manages distributions over the special Euclidean group SE(2).
 
 Fields
 =========
-The ErgodicManager type has the following fields:
+The :code:`ErgodicManagerR2` type has the following fields:
 ::
 
     K::Int
@@ -24,7 +24,7 @@ Construction
 The constructor for the ErgodicManager types is as follows:
 ::
 
-    ErgodicManager(L::Float64, K::Int, bins::Int)
+    ErgodicManagerR2(L::Float64, K::Int, bins::Int)
 
 
 Updating Spatial Distribution
@@ -54,10 +54,10 @@ Example Managers
 I provide a number of pre-made ergodic managers that correspond to frequently used example domains/distributions.
 ::
 
-    ErgodicManager(example_name::String; K::Int=5, bins::Int=100)
+    ErgodicManagerR2(example_name::String; K::Int=5, bins::Int=100)
 
 Currently, there are two valid values for example_name: "single gaussian" and "double gaussian". For exmaple, you could run:
 ::
 
-    em = ErgodicManager("single gaussian", K=5, bin=100)
+    em = ErgodicManagerR2("single gaussian", K=5, bin=100)
 

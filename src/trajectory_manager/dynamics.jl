@@ -23,23 +23,9 @@ type DubinsDynamics <: Dynamics
 	v0::Float64		# constant speed
 	r::Float64		# minimum turn radius
 
-	# should I have this???
-	A::Matrix{Float64}
-	B::Matrix{Float64}
-
-	function DubinsDynamics()
-		DubinsDynamics(1.0, 1.0)
-	end
-	function DubinsDynamics(v0::Real, r::Real)
-		dd = new()
-		dd.n = 3
-		dd.m = 1
-		dd.v0 = v0
-		dd.r = r
-		dd.A = eye(dd.n, dd.n)
-		dd.B = zeros(dd.n, dd.m)
-		return dd
-	end
+	# Constructors
+	DubinsDynamics() = DubinsDynamics(1.0, 1.0)
+	DubinsDynamics(v0::Real, r::Real) = new(3, 1, v0, r)
 end
 
 

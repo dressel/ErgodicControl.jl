@@ -62,7 +62,7 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 	end
 end
 
-function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int, ck)
+function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int, ck::Matrix{Float64})
 	xnx = xd[n + start_idx + 1][1]
 	xny = xd[n + start_idx + 1][2]
 	L = em.L
@@ -77,15 +77,7 @@ function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::I
 			dFk_dxn1 = -k1*pi*sin(k1*pi*xnx/L)*cos(k2*pi*xny/L) / (hk*L)
 			dFk_dxn2 = -k2*pi*cos(k1*pi*xnx/L)*sin(k2*pi*xny/L) / (hk*L)
 
-			# TODO:
-			#  I think this step is same for all indices
-			#  I think we could save some time here
-			fk = 0.0
-			for i in 0:(tm.N-1)
-				x = xd[i + start_idx + 1]
-				fk += cos(k1*pi*x[1]/L) * cos(k2*pi*x[2]/L) / hk
-			end
-			c = em.Lambda[k1+1,k2+1] * (tm.h*fk/tm.T - em.phik[k1+1,k2+1])
+			c = em.Lambda[k1+1,k2+1] * (ck[k1+1,k2+1] - em.phik[k1+1,k2+1])
 			an_x += c*dFk_dxn1
 			an_y += c*dFk_dxn2
 		end

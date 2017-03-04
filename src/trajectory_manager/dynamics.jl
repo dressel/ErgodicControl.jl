@@ -28,7 +28,51 @@ type DubinsDynamics <: Dynamics
 	DubinsDynamics(v0::Real, r::Real) = new(3, 1, v0, r)
 end
 
+# Not really types, 
+export SingleIntegrator, DoubleIntegrator
+function SingleIntegrator(n::Int, h::Float64)
+	A = eye(n)
+	B = h*eye(n)
+	return LinearDynamics(A, B)
+end
+function DoubleIntegrator(n::Int, h::Float64)
+	A = eye(2*n)
+	for i = 1:n
+		A[i, n+i] = h
+	end
 
+	B = zeros(2*n, n)
+	for i = 1:n
+		B[n+i, i] = h
+	end
+
+	return LinearDynamics(A, B)
+end
+
+
+"""
+`dynamics!(tm::TrajectoryManager, d::Dynamics)`
+
+Not only sets `tm.dynamics = d`, but also sets reward matrices `tm.Qn`, `tm.R`, and `tm.Rn` to default matrices of the correct sizes. These defaults are:
+
+`tm.Qn = eye(d.n)`
+
+`tm.R = 0.01 * eye(d.m)`
+
+`tm.Rn = eye(d.m)`
+
+"""
+function dynamics!(tm::TrajectoryManager, d::Dynamics)
+	tm.dynamics = d
+	tm.Qn = eye(d.n)
+	tm.R = 0.01 * eye(d.m)
+	tm.Rn = eye(d.m)
+end
+
+
+######################################################################
+# linearization
+######################################################################
 function linearize(d::Dynamics, x::VVF, u::VVF, h::Float64)
 	N = length(u)
 	A = VMF()
@@ -94,3 +138,8 @@ function forward_euler(dd::DubinsDynamics, x::VF, u::VF, h::Float64)
 	xp[3] += u_val / dd.r * h
 	return xp
 end
+
+
+######################################################################
+# symplectic_euler
+######################################################################

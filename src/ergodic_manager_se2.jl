@@ -201,11 +201,10 @@ function phi_mnp(em::ErgodicManagerSE2, m::Int, n::Int, p::Int, d::Array{Float64
 	return val
 end
 
-# I can get away with atan because everything is in first quadrant
 function F_mnp(m::Int, n::Int, p::Int, x::Float64, y::Float64, z::Float64)
 	# compute psi, r
 	r = sqrt(x*x + y*y)
-	psi = atan(y/x)	# atan2(y,x)
+	psi = atan2(y,x)	# atan(y/x)
 	i = float(im)
 	return i^(n-m) * exp(i*(m*psi + (n-m)z)) * besselj(m-n, p*r)
 end

@@ -15,10 +15,12 @@ function decompose(em::ErgodicManagerR2, traj::VVF, start_idx::Int=1)
 	K = em.K
 	N = length(traj)-1
 	ck = zeros(K+1, K+1)
+	Lx = em.domain.lengths[1]
+	Ly = em.domain.lengths[2]
 	for k1 = 0:K
-		kpiL1 = k1 * pi / em.L
+		kpiL1 = k1 * pi / Lx
 		for k2 = 0:K
-			kpiL2 = k2 * pi / em.L
+			kpiL2 = k2 * pi / Ly
 			hk = em.hk[k1+1, k2+1]
 			fk_sum = 0.0
 			# now loop over time
@@ -162,16 +164,18 @@ function barrier_score2(em::ErgodicManager, xd::VVF, c::Float64)
 	if c == 0.0; return 0.0; end
 
 	bs = 0.0
+	Lx = em.domain.lengths[1]
+	Ly = em.domain.lengths[2]
 	for xi in xd
-		if (xi[1] > em.L)
-			dx = xi[1] - em.L
+		if (xi[1] > Lx)
+			dx = xi[1] - Lx
 			bs += c * dx * dx
 		elseif (xi[1] < 0.0)
 			dx = xi[1]
 			bs += c * dx * dx
 		end
-		if (xi[2] > em.L)
-			dy = xi[2] - em.L
+		if (xi[2] > Ly)
+			dy = xi[2] - Ly
 			bs += c * dy * dy
 		elseif (xi[2] < 0.0)
 			dy = xi[2]

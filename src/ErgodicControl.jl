@@ -33,6 +33,7 @@ include("lq.jl")
 include("lqr.jl")
 
 # ergodic manager
+include("domain.jl")
 include("ergodic_manager.jl")
 include("ergodic_manager_r2.jl")
 include("ergodic_manager_se2.jl")

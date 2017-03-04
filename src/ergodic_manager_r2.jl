@@ -19,11 +19,8 @@ Valid `example_name` entries are:
 * "double gaussian"
 """
 type ErgodicManagerR2 <: ErgodicManager
-	K::Int
-	#bins::Int				# number of bins per side
-	#L::Float64
-	#cell_size::Float64
 	domain::Domain
+	K::Int
 	hk::Matrix{Float64}
 	phi::Matrix{Float64}
 	phik::Matrix{Float64}
@@ -38,7 +35,7 @@ type ErgodicManagerR2 <: ErgodicManager
 		kpixl = zeros(K+1, bins)
 		cell_size = L / bins
 		phi = ones(bins,bins) / (bins * bins)
-		em = new(K, d, hk, phi, phik, Lambda, kpixl)
+		em = new(d, K, hk, phi, phik, Lambda, kpixl)
 
 		Lambda!(em)
 		kpixl!(em)
@@ -102,7 +99,7 @@ function kpixl!(em::ErgodicManagerR2)
 	L = em.domain.lengths[1]
 
 	for xi = 1:bins
-		x = (xi-0.5)*cell_size
+		x = x_min(em) + (xi-0.5)*x_size(em)
 		for k = 0:em.K
 			em.kpixl[k+1,xi] = cos(k*pi*x / L)
 		end
@@ -121,10 +118,8 @@ end
 
 # computes the coefficients for a specific value of k1 and k2
 # called by hk!
+# TODO: this is wrecked by domain
 function hk_ij(em::ErgodicManagerR2, k1::Int, k2::Int)
-	#cs2 = em.cell_size * em.cell_size
-	cell_size = em.domain.cell_lengths[1]
-	cs2 = em.domain.cell_size  # in domain, em.cell_size is an area/volume
 	bins = em.domain.cells[1]
 
 	val = 0.0
@@ -133,7 +128,7 @@ function hk_ij(em::ErgodicManagerR2, k1::Int, k2::Int)
 		cx2 = cx * cx
 		for yi = 1:bins
 			cy = em.kpixl[k2+1,yi]
-			val += cx2 * cy * cy * cs2
+			val += cx2 * cy * cy * em.domain.cell_size
 		end
 	end
 
@@ -146,17 +141,16 @@ end
 ######################################################################
 function phi!(em::ErgodicManagerR2, dm::VF, ds::MF)
 	# first, generate d
-	d = zeros(em.domain.cells[1], em.domain.cells[2])
+	d = zeros(x_cells(em), y_cells(em))
 	d_sum = 0.0
-	for xi = 1:em.domain.cells[1]
-		x = (xi-0.5)*em.domain.cell_lengths[1]
-		for yi = 1:em.domain.cells[2]
-			y = (yi-0.5)*em.domain.cell_lengths[2]
+	for xi = 1:x_cells(em)
+		x = x_min(em) + (xi-0.5)*x_size(em)
+		for yi = 1:y_cells(em)
+			y = y_min(em) + (yi-0.5)*y_size(em)
 			d[xi,yi] = my_pdf((x,y), dm, ds)
 			d_sum += d[xi,yi]
 		end
 	end
-	#normalize!(d, em.cell_size * em.cell_size)
 	normalize!(d, em.domain.cell_size)
 	em.phi = d
 end

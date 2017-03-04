@@ -23,12 +23,13 @@ type ErgodicManagerSE2 <: ErgodicManager
 	M::Int
 	N::Int
 	P::Int
-	bins::Int				# number of bins per side
-	L::Float64
-	x_size::Float64
-	y_size::Float64
-	z_size::Float64
-	cell_volume::Float64
+	domain::Domain
+	#bins::Int				# number of bins per side
+	#L::Float64
+	#x_size::Float64
+	#y_size::Float64
+	#z_size::Float64
+	#cell_volume::Float64
 	phi::Array{Float64,3}
 	phik::Array{Complex{Float64},3}
 	Lambda::Array{Float64,3}
@@ -38,12 +39,13 @@ type ErgodicManagerSE2 <: ErgodicManager
 		em.M = K
 		em.N = K
 		em.P = K
-		em.bins = bins
-		em.L = L
-		em.x_size = L / em.bins
-		em.y_size = L / em.bins
-		em.z_size = 2 * pi / em.bins
-		em.cell_volume = em.x_size * em.y_size * em.z_size
+		em.domain = Domain([0,0,-pi/2], [1,1,pi/2], [bins,bins,bins])
+		#em.bins = bins
+		#em.L = L
+		#em.x_size = L / em.bins
+		#em.y_size = L / em.bins
+		#em.z_size = 2 * pi / em.bins
+		#em.cell_volume = em.x_size * em.y_size * em.z_size
 		em.phik = zeros(em.M+1, em.N+1, em.P+1)
 		em.Lambda = zeros(em.M+1, em.N+1, em.P+1)
 		em.phi = ones(bins,bins,bins) / (bins * bins * bins)
@@ -112,58 +114,59 @@ end
 ######################################################################
 function phi!(em::ErgodicManagerSE2, dm::VF, ds::MF)
 	# first, generate d
-	d = zeros(em.bins, em.bins, em.bins)
+	#d = zeros(em.bins, em.bins, em.bins)
+	d = zeros(x_cells(em), y_cells(em), z_cells(em))
 	d_sum = 0.0
-	for xi = 1:em.bins
-		x = (xi-0.5)*em.x_size
+	for xi = 1:x_cells(em)
+		x = x_min(em) + (xi-0.5)*x_size(em)
 		println("xi = ", xi)
-		for yi = 1:em.bins
-			y = (yi-0.5)*em.y_size
-			for zi = 1:em.bins
-				z = (zi-0.5) * em.z_size - pi	# range is (-pi,pi)
+		for yi = 1:y_cells(em)
+			y = y_min(em) + (yi-0.5)*y_size(em)
+			#for zi = 1:em.domain.cells[3]
+			for zi = 1:z_cells(em)
+				z = z_min(em) + (zi-0.5)*z_size(em)
 				d[xi,yi,zi] = my_pdf([x,y,z], dm, ds)
 				d_sum += d[xi,yi,zi]
 			end
 		end
 	end
-	normalize!(d, em.cell_volume)
+	normalize!(d, em.domain.cell_size)
 	em.phi = d
 end
 
-function phi!(em::ErgodicManagerSE2, dm1::Vector{Float64}, ds1::Matrix{Float64}, dm2::Vector{Float64}, ds2::Matrix{Float64})
-	half_size = em.cell_size / 2.0
-	d = zeros(em.bins, em.bins)
-	d_sum = 0.0
-	for xi = 1:em.bins
-		x = (xi-1)*em.cell_size + half_size
-		for yi = 1:em.bins
-			y = (yi-1)*em.cell_size + half_size
-			d[xi,yi] = .5*my_pdf((x,y), dm1, ds1)+.5*my_pdf((x,y), dm2, ds2)
-			d_sum += d[xi,yi]
-		end
-	end
-	normalize!(d, em.cell_volume)
-	em.phi = d
-end
+#function phi!(em::ErgodicManagerSE2, dm1::Vector{Float64}, ds1::Matrix{Float64}, dm2::Vector{Float64}, ds2::Matrix{Float64})
+#	d = zeros(em.bins, em.bins)
+#	d_sum = 0.0
+#	for xi = 1:em.bins
+#		x = (xi-0.5)*em.cell_size
+#		for yi = 1:em.bins
+#			y = (yi-0.5)*em.cell_size
+#			d[xi,yi] = .5*my_pdf((x,y), dm1, ds1)+.5*my_pdf((x,y), dm2, ds2)
+#			d_sum += d[xi,yi]
+#		end
+#	end
+#	normalize!(d, em.domain.cell_size)
+#	em.phi = d
+#end
 
-function phi!(em::ErgodicManagerSE2, means::VV_F, covs::VM_F, weights::Vector{Float64})
-	half_size = em.cell_size / 2.0
-	d = zeros(em.bins, em.bins)
-	d_sum = 0.0
-	num_gaussians = length(means)
-	for xi = 1:em.bins
-		x = (xi-1)*em.cell_size + half_size
-		for yi = 1:em.bins
-			y = (yi-1)*em.cell_size + half_size
-			for gi = 1:num_gaussians
-				d[xi,yi] += weights[gi] * my_pdf((x,y), means[gi], covs[gi])
-			end
-			d_sum += d[xi,yi]
-		end
-	end
-	normalize!(d)
-	em.phi = d
-end
+#function phi!(em::ErgodicManagerSE2, means::VV_F, covs::VM_F, weights::Vector{Float64})
+#	half_size = em.cell_size / 2.0
+#	d = zeros(em.bins, em.bins)
+#	d_sum = 0.0
+#	num_gaussians = length(means)
+#	for xi = 1:em.bins
+#		x = (xi-1)*em.cell_size + half_size
+#		for yi = 1:em.bins
+#			y = (yi-1)*em.cell_size + half_size
+#			for gi = 1:num_gaussians
+#				d[xi,yi] += weights[gi] * my_pdf((x,y), means[gi], covs[gi])
+#			end
+#			d_sum += d[xi,yi]
+#		end
+#	end
+#	normalize!(d)
+#	em.phi = d
+#end
 
 
 ######################################################################
@@ -188,13 +191,17 @@ end
 # iterate over the state space
 function phi_mnp(em::ErgodicManagerSE2, m::Int, n::Int, p::Int, d::Array{Float64,3})
 	val = 0.0im
-	for xi = 1:em.bins
-		x = (xi - 0.5) * em.x_size
-		for yi = 1:em.bins
-			y = (yi - 0.5) * em.y_size
-			for zi = 1:em.bins
-				z = (zi-0.5) * em.z_size - pi
-				val += d[xi,yi,zi] * F_mnp(m,n,p,x,y,z) * em.cell_volume
+	#for xi = 1:em.domain.cells[1]
+	for xi = 1:x_cells(em)
+		x = x_min(em) + (xi-0.5) * x_size(em)
+		#for yi = 1:em.domain.cells[2]
+		for yi = 1:y_cells(em)
+			#y = (yi-0.5) * em.domain.cell_lengths[2]
+			y = y_min(em) + (yi-0.5) * y_size(em)
+			#for zi = 1:em.domain.cells[3]
+			for zi = 1:z_cells(em)
+				z = z_min(em) + (zi-0.5) * z_size(em)
+				val += d[xi,yi,zi] * F_mnp(m,n,p,x,y,z) *em.domain.cell_size
 			end
 		end
 	end

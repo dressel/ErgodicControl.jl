@@ -40,10 +40,3 @@ type Domain
 		return d
 	end
 end
-
-export xmin, xmax, ymin, ymax
-xmin(d::Domain) = d.mins[1]
-xmax(d::Domain) = d.maxes[1]
-
-ymin(d::Domain) = d.mins[2]
-ymax(d::Domain) = d.maxes[2]

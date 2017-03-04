@@ -2,14 +2,6 @@
 # includes stuff I don't want to need distributions for...
 ######################################################################
 
-
-# only handles stuff in 2d
-# TODO: handle the redefinition gracefully
-function my_pdf(x::Vector{Float64}, m::Vector{Float64}, S::Matrix{Float64})
-	println("oook")
-	return my_pdf((x[1],x[2]), m, S)
-end
-
 function my_pdf(x::NTuple{2,Float64},m::Vector{Float64},S::Matrix{Float64})
 	dx = x[1] - m[1]
 	dy = x[2] - m[2]

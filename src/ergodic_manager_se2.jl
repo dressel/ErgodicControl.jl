@@ -71,7 +71,7 @@ type ErgodicManagerSE2 <: ErgodicManager
 		println("h3")
 
 		if example_name == "single gaussian"
-			mu = [L/2.0, L/2.0, -pi/2]
+			mu = [L/2.0, L/2.0, 0]
 			Sigma = 0.03 * eye(3)
 			println("pre fi")
 			phi!(em, mu, Sigma)

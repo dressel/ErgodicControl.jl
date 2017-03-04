@@ -14,6 +14,7 @@ type Domain
 	cell_size::Float64
 
 	function Domain(mins::VF, maxes::VF, cells::Vector{Int})
+		println("Making domain!!!")
 		# TODO: check that all the dimensions match
 		num_dims = length(mins)
 		@assert num_dims == length(mins)

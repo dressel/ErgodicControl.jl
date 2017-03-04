@@ -34,13 +34,15 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 		if tm.barrier_cost > 0.0
 			xnx = xd[n+start_idx+1][1]
 			xny = xd[n+start_idx+1][2]
-			if (xnx > em.L)
-				ad[1,ni] += tm.barrier_cost * (2.0*xnx - 2.0*em.L)
+			Lx = em.domain.lengths[1]
+			Ly = em.domain.lengths[2]
+			if (xnx > Lx)
+				ad[1,ni] += tm.barrier_cost * (2.0*xnx - 2.0*Lx)
 			elseif xnx < 0.0
 				ad[1,ni] += tm.barrier_cost * 2.0*xnx
 			end
-			if xny > em.L
-				ad[2,ni] += tm.barrier_cost * (2.0*xny - 2.0*em.L)
+			if xny > Ly
+				ad[2,ni] += tm.barrier_cost * (2.0*xny - 2.0*Ly)
 			elseif xny < 0.0
 				ad[2,ni] += tm.barrier_cost * (2.0*xny)
 			end
@@ -65,7 +67,8 @@ end
 function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int, ck::Matrix{Float64})
 	xnx = xd[n + start_idx + 1][1]
 	xny = xd[n + start_idx + 1][2]
-	L = em.L
+	#L = em.L
+	L = em.domain.lengths[1]
 
 	an_x = 0.0
 	an_y = 0.0

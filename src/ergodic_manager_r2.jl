@@ -19,10 +19,8 @@ Valid `example_name` entries are:
 * "double gaussian"
 """
 type ErgodicManagerR2 <: ErgodicManager
+	domain::Domain
 	K::Int
-	bins::Int				# number of bins per side
-	L::Float64
-	cell_size::Float64
 	hk::Matrix{Float64}
 	phi::Matrix{Float64}
 	phik::Matrix{Float64}
@@ -30,13 +28,14 @@ type ErgodicManagerR2 <: ErgodicManager
 	kpixl::Matrix{Float64}
 
 	function ErgodicManagerR2(L::Float64, K::Int, bins::Int)
+		d = Domain(zeros(2), L*ones(2), [bins,bins])
 		hk   = zeros(K+1,K+1)
 		phik = zeros(K+1,K+1)
 		Lambda = zeros(K+1,K+1)
 		kpixl = zeros(K+1, bins)
 		cell_size = L / bins
 		phi = ones(bins,bins) / (bins * bins)
-		em = new(K, bins, L, cell_size, hk, phi, phik, Lambda, kpixl)
+		em = new(d, K, hk, phi, phik, Lambda, kpixl)
 
 		Lambda!(em)
 		kpixl!(em)
@@ -44,19 +43,19 @@ type ErgodicManagerR2 <: ErgodicManager
 		return em
 	end
 
-	function ErgodicManagerR2(L::Float64, K::Int, d::Matrix{Float64})
-		hk   = zeros(K+1,K+1)
-		phik = zeros(K+1,K+1)
-		Lambda = zeros(K+1,K+1)
-		kpixl = zeros(K+1, bins)
-		cell_size = L / bins
-		em = new(K, bins, L, cell_size, hk, d, phik, Lambda, kpixl)
+	#function ErgodicManagerR2(L::Float64, K::Int, d::Matrix{Float64})
+	#	hk   = zeros(K+1,K+1)
+	#	phik = zeros(K+1,K+1)
+	#	Lambda = zeros(K+1,K+1)
+	#	kpixl = zeros(K+1, bins)
+	#	cell_size = L / bins
+	#	em = new(K, bins, L, cell_size, hk, d, phik, Lambda, kpixl)
 
-		Lambda!(em)
-		kpixl!(em)
-		hk!(em)
-		decompose!(em, d)
-	end
+	#	Lambda!(em)
+	#	kpixl!(em)
+	#	hk!(em)
+	#	decompose!(em, d)
+	#end
 
 	function ErgodicManagerR2(example_name::String; K::Int=5, bins::Int=100)
 		L = 1.0
@@ -94,10 +93,15 @@ end
 
 # TODO: check if the row/col ordering of this is julia-efficient
 function kpixl!(em::ErgodicManagerR2)
-	for xi = 1:em.bins
-		x = (xi-0.5)*em.cell_size
+	# change for the domain
+	cell_size = em.domain.cell_lengths[1]
+	bins = em.domain.cells[1]
+	L = em.domain.lengths[1]
+
+	for xi = 1:bins
+		x = x_min(em) + (xi-0.5)*x_size(em)
 		for k = 0:em.K
-			em.kpixl[k+1,xi] = cos(k*pi*x / em.L)
+			em.kpixl[k+1,xi] = cos(k*pi*x / L)
 		end
 	end
 end
@@ -114,15 +118,17 @@ end
 
 # computes the coefficients for a specific value of k1 and k2
 # called by hk!
+# TODO: this is wrecked by domain
 function hk_ij(em::ErgodicManagerR2, k1::Int, k2::Int)
-	cs2 = em.cell_size * em.cell_size
+	bins = em.domain.cells[1]
+
 	val = 0.0
-	for xi = 1:em.bins
+	for xi = 1:bins
 		cx = em.kpixl[k1+1,xi]
 		cx2 = cx * cx
-		for yi = 1:em.bins
+		for yi = 1:bins
 			cy = em.kpixl[k2+1,yi]
-			val += cx2 * cy * cy * cs2
+			val += cx2 * cy * cy * em.domain.cell_size
 		end
 	end
 
@@ -135,55 +141,53 @@ end
 ######################################################################
 function phi!(em::ErgodicManagerR2, dm::VF, ds::MF)
 	# first, generate d
-	half_size = em.cell_size / 2.0
-	d = zeros(em.bins, em.bins)
+	d = zeros(x_cells(em), y_cells(em))
 	d_sum = 0.0
-	for xi = 1:em.bins
-		x = (xi-1)*em.cell_size + half_size
-		for yi = 1:em.bins
-			y = (yi-1)*em.cell_size + half_size
+	for xi = 1:x_cells(em)
+		x = x_min(em) + (xi-0.5)*x_size(em)
+		for yi = 1:y_cells(em)
+			y = y_min(em) + (yi-0.5)*y_size(em)
 			d[xi,yi] = my_pdf((x,y), dm, ds)
 			d_sum += d[xi,yi]
 		end
 	end
-	normalize!(d, em.cell_size * em.cell_size)
+	normalize!(d, em.domain.cell_size)
 	em.phi = d
 end
 
 function phi!(em::ErgodicManagerR2, dm1::VF, ds1::MF, dm2::VF, ds2::MF)
-	half_size = em.cell_size / 2.0
-	d = zeros(em.bins, em.bins)
+	d = zeros(em.domain.cells[1], em.domain.cells[2])
 	d_sum = 0.0
-	for xi = 1:em.bins
-		x = (xi-1)*em.cell_size + half_size
-		for yi = 1:em.bins
-			y = (yi-1)*em.cell_size + half_size
+	for xi = 1:em.domain.cells[1]
+		x = (xi-0.5)*em.domain.cell_lengths[1]
+		for yi = 1:em.domain.cells[2]
+			y = (yi-0.5)*em.domain.cell_lengths[2]
 			d[xi,yi] = .5*my_pdf((x,y), dm1, ds1)+.5*my_pdf((x,y), dm2, ds2)
 			d_sum += d[xi,yi]
 		end
 	end
-	normalize!(d, em.cell_size * em.cell_size)
+	normalize!(d, em.domain.cell_size)
 	em.phi = d
 end
 
-function phi!(em::ErgodicManagerR2, means::VVF, covs::VMF, weights::VF)
-	half_size = em.cell_size / 2.0
-	d = zeros(em.bins, em.bins)
-	d_sum = 0.0
-	num_gaussians = length(means)
-	for xi = 1:em.bins
-		x = (xi-1)*em.cell_size + half_size
-		for yi = 1:em.bins
-			y = (yi-1)*em.cell_size + half_size
-			for gi = 1:num_gaussians
-				d[xi,yi] += weights[gi] * my_pdf((x,y), means[gi], covs[gi])
-			end
-			d_sum += d[xi,yi]
-		end
-	end
-	normalize!(d)
-	em.phi = d
-end
+#function phi!(em::ErgodicManagerR2, means::VVF, covs::VMF, weights::VF)
+#	half_size = em.cell_size / 2.0
+#	d = zeros(em.bins, em.bins)
+#	d_sum = 0.0
+#	num_gaussians = length(means)
+#	for xi = 1:em.bins
+#		x = (xi-1)*em.cell_size + half_size
+#		for yi = 1:em.bins
+#			y = (yi-1)*em.cell_size + half_size
+#			for gi = 1:num_gaussians
+#				d[xi,yi] += weights[gi] * my_pdf((x,y), means[gi], covs[gi])
+#			end
+#			d_sum += d[xi,yi]
+#		end
+#	end
+#	normalize!(d)
+#	em.phi = d
+#end
 
 
 ######################################################################
@@ -205,10 +209,11 @@ end
 # iterate over the state space
 function phi_ij(em::ErgodicManagerR2, k1::Int, k2::Int, d::Matrix{Float64})
 	val = 0.0
-	cs2 = em.cell_size * em.cell_size
-	for xi = 1:em.bins
+	#cs2 = em.cell_size * em.cell_size
+	cs2 = em.domain.cell_size
+	for xi = 1:em.domain.cells[1]
 		cx = em.kpixl[k1+1,xi]
-		for yi = 1:em.bins
+		for yi = 1:em.domain.cells[2]
 			cy = em.kpixl[k2+1,yi]
 			val += d[xi,yi] * cx * cy * cs2
 		end
@@ -218,25 +223,25 @@ end
 
 
 # reconstructs from Fourier coefficients in ck
-function reconstruct(em::ErgodicManagerR2, ck::Matrix{Float64})
-	# iterate over all bins
-	half_size = em.cell_size / 2.0
-	cs2 = em.cell_size * em.cell_size
-
-	vals = zeros(em.bins, em.bins)
-
-	for xi = 1:em.bins
-		x = (xi-1)*em.cell_size + half_size
-		for yi = 1:em.bins
-			y = (yi-1)*em.cell_size + half_size
-			for k1 = 0:em.K
-				cx = em.kpixl[k1+1,xi]
-				for k2 = 0:em.K
-					cy = em.kpixl[k2+1,yi]
-					vals[xi,yi] += ck[k1+1,k2+1]*cx*cy/em.hk[k1+1,k2+1]
-				end
-			end
-		end
-	end
-	return vals
-end
+#function reconstruct(em::ErgodicManagerR2, ck::Matrix{Float64})
+#	# iterate over all bins
+#	half_size = em.cell_size / 2.0
+#	cs2 = em.cell_size * em.cell_size
+#
+#	vals = zeros(em.bins, em.bins)
+#
+#	for xi = 1:em.bins
+#		x = (xi-1)*em.cell_size + half_size
+#		for yi = 1:em.bins
+#			y = (yi-1)*em.cell_size + half_size
+#			for k1 = 0:em.K
+#				cx = em.kpixl[k1+1,xi]
+#				for k2 = 0:em.K
+#					cy = em.kpixl[k2+1,yi]
+#					vals[xi,yi] += ck[k1+1,k2+1]*cx*cy/em.hk[k1+1,k2+1]
+#				end
+#			end
+#		end
+#	end
+#	return vals
+#end

@@ -41,3 +41,19 @@ type Domain
 		return d
 	end
 end
+
+x_min(domain::Domain) = domain.mins[1]
+y_min(domain::Domain) = domain.mins[2]
+z_min(domain::Domain) = domain.mins[3]
+
+x_max(domain::Domain) = domain.maxes[1]
+y_max(domain::Domain) = domain.maxes[2]
+z_max(domain::Domain) = domain.maxes[3]
+
+x_size(domain::Domain) = domain.cell_lengths[1]
+y_size(domain::Domain) = domain.cell_lengths[2]
+z_size(domain::Domain) = domain.cell_lengths[3]
+
+x_cells(domain::Domain) = domain.cells[1]
+y_cells(domain::Domain) = domain.cells[2]
+z_cells(domain::Domain) = domain.cells[3]

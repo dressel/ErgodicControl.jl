@@ -27,20 +27,21 @@ function plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score:
 end
 
 function plot(em::ErgodicManagerR2; alpha=1.0, cmap="Greys")
-	a = [0,em.L,0,em.L]
+	a = [x_min(em), x_max(em), y_min(em), y_max(em)]
 	imshow(em.phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
 	axis(a)
 end
 
 function plot(em::ErgodicManagerSE2; alpha=1.0, cmap="Greys")
-	a = [0,em.L,0,em.L]
+	a = [x_min(em), x_max(em), y_min(em), y_max(em)]
 	rar = size(em.phi)
-	temp_phi = reshape(sum(em.phi,3), em.bins, em.bins)
+	temp_phi = reshape(sum(em.phi,3), x_cells(em), y_cells(em))
 	imshow(temp_phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
 	axis(a)
 end
 
 # assumes L = 1.0
+# TODO: do I even use this anymore?
 function plot(mat::Matrix{Float64}; alpha=1.0, cmap="Greys")
 	L = 1.0
 	a = [0,L,0,L]

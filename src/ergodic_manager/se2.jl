@@ -6,8 +6,6 @@
 
 export ErgodicManagerSE2
 
-# kpixl is a (K+1 x bins) matrix, each entry storing cos(k*pi*x / L)
-#  this assumes some discretization
 """
 `ErgodicManagerSE2(L::Float64, K::Int, bins::Int)`
 
@@ -19,41 +17,26 @@ Valid `example_name` entries are:
 * "double gaussian"
 """
 type ErgodicManagerSE2 <: ErgodicManager
-	#K::Int
+	domain::Domain
 	M::Int
 	N::Int
 	P::Int
-	domain::Domain
-	#bins::Int				# number of bins per side
-	#L::Float64
-	#x_size::Float64
-	#y_size::Float64
-	#z_size::Float64
-	#cell_volume::Float64
-	phi::Array{Float64,3}
-	phik::Array{Complex{Float64},3}
-	Lambda::Array{Float64,3}
+	phi::Array{Float64,3}				# spatial distribution
+	phik::Array{Complex{Float64},3}		# spatial Fourier coefficients
+	Lambda::Array{Float64,3}			# constants 
 
 	function ErgodicManagerSE2(L::Float64, K::Int, bins::Int)
 		em = new()
 		em.M = K
 		em.N = K
 		em.P = K
-		em.domain = Domain([0,0,-pi/2], [1,1,pi/2], [bins,bins,bins])
-		#em.bins = bins
-		#em.L = L
-		#em.x_size = L / em.bins
-		#em.y_size = L / em.bins
-		#em.z_size = 2 * pi / em.bins
-		#em.cell_volume = em.x_size * em.y_size * em.z_size
+		em.domain = Domain([0,0,-pi/2], [L,L,pi/2], [bins,bins,bins])
 		em.phik = zeros(em.M+1, em.N+1, em.P+1)
 		em.Lambda = zeros(em.M+1, em.N+1, em.P+1)
 		em.phi = ones(bins,bins,bins) / (bins * bins * bins)
 
 		Lambda!(em)
-		println("Ok...")
 		#decompose!(em)		# TODO: I should do this I think
-		println("done!")
 		return em
 	end
 

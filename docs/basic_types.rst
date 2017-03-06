@@ -43,12 +43,12 @@ If you wanted to create the unit square with each dimension discretized into 100
 
 You should note that for :math:`\mathbb{R}^n`, the minimums need to be zero for the cosine Fourier ergodic metric to compute correctly.
 
-To generate domains in SE(2), just ensure there are three dimensions and that the last one.
+To generate domains in SE(2), just ensure there are three dimensions and that the last one covers the entire angular space. The minimums need not be zero for an SE(2) domain.
 ::
     
     d = Domain([-1,-1,-pi], [1,1,pi], 50)
 
-It is not recommended that you use more than 50 cells per dimension, simply because computation slows down as more cells are added.
+When computing ergodic trajectories over SE(2), it is recommended that you use more than 50 (or fewer) cells per dimension because SE(2) trajectories use Julia's :math:`besselj` function, which makes computation slow.
 
 
 Probability Distributions
@@ -59,6 +59,11 @@ The provided :code:`gaussian` functions make it easy to generate distributions o
 ::
     
     d = Domain([1,2], [100,200])
+
+    # returns array with 100 rows and 200 columns
     phi = gaussian(d, [0.5,0.5], 0.03*eye(2))
 
-To read more about the plotting function, check out the `Visuals` section of this readme.
+    # plot
+    plot(d, phi)
+
+To learn more about plotting, check out the `Visuals` section of this readme.

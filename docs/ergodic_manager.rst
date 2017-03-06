@@ -9,15 +9,14 @@ Fields
 The :code:`ErgodicManagerR2` type has the following fields:
 ::
 
-    K::Int
-    bins::Int
-    L::Float64
-    cell_size::Float64
-    hk::Matrix{Float64}
-    phi::Matrix{Float64}        # spatial distribution
-    phik::Matrix{Float64}       # spatial distribution Fourier coefficients
-    Lambdak::Matrix{Float64}
-    kpixl::Matrix{Float64}
+	domain::Domain				# spatial domain
+	K::Int						# number of Fourier coefficients
+	hk::Matrix{Float64}			# constants
+	phi::Matrix{Float64}		# spatial distribution
+	phik::Matrix{Float64}		# distribution's Fourier coefficients
+	Lambda::Matrix{Float64}		# constants
+	kpixl::Matrix{Float64}
+
 
 Construction
 =============

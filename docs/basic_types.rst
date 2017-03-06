@@ -53,15 +53,15 @@ When computing ergodic trajectories over SE(2), it is recommended that you use m
 
 Probability Distributions
 ===========================
-Probability distributions over :math:`\mathbb{R}^n` are simply represented as arrays with :math`n` dimensions.
+Probability distributions over :math:`\mathbb{R}^n` are simply represented as arrays with :math:`n` dimensions.
 
 The provided :code:`gaussian` functions make it easy to generate distributions over a domain
 ::
     
-    d = Domain([1,2], [100,200])
+    d = Domain([2,1], [200,100])
 
     # returns array with 100 rows and 200 columns
-    phi = gaussian(d, [0.5,0.5], 0.03*eye(2))
+    phi = gaussian(d, [1.5,0.5], 0.03*eye(2))
 
     # plot
     plot(d, phi)

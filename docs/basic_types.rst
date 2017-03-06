@@ -12,13 +12,32 @@ Domain
 The :code:`Domain` type has the following fields:
 ::
 
-    # must be provided
-	mins::Vector{Float64}
-	maxes::Vector{Float64}
-	cells::Vector{Int}
+	# user provided
+	mins::Vector{Float64}			# minimum value per dimension
+	maxes::Vector{Float64}			# maximum value per dimension
+	cells::Vector{Int}				# number of cells per dimension
 
-    # internal
-	lengths::Vector{Float64}
-	cell_lengths::Vector{Float64}
-	num_dims::Int
-	cell_size::Float64
+	# calculated and used internally
+	lengths::Vector{Float64}		# maxes - mins
+	cell_lengths::Vector{Float64}	# length of cell in each dimension
+	num_dims::Int					# number of dimensions
+	cell_size::Float64				# size (area, volume, etc) of a cell
+
+The :code:`Domain` constructor requires knowledge of the domain minimums, maximums, and number of cells per side.
+::
+    
+    Domain(mins, maxes, cells)
+
+If you wanted to create the unit square with each dimension discretized into 100 bins (100^2 for the whole square), you have the following options:
+::
+
+    # verbose
+    d = Domain([0,0], [1,1], [100,100])
+
+
+    # if one discretization level is provided, all dimensions assume it
+    d = Domain([0,0], [1,1], 100)
+
+    # If you don't provide minimums, they are assumed to be zero.
+    d = Domain([1,1], [100,100])
+    d = Domain([1,1], 100)

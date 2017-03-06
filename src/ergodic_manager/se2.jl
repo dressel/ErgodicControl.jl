@@ -25,52 +25,51 @@ type ErgodicManagerSE2 <: ErgodicManager
 	phik::Array{Complex{Float64},3}		# spatial Fourier coefficients
 	Lambda::Array{Float64,3}			# constants 
 
-	function ErgodicManagerSE2(L::Float64, K::Int, bins::Int)
+
+	function ErgodicManagerSE2(d::Domain, phi::Array{Float64,3}, K::Int=5)
 		em = new()
+		em.domain = deepcopy(d)
 		em.M = K
 		em.N = K
 		em.P = K
-		em.domain = Domain([0,0,-pi/2], [L,L,pi/2], [bins,bins,bins])
+		em.phi = deepcopy(phi)
 		em.phik = zeros(em.M+1, em.N+1, em.P+1)
 		em.Lambda = zeros(em.M+1, em.N+1, em.P+1)
-		em.phi = ones(bins,bins,bins) / (bins * bins * bins)
 
 		Lambda!(em)
-		#decompose!(em)		# TODO: I should do this I think
+		decompose!(em)
 		return em
 	end
 
-	function ErgodicManagerSE2(L::Float64, K::Int, d::Array{Float64,3})
-		bins = size(d,1)	# assuming all sides have same number cells
-		em = ErgodicManagerSE2(L, K, bins)
-		em.phi = d
 
-		Lambda!(em)
-		decompose!(em, d)
-	end
-
-	function ErgodicManagerSE2(example_name::String; K::Int=5, bins::Int=100)
+	function ErgodicManagerSE2(example_name::String; K::Int=5,bins::Int=50)
 		L = 1.0
+		d = Domain([0.,0.,-pi], [L,L,pi], [bins,bins,bins])
 		println("h2")
-		em = ErgodicManagerSE2(L, K, bins)
 		println("h3")
 
 		if example_name == "single gaussian"
 			mu = [L/2.0, L/2.0, 0]
 			Sigma = 0.03 * eye(3)
-			println("pre fi")
-			phi!(em, mu, Sigma)
-			println("post fi")
-			decompose!(em)
-			println("post dec")
+			phi = gaussian(d, mu, Sigma)
+			return ErgodicManagerSE2(d, phi, K)
+
 		elseif example_name == "double gaussian"
-			# Create Gaussian distribution and its coefficients
+			# How I should do it...
 			mu1 = [0.3, 0.7]
 			Sigma1 = 0.025* eye(2)
 			mu2 = [0.7, 0.3]
 			Sigma2 = 0.025* eye(2)
-			phi!(em, mu1, Sigma1, mu2, Sigma2)
-			decompose!(em)
+			phi = gaussian(d, mu1, Sigma1, mu2, Sigma2)
+			return ErgodicManagerR2(d, phi, K)
+
+			# Create Gaussian distribution and its coefficients
+			#mu1 = [0.3, 0.7]
+			#Sigma1 = 0.025* eye(2)
+			#mu2 = [0.7, 0.3]
+			#Sigma2 = 0.025* eye(2)
+			#phi!(em, mu1, Sigma1, mu2, Sigma2)
+			#decompose!(em)
 		else
 			error("example name not recognized")
 		end
@@ -174,14 +173,10 @@ end
 # iterate over the state space
 function phi_mnp(em::ErgodicManagerSE2, m::Int, n::Int, p::Int, d::Array{Float64,3})
 	val = 0.0im
-	#for xi = 1:em.domain.cells[1]
 	for xi = 1:x_cells(em)
 		x = x_min(em) + (xi-0.5) * x_size(em)
-		#for yi = 1:em.domain.cells[2]
 		for yi = 1:y_cells(em)
-			#y = (yi-0.5) * em.domain.cell_lengths[2]
 			y = y_min(em) + (yi-0.5) * y_size(em)
-			#for zi = 1:em.domain.cells[3]
 			for zi = 1:z_cells(em)
 				z = z_min(em) + (zi-0.5) * z_size(em)
 				val += d[xi,yi,zi] * F_mnp(m,n,p,x,y,z) *em.domain.cell_size

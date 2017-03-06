@@ -10,7 +10,7 @@ export ErgodicManagerR2
 # kpixl is a (K+1 x bins) matrix, each entry storing cos(k*pi*x / L)
 #  this assumes some discretization
 """
-`ErgodicManager(L::Float64, K::Int, bins::Int)`
+`ErgodicManager(d::Domain, phi::Matrix{Float64}, K::Int)`
 
 `ErgodicManager(example_name::String; K::Int=5, bins::Int=100)`
 
@@ -20,21 +20,18 @@ Valid `example_name` entries are:
 * "double gaussian"
 """
 type ErgodicManagerR2 <: ErgodicManager
-	domain::Domain
-	K::Int
-	hk::Matrix{Float64}
-	phi::Matrix{Float64}
-	phik::Matrix{Float64}
-	Lambda::Matrix{Float64}
-	kpixl::Matrix{Float64}
+	domain::Domain				# spatial domain
+	K::Int						# number of Fourier coefficients
+	phi::Matrix{Float64}		# spatial distribution
+	phik::Matrix{Float64}		# distribution's Fourier coefficients
 
-	# TODO: check that this constructor works, or that we even want it
-	function ErgodicManagerR2(L::Real, K::Int, bins::Int)
-		L = float(L)
-		d = Domain([0.,0.], [L,L], [bins,bins])
-		phi = ones(bins,bins) / (bins * bins)
-		return new(d, phi, K)
-	end
+	# constant regardless of phi (depend on k1,k2)
+	Lambda::Matrix{Float64}
+	hk::Matrix{Float64}
+
+	# to speed up computation
+	kpixl::Matrix{Float64}
+	kpiyl::Matrix{Float64}
 
 	function ErgodicManagerR2(d::Domain, phi::MF, K::Int=5)
 		em = new()
@@ -44,8 +41,8 @@ type ErgodicManagerR2 <: ErgodicManager
 		em.phi = deepcopy(phi)
 		em.phik = zeros(K+1,K+1)
 		em.Lambda = zeros(K+1,K+1)
-		# TODO: the whole kpixl thing must be sorted out
 		em.kpixl = zeros(K+1, d.cells[1])
+		em.kpiyl = zeros(K+1, d.cells[2])
 
 		Lambda!(em)
 		kpixl!(em)
@@ -66,10 +63,11 @@ type ErgodicManagerR2 <: ErgodicManager
 			return ErgodicManagerR2(d, phi, K)
 		elseif example_name == "double gaussian"
 			mu1 = [0.3, 0.7]
-			Sigma1 = 0.025* eye(2)
+			Sigma1 = 0.025 * eye(2)
 			mu2 = [0.7, 0.3]
-			Sigma2 = 0.025* eye(2)
-			phi = gaussian(d, mu1, Sigma1, mu2, Sigma2)
+			Sigma2 = 0.025 * eye(2)
+			#phi = gaussian(d, [mu1,mu2], [Sigma1, Sigma2], [.5,.5])
+			phi = gaussian(d, [mu1,mu2], [Sigma1, Sigma2])
 			return ErgodicManagerR2(d, phi, K)
 		else
 			error("example name not recognized")
@@ -87,17 +85,23 @@ function Lambda!(em::ErgodicManagerR2)
 	end
 end
 
-# TODO: check if the row/col ordering of this is julia-efficient
-function kpixl!(em::ErgodicManagerR2)
-	# change for the domain
-	cell_size = em.domain.cell_lengths[1]
-	bins = em.domain.cells[1]
-	L = em.domain.lengths[1]
 
-	for xi = 1:bins
+# TODO: check if the row/col ordering of this is julia-efficient
+# TODO: also, I could probably speed up by iterating over k first?
+function kpixl!(em::ErgodicManagerR2)
+	Lx = em.domain.cell_lengths[1]
+	for xi = 1:x_cells(em)
 		x = x_min(em) + (xi-0.5)*x_size(em)
 		for k = 0:em.K
-			em.kpixl[k+1,xi] = cos(k*pi*x / L)
+			em.kpixl[k+1,xi] = cos(k*pi*x / Lx)
+		end
+	end
+
+	Ly = em.domain.cell_lengths[2]
+	for yi = 1:y_cells(em)
+		y = y_min(em) + (yi-0.5)*y_size(em)
+		for k = 0:em.K
+			em.kpiyl[k+1,yi] = cos(k*pi*y / Ly)
 		end
 	end
 end
@@ -116,14 +120,12 @@ end
 # called by hk!
 # TODO: this is wrecked by domain
 function hk_ij(em::ErgodicManagerR2, k1::Int, k2::Int)
-	bins = em.domain.cells[1]
-
 	val = 0.0
-	for xi = 1:bins
+	for xi = 1:x_cells(em)
 		cx = em.kpixl[k1+1,xi]
 		cx2 = cx * cx
-		for yi = 1:bins
-			cy = em.kpixl[k2+1,yi]
+		for yi = 1:y_cells(em)
+			cy = em.kpiyl[k2+1,yi]
 			val += cx2 * cy * cy * em.domain.cell_size
 		end
 	end
@@ -155,7 +157,7 @@ function phi_ij(em::ErgodicManagerR2, k1::Int, k2::Int, d::Matrix{Float64})
 	for xi = 1:x_cells(em)
 		cx = em.kpixl[k1+1,xi]
 		for yi = 1:y_cells(em)
-			cy = em.kpixl[k2+1,yi]
+			cy = em.kpiyl[k2+1,yi]
 			val += d[xi,yi] * cx * cy * em.domain.cell_size
 		end
 	end

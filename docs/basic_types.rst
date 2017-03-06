@@ -48,7 +48,7 @@ To generate domains in SE(2), just ensure there are three dimensions and that th
     
     d = Domain([-1,-1,-pi], [1,1,pi], 50)
 
-When computing ergodic trajectories over SE(2), it is recommended that you use more than 50 (or fewer) cells per dimension because SE(2) trajectories use Julia's :code:`besselj` function, which makes computation slow.
+When computing ergodic trajectories over SE(2), it is recommended that you use 50 (or fewer) cells per dimension because SE(2) trajectories use Julia's :code:`besselj` function, which makes computation slow.
 
 
 Probability Distributions

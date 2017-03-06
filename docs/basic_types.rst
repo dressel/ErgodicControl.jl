@@ -34,10 +34,31 @@ If you wanted to create the unit square with each dimension discretized into 100
     # verbose
     d = Domain([0,0], [1,1], [100,100])
 
-
     # if one discretization level is provided, all dimensions assume it
     d = Domain([0,0], [1,1], 100)
 
-    # If you don't provide minimums, they are assumed to be zero.
+    # if you don't provide minimums, they are assumed to be zero
     d = Domain([1,1], [100,100])
     d = Domain([1,1], 100)
+
+You should note that for :math:`\mathbb{R}^n`, the minimums need to be zero for the cosine Fourier ergodic metric to compute correctly.
+
+To generate domains in SE(2), just ensure there are three dimensions and that the last one.
+::
+    
+    d = Domain([-1,-1,-pi], [1,1,pi], 50)
+
+It is not recommended that you use more than 50 cells per dimension, simply because computation slows down as more cells are added.
+
+
+Probability Distributions
+===========================
+Probability distributions over :math:`\mathbb{R}^n` are simply represented as arrays with :math`n` dimensions.
+
+The provided :code:`gaussian` functions make it easy to generate distributions over a domain
+::
+    
+    d = Domain([1,2], [100,200])
+    phi = gaussian(d, [0.5,0.5], 0.03*eye(2))
+
+To read more about the plotting function, check out the `Visuals` section of this readme.

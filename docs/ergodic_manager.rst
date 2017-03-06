@@ -11,11 +11,16 @@ The :code:`ErgodicManagerR2` type has the following fields:
 
 	domain::Domain              # spatial domain
 	K::Int                      # number of Fourier coefficients
-	hk::Matrix{Float64}         # constants
 	phi::Matrix{Float64}        # spatial distribution
 	phik::Matrix{Float64}       # distribution's Fourier coefficients
-	Lambda::Matrix{Float64}     # constants
+
+	# constant regardless of phi (depend on k1,k2)
+	Lambda::Matrix{Float64}
+	hk::Matrix{Float64}
+
+	# to speed up computation
 	kpixl::Matrix{Float64}
+	kpiyl::Matrix{Float64}
 
 
 Construction
@@ -28,7 +33,7 @@ An ergodic manager for :math:`\mathbb{R}^2` can be constructed with a :code:`Dom
 
 Updating Spatial Distribution
 ==============================
-The `decompose!` function decomposes an ergodic manager's spatial distribution :code:`phi` into Fourier coefficients, updating the managers :code:`phik`field:
+The :code:`decompose!` function decomposes an ergodic manager's spatial distribution :code:`phi` into Fourier coefficients, updating the managers :code:`phik`field:
 ::
 
     decompose!(em::ErgodicManager)

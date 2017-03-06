@@ -42,11 +42,17 @@ end
 
 # assumes L = 1.0
 # TODO: do I even use this anymore?
-function plot(mat::Matrix{Float64}; alpha=1.0, cmap="Greys")
-	L = 1.0
-	a = [0,L,0,L]
-	imshow(mat', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
-	#labels()	# from an old package
+#function plot(mat::Matrix{Float64}; alpha=1.0, cmap="Greys")
+#	L = 1.0
+#	a = [0,L,0,L]
+#	imshow(mat', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+#	#labels()	# from an old package
+#	axis(a)
+#end
+
+function plot(d::Domain, phi::Matrix{Float64}; alpha=1.0, cmap="Greys")
+	a = [x_min(d), x_max(d), y_min(d), y_max(d)]
+	imshow(phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
 	axis(a)
 end
 

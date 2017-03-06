@@ -122,38 +122,26 @@ function scaled_dd(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::Matrix{Floa
 end
 
 
-# normalizes zd and vd
-# recall that zd and vd are together a direction, we normalize em both
-function normalizer!(zd::VV_F, vd::VV_F)
-	norm_factor = sqrt(dot(zd,zd) + dot(vd,vd))
-	for i = 1:length(zd)
-		zd[i][1] /= norm_factor
-		zd[i][2] /= norm_factor
-		vd[i][1] /= norm_factor
-		vd[i][2] /= norm_factor
-	end
-end
-
 # TODO: why exactly do I do this?
 # "normalizes" a matrix so (bins * bins) / sum(mat) = 1.0
 function normalize!(mat::Matrix{Float64}, dA::Float64)
-	bins, rar = size(mat)
+	num_x, num_y = size(mat)
 	#c = (bins * bins) / sum(mat)
 	c = 1.0 / (sum(mat) * dA)	# LD 3/02/2017
-	for i = 1:bins
-		for j = 1:bins
-			mat[i,j] *= c
+	for xi = 1:num_x
+		for yi = 1:num_y
+			mat[xi,yi] *= c
 		end
 	end
 end
 function normalize!(mat::Array{Float64,3}, dV::Float64)
-	bins = size(mat,1)	# assume dimensions are all the same
+	num_x, num_y, num_z = size(mat)
 	#c = (bins * bins * bins) / sum(mat)
 	c = 1.0 / (sum(mat) * dV)		# LD change 3/02/2017
-	for i = 1:bins
-		for j = 1:bins
-			for k = 1:bins
-				mat[i,j,k] *= c
+	for xi = 1:num_x
+		for yi = 1:num_y
+			for zi = 1:num_z
+				mat[xi,yi,zi] *= c
 			end
 		end
 	end

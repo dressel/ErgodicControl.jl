@@ -24,6 +24,8 @@ The function :math:`F_k(x)` is as follows:
 
 where :math:`h_k` is a normalizing factor and :math:`L_i` is the length of dimension :math:`i`.
 
+.. math:: h_k = \left(\int_0^L_1 \int_0^L_2 \cos^2(\frac{k_1\pi x_1}{L_1}) \cos^2(\frac{k_2\pi x_2}{L_2})dx_1 dx_2 \right)^{1/2}
+
 If we have a trajectory :math:`x(t)`, we can find the Fourier coefficients :math:`c_k` of the trajectory:
 
 .. math:: c_k = \frac{1}{T}\int_0^T F_k(x(t))dt,

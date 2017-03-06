@@ -13,15 +13,15 @@ The :code:`Domain` type has the following fields:
 ::
 
 	# user provided
-	mins::Vector{Float64}			# minimum value per dimension
-	maxes::Vector{Float64}			# maximum value per dimension
-	cells::Vector{Int}				# number of cells per dimension
+	mins::Vector{Float64}           # minimum value per dimension
+	maxes::Vector{Float64}          # maximum value per dimension
+	cells::Vector{Int}              # number of cells per dimension
 
 	# calculated and used internally
-	lengths::Vector{Float64}		# maxes - mins
-	cell_lengths::Vector{Float64}	# length of cell in each dimension
-	num_dims::Int					# number of dimensions
-	cell_size::Float64				# size (area, volume, etc) of a cell
+	lengths::Vector{Float64}        # maxes - mins
+	cell_lengths::Vector{Float64}   # length of cell in each dimension
+	num_dims::Int                   # number of dimensions
+	cell_size::Float64              # size (area, volume, etc) of a cell
 
 The :code:`Domain` constructor requires knowledge of the domain minimums, maximums, and number of cells per side.
 ::
@@ -48,7 +48,7 @@ To generate domains in SE(2), just ensure there are three dimensions and that th
     
     d = Domain([-1,-1,-pi], [1,1,pi], 50)
 
-When computing ergodic trajectories over SE(2), it is recommended that you use more than 50 (or fewer) cells per dimension because SE(2) trajectories use Julia's :math:`besselj` function, which makes computation slow.
+When computing ergodic trajectories over SE(2), it is recommended that you use more than 50 (or fewer) cells per dimension because SE(2) trajectories use Julia's :code:`besselj` function, which makes computation slow.
 
 
 Probability Distributions

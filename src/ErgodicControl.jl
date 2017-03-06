@@ -55,9 +55,10 @@ include("visuals/gif.jl")
 # temporary...
 function fletcher(N::Int)
 	xd = VVF(N)
-	s = sqrt(0.03)
+	s = sqrt(0.1)
 	for i = 1:N
-		xd[i] = [s*randn() + 0.5, s*randn() + .5, s*randn()]
+		#xd[i] = [s*randn() + 0.5, s*randn() + .5, s*randn()]
+		xd[i] = [s*randn() + 0.0, s*randn() + 0.0]
 	end
 	return xd
 end

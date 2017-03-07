@@ -89,7 +89,7 @@ end
 # TODO: check if the row/col ordering of this is julia-efficient
 # TODO: also, I could probably speed up by iterating over k first?
 function kpixl!(em::ErgodicManagerR2)
-	Lx = em.domain.cell_lengths[1]
+	Lx = em.domain.lengths[1]
 	xmin = x_min(em)
 	for xi = 1:x_cells(em)
 		# TODO: seems like I just cancel xmin out. Ignore it maybe?
@@ -99,7 +99,7 @@ function kpixl!(em::ErgodicManagerR2)
 		end
 	end
 
-	Ly = em.domain.cell_lengths[2]
+	Ly = em.domain.lengths[2]
 	ymin = y_min(em)
 	for yi = 1:y_cells(em)
 		y = ymin + (yi-0.5)*y_size(em)

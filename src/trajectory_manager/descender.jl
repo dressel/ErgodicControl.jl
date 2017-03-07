@@ -13,7 +13,7 @@ type InverseStep <: Descender
 	alpha::Float64
 end
 
-function get_step_size(ir::InverseStep, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, ad::MF, bd::MF, K::Vector{MF}, i::Int)
+function get_step_size(ir::InverseStep, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, zd::VVF, vd::VVF, ad::MF, bd::MF, K::Vector{MF}, i::Int)
 	return ir.alpha / i
 end
 
@@ -23,7 +23,7 @@ type InverseRootStep <: Descender
 end
 
 #get_step_size(ir::InverseRootStep, i::Int) = ir.alpha / sqrt(i)
-function get_step_size(ir::InverseRootStep, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, ad::MF, bd::MF, K::Vector{MF}, i::Int)
+function get_step_size(ir::InverseRootStep, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, zd::VVF, vd::VVF, ad::MF, bd::MF, K::Vector{MF}, i::Int)
 	return ir.alpha / sqrt(i)
 end
 
@@ -32,7 +32,7 @@ type ConstantStep <: Descender
 	alpha::Float64
 end
 
-function get_step_size(cs::ConstantStep, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, ad::MF, bd::MF, K::Vector{MF}, i::Int)
+function get_step_size(cs::ConstantStep, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, zd::VVF, vd::VVF, ad::MF, bd::MF, K::Vector{MF}, i::Int)
 	return cs.alpha
 end
 

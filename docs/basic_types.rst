@@ -41,9 +41,7 @@ If you wanted to create the unit square with each dimension discretized into 100
     d = Domain([1,1], [100,100])
     d = Domain([1,1], 100)
 
-You should note that for :math:`\mathbb{R}^n`, the minimums need to be zero for the cosine Fourier ergodic metric to compute correctly.
-
-To generate domains in SE(2), just ensure there are three dimensions and that the last one covers the entire angular space. The minimums need not be zero for an SE(2) domain.
+To generate domains in SE(2), just ensure there are three dimensions and that the last one covers the entire angular space.
 ::
     
     d = Domain([-1,-1,-pi], [1,1,pi], 50)

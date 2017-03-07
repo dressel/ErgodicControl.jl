@@ -17,6 +17,8 @@ function decompose(em::ErgodicManagerR2, traj::VVF, start_idx::Int=1)
 	ck = zeros(K+1, K+1)
 	Lx = em.domain.lengths[1]
 	Ly = em.domain.lengths[2]
+	xm = x_min(em)
+	ym = y_min(em)
 	for k1 = 0:K
 		kpiL1 = k1 * pi / Lx
 		for k2 = 0:K
@@ -26,7 +28,7 @@ function decompose(em::ErgodicManagerR2, traj::VVF, start_idx::Int=1)
 			# now loop over time
 			for n = 0:N-1
 				xn = traj[n + start_idx + 1]
-				fk_sum += cos(kpiL1 * xn[1])  * cos(kpiL2 * xn[2])
+				fk_sum += cos(kpiL1 * (xn[1]-xm))  * cos(kpiL2 * (xn[2]-ym))
 			end
 			ck[k1+1, k2+1] = fk_sum / (hk * N)
 		end

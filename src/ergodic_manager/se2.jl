@@ -104,7 +104,6 @@ function phi!(em::ErgodicManagerSE2, dm::VF, ds::MF)
 		println("xi = ", xi)
 		for yi = 1:y_cells(em)
 			y = y_min(em) + (yi-0.5)*y_size(em)
-			#for zi = 1:em.domain.cells[3]
 			for zi = 1:z_cells(em)
 				z = z_min(em) + (zi-0.5)*z_size(em)
 				d[xi,yi,zi] = my_pdf([x,y,z], dm, ds)
@@ -173,17 +172,23 @@ end
 # iterate over the state space
 function phi_mnp(em::ErgodicManagerSE2, m::Int, n::Int, p::Int, d::Array{Float64,3})
 	val = 0.0im
+	i = float(im)
 	for xi = 1:x_cells(em)
 		x = x_min(em) + (xi-0.5) * x_size(em)
 		for yi = 1:y_cells(em)
 			y = y_min(em) + (yi-0.5) * y_size(em)
+			r = sqrt(x*x + y*y)
+			psi = atan2(y,x)	# atan(y/x)
+			bj = besselj(m-n, p*r)
 			for zi = 1:z_cells(em)
 				z = z_min(em) + (zi-0.5) * z_size(em)
-				val += d[xi,yi,zi] * F_mnp(m,n,p,x,y,z) *em.domain.cell_size
+				#val += d[xi,yi,zi] * i^(n-m) * exp(i*(m*psi+(n-m)z)) * bj * em.domain.cell_size
+				val += d[xi,yi,zi] * exp(i*(m*psi+(n-m)z)) * bj
 			end
 		end
 	end
-	return val
+	# i^(n-m) and em.domain.cell_size don't depend on x, y, z
+	return i^(n-m) * val * em.domain.cell_size
 end
 
 function F_mnp(m::Int, n::Int, p::Int, x::Float64, y::Float64, z::Float64)

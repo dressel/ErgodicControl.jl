@@ -143,3 +143,33 @@ end
 ######################################################################
 # symplectic_euler
 ######################################################################
+function symplectic_euler(tm::TrajectoryManager, x::VF, u::VF)
+	symplectic_euler(tm.dynamics, x, u, tm.h)
+end
+function symplectic_euler(d::Dynamics, x::VF, u::VF, h::Float64)
+	A,B = linearize(d, x, u, h)
+	n2 = round(Int, d.n/2)
+
+	A11 = A[1:n2, 1:n2]
+	A12 = A[1:n2, n2+1:d.n]
+	A21 = A[n2+1:d.n, 1:n2]
+	A22 = A[n2+1:d.n, n2+1:d.n]
+
+	B1 = B[1:n2,:]
+	B2 = B[n2+1:d.n,:]
+
+	# block matrices
+	Ad22 = inv(eye(n2)-h*A22)
+	Ad11 = eye(n2) + h*A11 + h*h*A12*Ad22*A21
+	Ad12 = h*A12*Ad22
+	Ad21 = h*Ad22*A21
+
+	Bd1 = h*h*A12*Ad22*B2 + h*B1
+	Bd2 = h*Ad22*B2
+
+	Ase = [A11 A12; A21 A22]
+	Bse = [Bd1; Bd2]
+
+	xp = Ase*x + Bse*u
+	return xp
+end

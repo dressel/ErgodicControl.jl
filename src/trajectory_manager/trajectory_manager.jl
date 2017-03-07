@@ -61,7 +61,7 @@ end
 # TODO: really, this is a general tool useful for other code
 #  it should go somewhere else
 export compute_controls
-function compute_controls(xd::VV_F, h::Float64)
+function compute_controls(xd::VVF, h::Float64)
 	N = length(xd) - 1
 	ud = Array(Vector{Float64}, N)
 	for n = 1:N

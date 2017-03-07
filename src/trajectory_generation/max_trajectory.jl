@@ -47,7 +47,7 @@ end
 export max_trajectory
 
 
-function compute_gradients(xd::VV_F, ud::VV_F, mu::Vector{Float64}, Sigma::Matrix{Float64})
+function compute_gradients(xd::VVF, ud::VVF, mu::Vector{Float64}, Sigma::Matrix{Float64})
 	N = length(xd) - 1
 
 	a = Array(Vector{Float64}, N)
@@ -72,7 +72,7 @@ end
 
 
 
-function project3!(xd::VV_F, ud::VV_F, zd::VV_F,vd::VV_F,step_size::Float64)
+function project3!(xd::VVF, ud::VVF, zd::VVF,vd::VVF,step_size::Float64)
 	N = length(ud) - 1
 	for i = 0:(N-1)
 		ud[i+1] += step_size*vd[i+1]

@@ -62,7 +62,7 @@ function LQ(A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 end
 
 
-function apply_LQ_gains(A::MF, B::MF, K::Vector{MF}, C::VV_F)
+function apply_LQ_gains(A::MF, B::MF, K::Vector{MF}, C::VVF)
 	N = length(K)
 
 	z = [zeros(size(B,1))]
@@ -87,7 +87,7 @@ function apply_LQ_gains(A::VMF, B::VMF, K::VMF, C::VVF)
 end
 
 # Nope, not here
-#function apply_LQ_gains(d::Dynamics, K::Vector{MF}, C::VV_F)
+#function apply_LQ_gains(d::Dynamics, K::Vector{MF}, C::VVF)
 #	N = length(K)
 #
 #	z = [zeros(size(B,1))]

@@ -63,7 +63,7 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 	end
 end
 
-function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int, ck::Matrix{Float64})
+function compute_ans(em::ErgodicManagerR2, xd::VVF, tm::TrajectoryManager, n::Int, start_idx::Int, ck::Matrix{Float64})
 	x = xd[n + start_idx + 1][1]
 	y = xd[n + start_idx + 1][2]
 
@@ -93,7 +93,7 @@ function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::I
 	return an_x, an_y
 end
 
-function compute_ans(em::ErgodicManagerSE2, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int, ck)
+function compute_ans(em::ErgodicManagerSE2, xd::VVF, tm::TrajectoryManager, n::Int, start_idx::Int, ck)
 	x = xd[n + start_idx + 1][1]
 	y = xd[n + start_idx + 1][2]
 	z = xd[n + start_idx + 1][3]

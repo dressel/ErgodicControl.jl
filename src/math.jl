@@ -66,7 +66,7 @@ end
 # u1, u2 are components of direction
 # basically,
 # [g_f1, g_f2]' * [u1, u2]'
-function directional_derivative(g_f1::VV_F, g_f2::VV_F, u1::VV_F, u2::VV_F)
+function directional_derivative(g_f1::VVF, g_f2::VVF, u1::VVF, u2::VVF)
 	N = length(g_f1)
 	dd = 0.0
 	for i = 1:N
@@ -74,7 +74,7 @@ function directional_derivative(g_f1::VV_F, g_f2::VV_F, u1::VV_F, u2::VV_F)
 	end
 	return dd
 end
-function directional_derivative(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::VV_F, u2::VV_F)
+function directional_derivative(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::VVF, u2::VVF)
 	#N = length(g_f1)
 	N = size(g_f1, 2)
 	#n = size(u1[1])
@@ -103,13 +103,13 @@ function directional_derivative(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1
 	return dd
 end
 # like above, but scales the direction first
-function scaled_dd(g_f1::VV_F, g_f2::VV_F, u1::VV_F, u2::VV_F)
+function scaled_dd(g_f1::VVF, g_f2::VVF, u1::VVF, u2::VVF)
 	dd = directional_derivative(g_f1, g_f2, u1, u2)
 	norm_factor = sqrt( dot(u1,u1) + dot(u2,u2) )
 	return dd / norm_factor
 end
 
-function scaled_dd(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::VV_F, u2::VV_F)
+function scaled_dd(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::VVF, u2::VVF)
 	dd = directional_derivative(g_f1, g_f2, u1, u2)
 	norm_factor = sqrt( dot(u1,u1) + dot(u2,u2) )
 	return dd / norm_factor
@@ -151,7 +151,7 @@ export normalize!
 """
 `mat2traj(mat::Matrix{Float64})`
 
-Converts a matrix to a vector of Float64 vectors (VV_F's).
+Converts a matrix to a vector of Float64 vectors (VVF's).
 Assumes the matrix is `N x n`, where `n` is the dimensionality of the state space and `N` is the number of points in the trajectory.
 """
 function mat2traj(mat::Matrix{Float64})

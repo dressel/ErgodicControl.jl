@@ -28,13 +28,14 @@ function project(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud:
 	for n = 1:tm.N
 		push!(udn, ud[n] + step_size*vd[n] + K[n]*(alpha[n] - xdn[n]))
 		push!(xdn, forward_euler(tm, xdn[n], udn[n]) )
+		#push!(xdn, symplectic_euler(tm, xdn[n], udn[n]) )
 	end
 	return xdn, udn
 end
 
 
 # modifies (xd,ud) by moving step_size in direction (zd,vd)
-function descend!(xd::VV_F, ud::VV_F, zd::Matrix{Float64}, vd::Matrix{Float64}, step_size::Float64, N::Int)
+function descend!(xd::VVF, ud::VVF, zd::Matrix{Float64}, vd::Matrix{Float64}, step_size::Float64, N::Int)
 	num_u = length(ud[1])
 	num_x = length(xd[1])
 	for i = 0:(N-1)
@@ -50,7 +51,7 @@ function descend!(xd::VV_F, ud::VV_F, zd::Matrix{Float64}, vd::Matrix{Float64}, 
 	end
 end
 
-function descend!(xd::VV_F, ud::VV_F, zd::VV_F, vd::VV_F, step_size::Float64, N::Int)
+function descend!(xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64, N::Int)
 	num_u = length(ud[1])
 	num_x = length(xd[1])
 	for i = 0:(N-1)

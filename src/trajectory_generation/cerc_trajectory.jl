@@ -12,7 +12,7 @@ function cerc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Boo
 	cerc_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit,right=right)
 end
 
-function cerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VV_F, ud0::VV_F; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es_crit::Float64=0.003, right::Bool=true)
+function cerc_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=30, es_crit::Float64=0.003, right::Bool=true)
 
 	# let's not overwrite the initial trajectories
 	xd = deepcopy(xd0)
@@ -124,7 +124,7 @@ end
 #	println("--------------------------------------------------------------------------")
 #end
 #
-#function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VV_F, ud::VV_F, start_idx::Int)
+#function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, start_idx::Int)
 #	ni =  1
 #	for n = 0:(tm.N-1)
 #		an_x, an_y = compute_ans(em, xd, tm, n, start_idx)
@@ -145,7 +145,7 @@ end
 #	end
 #end
 #
-#function compute_ans(em::ErgodicManager, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int)
+#function compute_ans(em::ErgodicManager, xd::VVF, tm::TrajectoryManager, n::Int, start_idx::Int)
 #	xnx = xd[n + start_idx + 1][1]
 #	xny = xd[n + start_idx + 1][2]
 #	L = em.L
@@ -190,7 +190,7 @@ end
 #
 #
 ## modifies (xd,ud) by moving step_size in direction (zd,vd)
-#function descend!(xd::VV_F, ud::VV_F, zd::Matrix{Float64}, vd::Matrix{Float64}, step_size::Float64, N::Int)
+#function descend!(xd::VVF, ud::VVF, zd::Matrix{Float64}, vd::Matrix{Float64}, step_size::Float64, N::Int)
 #	for i = 0:(N-1)
 #		ud[i+1][1] += step_size*vd[1,i+1]
 #		ud[i+1][2] += step_size*vd[2,i+1]
@@ -202,7 +202,7 @@ end
 #end
 
 # called if logging, not meant for general use
-#function save(outfile::IOStream, xd::VV_F)
+#function save(outfile::IOStream, xd::VVF)
 #	n = length(xd[1])
 #	for xi in xd
 #		for i = 1:(n-1)

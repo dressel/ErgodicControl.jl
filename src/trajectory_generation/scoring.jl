@@ -63,7 +63,7 @@ end
 
 
 """
-`ergodic_score(em, traj::V_T2F)`
+`ergodic_score(em, traj::VVF)`
 
 First breaks down the trajectory into components ck.
 """

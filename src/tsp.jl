@@ -6,7 +6,7 @@
 
 # uses nearest neighbors to heuristically solve tsp
 # tsp is traveling salesman problem
-function tsp_nn!(xd::VV_F, points::VV_F)
+function tsp_nn!(xd::VVF, points::VVF)
 	xc = xd[1]
 	next_p = xd[1]
 	n = 1
@@ -30,7 +30,7 @@ end
 
 # simply takes the points as they are
 # this creates a shitty trajectory
-function tsp_rand!(xd::VV_F, points::VV_F)
+function tsp_rand!(xd::VVF, points::VVF)
 	n = 1
 	for p in points
 		xd[n+1] = p

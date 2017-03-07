@@ -115,40 +115,6 @@ function phi!(em::ErgodicManagerSE2, dm::VF, ds::MF)
 	em.phi = d
 end
 
-#function phi!(em::ErgodicManagerSE2, dm1::Vector{Float64}, ds1::Matrix{Float64}, dm2::Vector{Float64}, ds2::Matrix{Float64})
-#	d = zeros(em.bins, em.bins)
-#	d_sum = 0.0
-#	for xi = 1:em.bins
-#		x = (xi-0.5)*em.cell_size
-#		for yi = 1:em.bins
-#			y = (yi-0.5)*em.cell_size
-#			d[xi,yi] = .5*my_pdf((x,y), dm1, ds1)+.5*my_pdf((x,y), dm2, ds2)
-#			d_sum += d[xi,yi]
-#		end
-#	end
-#	normalize!(d, em.domain.cell_size)
-#	em.phi = d
-#end
-
-#function phi!(em::ErgodicManagerSE2, means::VV_F, covs::VM_F, weights::Vector{Float64})
-#	half_size = em.cell_size / 2.0
-#	d = zeros(em.bins, em.bins)
-#	d_sum = 0.0
-#	num_gaussians = length(means)
-#	for xi = 1:em.bins
-#		x = (xi-1)*em.cell_size + half_size
-#		for yi = 1:em.bins
-#			y = (yi-1)*em.cell_size + half_size
-#			for gi = 1:num_gaussians
-#				d[xi,yi] += weights[gi] * my_pdf((x,y), means[gi], covs[gi])
-#			end
-#			d_sum += d[xi,yi]
-#		end
-#	end
-#	normalize!(d)
-#	em.phi = d
-#end
-
 
 ######################################################################
 # Computing Fourier coefficients

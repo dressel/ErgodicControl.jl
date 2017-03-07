@@ -5,7 +5,7 @@ using PyPlot
 
 export plot, plot_trajectory
 """
-`plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score=true, right=true, lw=1.0, ms=6.0)`
+`plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, right=true, lw=1.0, ms=6.0)`
 
 `plot(em::ErgodicManager; alpha=1.0, cmap="Greys")`
 
@@ -14,7 +14,7 @@ The "gray" cmap option is light where there is most density.
 
 An `alpha` value closest to 1.0 is darker; less is more transparent.
 """
-function plot(em::ErgodicManager, xd::VV_F; alpha=1.0, cmap="Greys", show_score::Bool=true, right::Bool=true, lw::Float64=1.0, ms::Float64=6.0)
+function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::Bool=true, right::Bool=true, lw::Float64=1.0, ms::Float64=6.0)
 	plot_trajectory(xd, lw=lw, ms=ms)
 	hold(true)
 	plot(em, alpha=alpha, cmap=cmap)
@@ -58,7 +58,7 @@ end
 
 # what other stuff do we need here?
 # only marks, colors, etc
-function plot_trajectory(xd::VV_F; lw::Real=1.0, ms::Real=6, onlyMarks=false)
+function plot_trajectory(xd::VVF; lw::Real=1.0, ms::Real=6, onlyMarks=false)
 	N = length(xd)
 	xvals = zeros(N)
 	yvals = zeros(N)

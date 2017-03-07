@@ -28,7 +28,7 @@ function kmeans_trajectory(em::ErgodicManager, x0::T2F, h::Float64, N::Int)
 
 end
 
-function assign_step(em::ErgodicManager, assignments::Matrix{Int}, means::VV_F)
+function assign_step(em::ErgodicManager, assignments::Matrix{Int}, means::VVF)
 	N = length(means)
 	for xi = 1:em.bins
 		for yi = 1:em.bins
@@ -47,7 +47,7 @@ function assign_step(em::ErgodicManager, assignments::Matrix{Int}, means::VV_F)
 end
 
 # compute the mean of each cluster
-function mean_step(em::ErgodicManager, assignments::Matrix{Int}, means::VV_F)
+function mean_step(em::ErgodicManager, assignments::Matrix{Int}, means::VVF)
 	N = length(means)
 	# let's clear the means vector
 	for i = 1:N

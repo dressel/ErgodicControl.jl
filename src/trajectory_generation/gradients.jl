@@ -65,20 +65,25 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 end
 
 function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int, ck::Matrix{Float64})
-	xnx = xd[n + start_idx + 1][1]
-	xny = xd[n + start_idx + 1][2]
+	x = xd[n + start_idx + 1][1]
+	y = xd[n + start_idx + 1][2]
 	#L = em.L
-	L = em.domain.lengths[1]
+	#L = em.domain.lengths[1]
+	Lx = em.domain.lengths[1]
+	Ly = em.domain.lengths[2]
 
 	an_x = 0.0
 	an_y = 0.0
 	 
+	xm = x_min(em)
+	ym = y_min(em)
+
 	for k1 = 0:em.K
 		for k2 = 0:em.K
 			hk = em.hk[k1+1,k2+1]
 
-			dFk_dxn1 = -k1*pi*sin(k1*pi*xnx/L)*cos(k2*pi*xny/L) / (hk*L)
-			dFk_dxn2 = -k2*pi*cos(k1*pi*xnx/L)*sin(k2*pi*xny/L) / (hk*L)
+			dFk_dxn1 = -k1*pi*sin(k1*pi*(x-xm)/Lx)*cos(k2*pi*(y-ym)/Ly) / (hk*Lx)
+			dFk_dxn2 = -k2*pi*cos(k1*pi*(x-xm)/Lx)*sin(k2*pi*(y-ym)/Ly) / (hk*Ly)
 
 			c = em.Lambda[k1+1,k2+1] * (ck[k1+1,k2+1] - em.phik[k1+1,k2+1])
 			an_x += c*dFk_dxn1

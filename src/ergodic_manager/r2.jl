@@ -90,18 +90,21 @@ end
 # TODO: also, I could probably speed up by iterating over k first?
 function kpixl!(em::ErgodicManagerR2)
 	Lx = em.domain.lengths[1]
+	xmin = x_min(em)
 	for xi = 1:x_cells(em)
-		x = x_min(em) + (xi-0.5)*x_size(em)
+		# TODO: seems like I just cancel xmin out. Ignore it maybe?
+		x = xmin + (xi-0.5)*x_size(em)
 		for k = 0:em.K
-			em.kpixl[k+1,xi] = cos(k*pi*x / Lx)
+			em.kpixl[k+1,xi] = cos(k*pi*(x-xmin) / Lx)
 		end
 	end
 
 	Ly = em.domain.lengths[2]
+	ymin = y_min(em)
 	for yi = 1:y_cells(em)
-		y = y_min(em) + (yi-0.5)*y_size(em)
+		y = ymin + (yi-0.5)*y_size(em)
 		for k = 0:em.K
-			em.kpiyl[k+1,yi] = cos(k*pi*y / Ly)
+			em.kpiyl[k+1,yi] = cos(k*pi*(y-ymin) / Ly)
 		end
 	end
 end

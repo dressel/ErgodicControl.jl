@@ -145,42 +145,45 @@ end
 
 
 # if anyone is outside the domain...
+#function barrier_score(em::ErgodicManager, xd::VVF, c::Float64)
+#	if c == 0.0; return 0.0; end
+#
+#	bs = 0.0
+#	for xi in xd
+#		if (xi[1] > em.L) || (xi[1] < 0.0)
+#			dx = (xi[1] - 0.5*em.L)
+#			bs += c * dx * dx
+#		end
+#		if (xi[2] > em.L) || (xi[2] < 0.0)
+#			dy = (xi[2] - 0.5*em.L)
+#			bs += c * dy * dy
+#		end
+#	end
+#	return bs
+#end
+
 function barrier_score(em::ErgodicManager, xd::VVF, c::Float64)
 	if c == 0.0; return 0.0; end
 
 	bs = 0.0
-	for xi in xd
-		if (xi[1] > em.L) || (xi[1] < 0.0)
-			dx = (xi[1] - 0.5*em.L)
-			bs += c * dx * dx
-		end
-		if (xi[2] > em.L) || (xi[2] < 0.0)
-			dy = (xi[2] - 0.5*em.L)
-			bs += c * dy * dy
-		end
-	end
-	return bs
-end
+	xmax = x_max(em)
+	ymax = y_max(em)
+	xmin = x_min(em)
+	ymin = y_min(em)
 
-function barrier_score2(em::ErgodicManager, xd::VVF, c::Float64)
-	if c == 0.0; return 0.0; end
-
-	bs = 0.0
-	Lx = em.domain.lengths[1]
-	Ly = em.domain.lengths[2]
 	for xi in xd
-		if (xi[1] > Lx)
-			dx = xi[1] - Lx
+		if (xi[1] > xmax)
+			dx = xi[1] - xmax
 			bs += c * dx * dx
-		elseif (xi[1] < 0.0)
-			dx = xi[1]
+		elseif (xi[1] < xmin)
+			dx = xi[1] - xmin
 			bs += c * dx * dx
 		end
-		if (xi[2] > Ly)
-			dy = xi[2] - Ly
+		if (xi[2] > ymax)
+			dy = xi[2] - ymax
 			bs += c * dy * dy
-		elseif (xi[2] < 0.0)
-			dy = xi[2]
+		elseif (xi[2] < ymin)
+			dy = xi[2] - ymin
 			bs += c * dy * dy
 		end
 	end
@@ -197,7 +200,7 @@ function total_score(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF
 	# TODO: add quadratic barrier score if need be
 	es = tm.q * ergodic_score(em, xd)
 	cs = control_score(ud, tm.R, tm.h)
-	bs = barrier_score2(em, xd, tm.barrier_cost)
+	bs = barrier_score(em, xd, tm.barrier_cost)
 	#bs = 0.0
 	return es + cs + bs
 end

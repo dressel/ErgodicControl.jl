@@ -15,9 +15,6 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 		for i = 1:length(an)
 			ad[i,ni] = an[i]
 		end
-		#an_x, an_y = compute_ans(em, xd, tm, n, start_idx)
-		#ad[1,ni] = an_x
-		#ad[2,ni] = an_y
 
 		# quadratic boundary
 		#if tm.barrier_cost > 0.0
@@ -34,17 +31,19 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 		if tm.barrier_cost > 0.0
 			xnx = xd[n+start_idx+1][1]
 			xny = xd[n+start_idx+1][2]
-			Lx = em.domain.lengths[1]
-			Ly = em.domain.lengths[2]
-			if (xnx > Lx)
-				ad[1,ni] += tm.barrier_cost * (2.0*xnx - 2.0*Lx)
-			elseif xnx < 0.0
-				ad[1,ni] += tm.barrier_cost * 2.0*xnx
+			xmax = x_max(em)
+			xmin = x_min(em)
+			ymax = y_max(em)
+			ymin = y_min(em)
+			if (xnx > xmax)
+				ad[1,ni] += tm.barrier_cost * 2.0 * (xnx - xmax)
+			elseif xnx < xmin
+				ad[1,ni] += tm.barrier_cost * 2.0 * (xnx - xmin)
 			end
-			if xny > Ly
-				ad[2,ni] += tm.barrier_cost * (2.0*xny - 2.0*Ly)
-			elseif xny < 0.0
-				ad[2,ni] += tm.barrier_cost * (2.0*xny)
+			if xny > ymax
+				ad[2,ni] += tm.barrier_cost * 2.0 * (xny - ymax)
+			elseif xny < ymin
+				ad[2,ni] += tm.barrier_cost * 2.0 * (xny - ymin)
 			end
 		end
 

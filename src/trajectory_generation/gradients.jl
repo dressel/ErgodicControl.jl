@@ -67,8 +67,7 @@ end
 function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::Int, start_idx::Int, ck::Matrix{Float64})
 	x = xd[n + start_idx + 1][1]
 	y = xd[n + start_idx + 1][2]
-	#L = em.L
-	#L = em.domain.lengths[1]
+
 	Lx = em.domain.lengths[1]
 	Ly = em.domain.lengths[2]
 
@@ -90,8 +89,8 @@ function compute_ans(em::ErgodicManagerR2, xd::VV_F, tm::TrajectoryManager, n::I
 			an_y += c*dFk_dxn2
 		end
 	end
-	an_x *= 2.0*tm.h
-	an_y *= 2.0*tm.h
+	an_x *= 2.0*(tm.h / tm.T)
+	an_y *= 2.0*(tm.h / tm.T)
 	return an_x, an_y
 end
 

@@ -4,6 +4,7 @@
 ######################################################################
 export Dynamics, LinearDynamics, DubinsDynamics, linearize
 export IntegrationScheme, ForwardEuler, SymplecticEuler
+export forward_euler
 
 type LinearDynamics <: Dynamics
 	n::Int

@@ -15,7 +15,6 @@ export clerc_trajectory
 export cerc_trajectory
 
 # to make some things easier
-typealias VM_F  Vector{Matrix{Float64}}   # vector of matrix of floats
 typealias T2F      NTuple{2, Float64}    # x, y
 
 typealias MF Matrix{Float64}

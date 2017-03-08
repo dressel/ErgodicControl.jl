@@ -9,6 +9,7 @@ using StatsBase: WeightVec, sample
 abstract Dynamics
 abstract Initializer
 abstract Descender
+abstract IntegrationScheme
 
 type TrajectoryManager
 
@@ -28,6 +29,7 @@ type TrajectoryManager
 	initializer::Initializer
 	descender::Descender
 	dynamics::Dynamics
+	int_scheme::IntegrationScheme
 
 
 	function TrajectoryManager(x0::Vector{Float64}, h::Real, N::Int, i::Initializer=RandomInitializer())
@@ -50,6 +52,7 @@ type TrajectoryManager
 
 		# dynamics stuff
 		tm.dynamics = LinearDynamics(eye(2), tm.h*eye(2))
+		tm.int_scheme = ForwardEuler()
 
 		return tm
 	end

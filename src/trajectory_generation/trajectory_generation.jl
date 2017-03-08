@@ -27,7 +27,7 @@ function project(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud:
 	# perform the projection
 	for n = 1:tm.N
 		push!(udn, ud[n] + step_size*vd[n] + K[n]*(alpha[n] - xdn[n]))
-		push!(xdn, forward_euler(tm, xdn[n], udn[n]) )
+		push!(xdn, integrate(tm, xdn[n], udn[n]) )
 		#push!(xdn, symplectic_euler(tm, xdn[n], udn[n]) )
 	end
 	return xdn, udn

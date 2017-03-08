@@ -132,7 +132,7 @@ function initialize(initializer::PointInitializer, em::ErgodicManager, tm::Traje
 		end
 	end
 
-	xd = forward_euler(tm, ud)
+	xd = integrate(tm, ud)
 
 	return xd, ud
 end

@@ -3,6 +3,7 @@
 # Each trajectory manager will have a type of dynamics
 ######################################################################
 export Dynamics, LinearDynamics, DubinsDynamics, linearize
+export IntegrationScheme, ForwardEuler, SymplecticEuler
 
 type LinearDynamics <: Dynamics
 	n::Int
@@ -73,6 +74,8 @@ end
 ######################################################################
 # linearization
 ######################################################################
+
+# linearizes about a trajectory
 function linearize(d::Dynamics, x::VVF, u::VVF, h::Float64)
 	N = length(u)
 	A = VMF()
@@ -103,22 +106,40 @@ end
 
 
 ######################################################################
+# integration
+######################################################################
+type ForwardEuler <: IntegrationScheme end
+type SymplecticEuler <: IntegrationScheme end
+
+function integrate(tm::TrajectoryManager, x::VF, u::VF)
+	integrate(tm.int_scheme, tm.dynamics, x, u, tm.h)
+end
+
+function integrate(::ForwardEuler, d::Dynamics, x::VF, u::VF, h::Float64)
+	forward_euler(d, x, u, h)
+end
+
+function integrate(::SymplecticEuler, d::Dynamics, x::VF, u::VF, h::Float64)
+	symplectic_euler(d, x, u, h)
+end
+
+function integrate(tm::TrajectoryManager, ud::VVF)
+	xd = Array(Vector{Float64}, tm.N+1)
+
+	xd[1] = deepcopy(tm.x0)
+	for i = 1:tm.N
+		xd[i+1] = integrate(tm.int_scheme, tm.dynamics, x, ud[i], tm.h)
+	end
+
+	return xd
+end
+
+
+######################################################################
 # forward_euler
 ######################################################################
 function forward_euler(tm::TrajectoryManager, x::VF, u::VF)
 	forward_euler(tm.dynamics, x, u, tm.h)
-end
-
-function forward_euler(tm::TrajectoryManager, ud::VVF)
-	N = length(ud)
-	xd = Array(Vector{Float64}, N+1)
-
-	xd[1] = deepcopy(tm.x0)
-	for i = 1:tm.N
-		xd[i+1] = forward_euler(tm.dynamics, x, ud[i], tm.h)
-	end
-
-	return xd
 end
 
 function forward_euler(ld::LinearDynamics, x::VF, u::VF, h::Float64)
@@ -143,9 +164,6 @@ end
 ######################################################################
 # symplectic_euler
 ######################################################################
-function symplectic_euler(tm::TrajectoryManager, x::VF, u::VF)
-	symplectic_euler(tm.dynamics, x, u, tm.h)
-end
 function symplectic_euler(d::Dynamics, x::VF, u::VF, h::Float64)
 	A,B = linearize(d, x, u, h)
 	n2 = round(Int, d.n/2)

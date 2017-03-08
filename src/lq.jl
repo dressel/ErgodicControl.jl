@@ -52,10 +52,11 @@ function LQ(A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 	#for n = (N-1):-1:0
 	for n = N:-1:1
 		G[n] = R + (B[n]' * P[n+1] * B[n])
-		K[n] = inv(G[n]) * B[n]' * P[n+1] * A[n]
+		Ginv = inv(G[n])
+		K[n] = Ginv * B[n]' * P[n+1] * A[n]
 		P[n] = Q + (A[n]' * P[n+1] * A[n]) - (K[n]' * G[n] * K[n])
 		r[n] = (A[n]'-K[n]'*B[n]')r[n+1] + .5*a[:,n] - .5*K[n]'*b[:,n]
-		C[n] = inv(G[n]) * (B[n]'*r[n+1] + .5*b[:,n])
+		C[n] = Ginv * (B[n]'*r[n+1] + .5*b[:,n])
 	end
 
 	return K, C

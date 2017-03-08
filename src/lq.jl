@@ -54,8 +54,9 @@ function LQ(A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 		G[n] = R + (B[n]' * P[n+1] * B[n])
 		Ginv = inv(G[n])
 		K[n] = Ginv * B[n]' * P[n+1] * A[n]
-		P[n] = Q + (A[n]' * P[n+1] * A[n]) - (K[n]' * G[n] * K[n])
-		r[n] = (A[n]'-K[n]'*B[n]')r[n+1] + .5*a[:,n] - .5*K[n]'*b[:,n]
+		Kp = K[n]'
+		P[n] = Q + (A[n]' * P[n+1] * A[n]) - (Kp * G[n] * K[n])
+		r[n] = (A[n]'-Kp*B[n]')r[n+1] + .5*a[:,n] - .5*Kp*b[:,n]
 		C[n] = Ginv * (B[n]'*r[n+1] + .5*b[:,n])
 	end
 

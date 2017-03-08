@@ -49,15 +49,6 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 
 		# control gradients
 		bd[:,ni] = tm.h * tm.R * ud[ni]
-		# The code below reduces some allocation but is barbaric
-		# The difference is minimal so I just use the line above
-		#if tm.dynamics.m == 2
-		#	bd[1,ni] = tm.h * (tm.R[1,1]*ud[ni][1] + tm.R[1,2]*ud[ni][2])
-		#	bd[2,ni] = tm.h * (tm.R[2,1]*ud[ni][1] + tm.R[2,2]*ud[ni][2])
-		#end
-		#if tm.dynamics.m == 1
-		#	bd[1,ni] = tm.h * (tm.R[1,1]*ud[ni][1])
-		#end
 
 		ni += 1
 	end

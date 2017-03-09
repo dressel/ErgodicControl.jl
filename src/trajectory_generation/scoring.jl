@@ -101,24 +101,35 @@ end
 """
 `control_score(ud::VVF, R, h)`
 
-Assumes only non-zero elements of `R` are corners.
+Assumes only non-zero elements of `R` are corners (not anymore I think)
 
-`control_score(ud::VVF, N::Int)`
-
-Computes sum_i=1^N dot(u,u). Does not divide by 2 or do anything else.
+`control_score(tm::TrajectoryManager,u::VVF) = control_score(u, tm.R, tm.h)`
 """
 function control_score(ud::VVF, R::Matrix{Float64}, h::Float64)
 	cs = 0.0
 	num_u = length(ud[1])
 	for ui in ud
+
 		for j = 1:num_u
-			cs += R[j,j] * ui[j] * ui[j]
+		   cs += R[j,j] * ui[j] * ui[j]
 		end
+
+		# TODO: this is how I do it. Benchmark it
+		#cs += dot(ui, R*ui)
+
+		# old way I suppose. delete this dumb stuff
 		#cs += R[1,1] * ui[1] * ui[1]
 		#cs += R[2,2] * ui[2] * ui[2]
 	end
 	return 0.5 * h * cs
 end
+
+function control_score(tm::TrajectoryManager, ud::VVF)
+	return control_score(ud, tm.R, tm.h)
+end
+
+
+# TODO: do I even use these functions?
 control_score(ud::VVF) = control_score(ud, eye(2), 1.0)
 function control_score(ud::VVF, N::Int)
 	cs = 0.0

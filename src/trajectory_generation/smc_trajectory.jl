@@ -6,19 +6,7 @@
 
 export smc_trajectory
 
-# TODO: really, it doesn't make sense to do this
-function smc_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
-	xd0, ud0 = initialize(tm.initializer, em, tm)
-	smc_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit, right=right)
-end
-
-function smc_trajectory(em::ErgodicManagerR2, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
-
-	# I don't think this matters here
-	start_idx = right ? 1 : 0
-
-	# TODO: umax??
-	umax = 1.
+function smc_trajectory(em::ErgodicManagerR2, tm::TrajectoryManager; verbose::Bool=true, umax::Float64=1.0) 
 
 	ud = VVF(tm.N)
 	xd = VVF(tm.N+1)
@@ -39,6 +27,7 @@ function smc_trajectory(em::ErgodicManagerR2, tm::TrajectoryManager, xd0::VVF, u
 	return xd, ud
 end
 
+# TODO: this can be done a lot quicker
 function compute_B(em::ErgodicManagerR2, xd::VVF, n::Int, h::Float64)
 	Lx = em.domain.lengths[1]
 	Ly = em.domain.lengths[2]

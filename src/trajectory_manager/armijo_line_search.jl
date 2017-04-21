@@ -28,18 +28,35 @@ function get_step_size(als::ArmijoLineSearch, em::ErgodicManager, tm::Trajectory
 
 	xdn, udn = project(em, tm, K, xd, ud, zd, vd, step_size)
 	ts = total_score(em, tm, xdn, udn)
-	#ts_arr = Float64[]
-	#step_arr = Float64[]
 	armijo_index = 0.0
 	while (total_score(em, tm, xdn, udn) > f_x + step_size*als.c*m) && (armijo_index < als.max_iters)
 		ts = total_score(em, tm, xdn, udn)
-		#push!(ts_arr, ts)
-		#push!(step_arr, step_size)
 		step_size *= tau
 		xdn, udn = project(em, tm, K, xd, ud, zd, vd, step_size)
 		armijo_index += 1
 	end
-	#writecsv("ts.csv", ts_arr)
-	#writecsv("step.csv", step_arr)
+	return step_size
+end
+
+
+# kind of hacky, just for linear dynamics (no projection)
+function get_step_size2(als::ArmijoLineSearch, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, zd::VVF, vd::VVF, ad::MF, bd::MF, K::Vector{MF}, i::Int)
+	tau = 0.5
+	step_size = als.initial_step
+
+	# compute m = p' * grad f(x)
+	m = directional_derivative(ad, bd, zd, vd)
+
+	f_x = total_score(em, tm, xd, ud)
+
+	xdn, udn = project2(em, tm, K, xd, ud, zd, vd, step_size)
+	ts = total_score(em, tm, xdn, udn)
+	armijo_index = 0.0
+	while (total_score(em, tm, xdn, udn) > f_x + step_size*als.c*m) && (armijo_index < als.max_iters)
+		ts = total_score(em, tm, xdn, udn)
+		step_size *= tau
+		xdn, udn = project2(em, tm, K, xd, ud, zd, vd, step_size)
+		armijo_index += 1
+	end
 	return step_size
 end

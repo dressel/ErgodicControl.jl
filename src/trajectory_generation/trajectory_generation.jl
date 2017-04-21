@@ -34,6 +34,26 @@ function project(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud:
 	return xdn, udn
 end
 
+# This is really just for linear stuff
+function project2(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)
+	xdn = [xd[1]]
+	udn = Array(Vector{Float64}, 0)
+
+	xdn = VVF(0)
+	udn = VVF(0)
+
+	# perform the projection
+	# Shouldn't need to even integrate...
+	for n = 1:tm.N
+		push!(udn, ud[n] + step_size*vd[n])
+		push!(xdn, xd[n] + step_size*zd[n])
+		#push!(xdn, integrate(tm, xdn[n], udn[n]) )
+		#push!(xdn, symplectic_euler(tm, xdn[n], udn[n]) )
+	end
+	push!(xdn, xd[tm.N+1] + step_size*zd[tm.N+1])
+	return xdn, udn
+end
+
 
 # modifies (xd,ud) by moving step_size in direction (zd,vd)
 function descend!(xd::VVF, ud::VVF, zd::Matrix{Float64}, vd::Matrix{Float64}, step_size::Float64, N::Int)
@@ -52,6 +72,7 @@ function descend!(xd::VVF, ud::VVF, zd::Matrix{Float64}, vd::Matrix{Float64}, st
 	end
 end
 
+# This one actually get's called
 function descend!(xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64, N::Int)
 	num_u = length(ud[1])
 	num_x = length(xd[1])

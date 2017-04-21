@@ -40,7 +40,7 @@ function compute_B(em::ErgodicManagerR2, xd::VVF, n::Int, h::Float64)
 			cx = cos(k1*pi*dxn/Lx)
 			cy = cos(k2*pi*dyn/Ly)
 
-			# compute fk
+			# compute ck
 			fk = 0.0
 			for i = 1:n
 				dx = xd[i][1] - x_min(em)
@@ -48,8 +48,11 @@ function compute_B(em::ErgodicManagerR2, xd::VVF, n::Int, h::Float64)
 				fk += cos(k1*pi*dx/Lx) * cos(k2*pi*dy/Ly)
 			end
 			fk /= (hk*n)
+
+			# t * Lambda_k * (c_k - phi_k)
 			LS = em.Lambda[k1+1,k2+1] * h * n * (fk - em.phik[k1+1, k2+1])
 
+			# multiplying by gradient
 			Bx += -LS * k1*pi * sin(k1*pi*dxn/Lx) * cy / (hk*Lx)
 			By += -LS * k2*pi * cx * sin(k2*pi*dyn/Ly) / (hk*Ly)
 		end

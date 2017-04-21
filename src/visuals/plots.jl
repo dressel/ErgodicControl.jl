@@ -2,6 +2,8 @@
 # plots.jl
 ######################################################################
 using PyPlot
+using PyCall
+PyCall.PyDict(matplotlib["rcParams"])["font.family"]=["Times New Roman"]
 
 export plot, plot_trajectory
 """
@@ -76,3 +78,4 @@ function plot_trajectory(xd::VVF; lw::Real=1.0, ms::Real=6, onlyMarks=false)
 	end
 	#PyPlot.plot(xvals, yvals, line_style, lw=lw, ms=ms)
 end
+

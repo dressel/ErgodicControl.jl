@@ -16,10 +16,10 @@ The "gray" cmap option is light where there is most density.
 
 An `alpha` value closest to 1.0 is darker; less is more transparent.
 """
-function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::Bool=true, right::Bool=true, lw::Float64=1.0, ms::Float64=6.0)
-	plot_trajectory(xd, lw=lw, ms=ms)
+function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::Bool=true, right::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
+	plot_trajectory(xd, lw=lw, ms=ms, onlyMarks=onlyMarks)
 	hold(true)
-	plot(em, alpha=alpha, cmap=cmap)
+	plot(em, alpha=alpha, cmap=cmap, no_domain=no_domain)
 	if show_score
 		start_idx = right ? 1 : 0
 		es = ergodic_score(em, xd, start_idx)
@@ -28,9 +28,14 @@ function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::
 	end
 end
 
-function plot(em::ErgodicManagerR2; alpha=1.0, cmap="Greys")
+function plot(em::ErgodicManagerR2; alpha=1.0, cmap="Greys",no_domain=false)
 	a = [x_min(em), x_max(em), y_min(em), y_max(em)]
-	imshow(em.phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+	if no_domain
+		rar = zeros(size(em.phi'))
+		imshow(rar, interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+	else
+		imshow(em.phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+	end
 	axis(a)
 end
 
@@ -72,7 +77,8 @@ function plot_trajectory(xd::VVF; lw::Real=1.0, ms::Real=6, onlyMarks=false)
 	m = onlyMarks ? "o" : "."
 	#PyPlot.plot(xvals, yvals, ".-", lw=lw, ms=ms)
 	if onlyMarks
-		PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms, mfc="none")
+		#PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms, mfc="none")
+		PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms, alpha=.1,mfc="black")
 	else
 		PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms)
 	end

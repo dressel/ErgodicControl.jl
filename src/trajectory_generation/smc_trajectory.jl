@@ -11,9 +11,10 @@ function smc_trajectory(em::ErgodicManagerR2, tm::TrajectoryManager; verbose::Bo
 	ud = VVF(tm.N)
 	xd = VVF(tm.N+1)
 	xd[1] = deepcopy(tm.x0)
+	ck = zeros(em.K+1, em.K+1)
 	for n = 1:tm.N
 		# compute B
-		Bx, By = compute_B(em, xd, n, tm.h)
+		Bx, By = compute_B(em, xd, n, tm.h, ck)
 
 		# normalize
 		den = sqrt(Bx*Bx + By*By)
@@ -28,7 +29,7 @@ function smc_trajectory(em::ErgodicManagerR2, tm::TrajectoryManager; verbose::Bo
 end
 
 # TODO: this can be done a lot quicker
-function compute_B(em::ErgodicManagerR2, xd::VVF, n::Int, h::Float64)
+function compute_B(em::ErgodicManagerR2, xd::VVF, n::Int, h::Float64, ck::Matrix{Float64})
 	Lx = em.domain.lengths[1]
 	Ly = em.domain.lengths[2]
 	dxn = xd[n][1] - x_min(em)
@@ -41,13 +42,18 @@ function compute_B(em::ErgodicManagerR2, xd::VVF, n::Int, h::Float64)
 			cy = cos(k2*pi*dyn/Ly)
 
 			# compute ck
-			fk = 0.0
-			for i = 1:n
-				dx = xd[i][1] - x_min(em)
-				dy = xd[i][2] - y_min(em)
-				fk += cos(k1*pi*dx/Lx) * cos(k2*pi*dy/Ly)
-			end
-			fk /= (hk*n)
+			#fk = 0.0
+			#for i = 1:n
+			#	dx = xd[i][1] - x_min(em)
+			#	dy = xd[i][2] - y_min(em)
+			#	fk += cos(k1*pi*dx/Lx) * cos(k2*pi*dy/Ly)
+			#end
+			#fk /= (hk*n)
+
+			# new method to compute ck
+			fk = ( (n-1)*ck[k1+1,k2+1] + cx*cy/hk ) / n
+			ck[k1+1, k2+1] = fk
+
 
 			# t * Lambda_k * (c_k - phi_k)
 			LS = em.Lambda[k1+1,k2+1] * h * n * (fk - em.phik[k1+1, k2+1])

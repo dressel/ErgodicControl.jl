@@ -12,7 +12,7 @@ export gif
 
 Below is an example of how you might use this. You `must` set `logging` to true during the trajectory generation.
 
-`xd, ud = new_trajectory(em, tm, logging=true)`
+`xd, ud = pto_trajectory(em, tm, logging=true)`
 
 `gif(em, tm, fps=15)`
 

@@ -1,17 +1,17 @@
 ######################################################################
-# new_trajectory.jl
+# pto_trajectory.jl
 #
 # Here I try to apply the original way of doing it.
 ######################################################################
 
-export new_trajectory
+export pto_trajectory
 
-function new_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
+function pto_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
 	xd0, ud0 = initialize(tm.initializer, em, tm)
-	new_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit, right=right)
+	pto_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit, right=right)
 end
 
-function new_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
+function pto_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
 
 	# let's not overwrite the initial trajectories
 	xd = deepcopy(xd0)

@@ -52,6 +52,30 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 
 		ni += 1
 	end
+
+	n = tm.N
+	an = compute_ans(em, xd, tm, n, start_idx, ck)
+	for i = 1:length(an)
+		ad[i,ni] = an[i]
+	end
+	if tm.barrier_cost > 0.0
+		xnx = xd[n+start_idx+1][1]
+		xny = xd[n+start_idx+1][2]
+		xmax = x_max(em)
+		xmin = x_min(em)
+		ymax = y_max(em)
+		ymin = y_min(em)
+		if (xnx > xmax)
+			ad[1,ni] += tm.barrier_cost * 2.0 * (xnx - xmax)
+		elseif xnx < xmin
+			ad[1,ni] += tm.barrier_cost * 2.0 * (xnx - xmin)
+		end
+		if xny > ymax
+			ad[2,ni] += tm.barrier_cost * 2.0 * (xny - ymax)
+		elseif xny < ymin
+			ad[2,ni] += tm.barrier_cost * 2.0 * (xny - ymin)
+		end
+	end
 end
 
 function compute_ans(em::ErgodicManagerR2, xd::VVF, tm::TrajectoryManager, n::Int, start_idx::Int, ck::Matrix{Float64})
@@ -79,8 +103,8 @@ function compute_ans(em::ErgodicManagerR2, xd::VVF, tm::TrajectoryManager, n::In
 			an_y += c*dFk_dxn2
 		end
 	end
-	an_x *= 2.0*(tm.h / tm.T)
-	an_y *= 2.0*(tm.h / tm.T)
+	an_x *= 2.0/(tm.N+1)
+	an_y *= 2.0/(tm.N+1)
 	return an_x, an_y
 end
 
@@ -134,8 +158,8 @@ function compute_ans(em::ErgodicManagerSE2, xd::VVF, tm::TrajectoryManager, n::I
 			end
 		end
 	end
-	an_x *= 2.0 * (tm.h / tm.T)
-	an_y *= 2.0 * (tm.h / tm.T)
-	an_z *= 2.0 * (tm.h / tm.T)
+	an_x *= 2.0 / (tm.N+1)
+	an_y *= 2.0 / (tm.N+1)
+	an_z *= 2.0 / (tm.N+1)
 	return an_x, an_y, an_z
 end

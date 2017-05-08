@@ -7,12 +7,12 @@
 include("gradients.jl")
 include("scoring.jl")
 include("printing.jl")
-include("pto_trajectory.jl")
-include("smc_trajectory.jl")
+include("pto.jl")
+include("smc.jl")
 #include("clerc_trajectory.jl")
 #include("cerc_trajectory.jl")
-include("max_trajectory.jl")
-include("kmeans_trajectory.jl")
+include("max.jl")
+include("kmeans.jl")
 
 # returns xdn and udn, the feasible projected trajectory
 function project(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)

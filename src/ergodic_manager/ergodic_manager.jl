@@ -17,9 +17,9 @@ Reconstructs distribution from Fourier coefficients `ck`.
 Both options return a distribution `phi`, a `em.bins` by `em.bins` matrix.
 The value at `phi[xi,yi]` gives the value at the cell index `xi,yi`.
 
-`phi = reconstruct(em, xd::VVF, start_idx=1)`
+`phi = reconstruct(em, xd::VVF)`
 
-Reconstructs from trajectory `xd`. If `start_idx` is 1, then the right Riemann sum is used. If it is 0, the left Riemann sum is used.
+Reconstructs from trajectory `xd`.
 """
 reconstruct(em::ErgodicManager) = reconstruct(em, em.phik)
 

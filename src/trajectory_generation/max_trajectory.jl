@@ -8,17 +8,15 @@ function max_trajectory(tm::TrajectoryManager, mu::VF, Sigma::MF)
 	T = N*h
 
 	# initialize trajectory
+	# TODO do this correctly
 	xd, ud = initialize_trajectory(N, h, x0)
+	xd0, ud0 = initialize(tm.initializer, em, tm)
 
 	# generate linearized dynamics (assumed constant)
-	# TODO: generate these from system dynamics
-	A = eye(2)
-	B = h*eye(2)
 
 	# TODO: really a termination condition
 	for i = 1:100
-		#K, zd, vd, ad, bd, P = max_descent(em, A, B, N, xd, ud)
-		ad, bd = compute_gradients(xd, ud, mu, Sigma)
+		ad, bd = compute_gradients(tm, xd, ud, mu, Sigma)
 		zd, vd = convex_descent(A, B, ad, bd, N)
 		step_size = .15 / sqrt(i)
 
@@ -46,27 +44,25 @@ end
 export max_trajectory
 
 
-function compute_gradients(xd::VVF, ud::VVF, mu::VF, Sigma::MF)
+# TODO: should really take in a bunch of gaussians here
+function compute_gradients(tm::TrajectoryManager, xd::VVF, ud::VVF, mu::VF, Sigma::MF)
 	N = length(xd) - 1
 
 	a = Array(VF, N+1)
 	b = Array(VF, N)
 
-	R = 0.01 * eye(2)
-
-	for n = 0:(N-1)
-		a[n+1] = compute_an(mu, Sigma, xd[n+1])
-		b[n+1] = compute_bn(ud[n+1])
+	for ni = 1:N
+		a[ni] = compute_an(mu, Sigma, xd[ni], tm.h)
+		b[ni] = tm.h * tm.R * ud[ni]
 	end
-	a[N+1] = compute_an(mu, Sigma, xd[N+1])
+	a[N+1] = compute_an(mu, Sigma, xd[N+1], tm.h)
 
 	return a, b
 end
 
-function compute_an(mu::VF, Sigma::MF, x::VF)
+function compute_an(mu::VF, Sigma::MF, x::VF, h::Float64)
 	xmu = x - mu
 	inv_Sigma = inv(Sigma)
-	h = 0.5
 	q = 1.0
 	c = q*h*exp(-.5dot(xmu, inv_Sigma*xmu)) / (2*pi*sqrt(det(Sigma)))
 	return c*inv_Sigma*xmu

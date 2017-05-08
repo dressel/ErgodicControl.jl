@@ -4,14 +4,12 @@
 ######################################################################
 
 """
-`decompose(em, traj::VVF, start_idx=1)`
+`decompose(em, traj::VVF)`
 
 Decomposes a set of positions into a set of `ck` Fourier coefficients.
 
-If `start_idx` is 1, then the right Riemann sum is used.
-If `start_idx` is 0, then the left Riemann sum is used.
 """
-function decompose(em::ErgodicManagerR2, traj::VVF, start_idx::Int=1)
+function decompose(em::ErgodicManagerR2, traj::VVF)
 	K = em.K
 	N = length(traj)-1
 	#N = length(traj)
@@ -29,7 +27,7 @@ function decompose(em::ErgodicManagerR2, traj::VVF, start_idx::Int=1)
 			# now loop over time
 			#for n = 0:N-1
 			for n = 0:N
-				xn = traj[n + start_idx + 1]
+				xn = traj[n + 1]
 				fk_sum += cos(kpiL1 * (xn[1]-xm))  * cos(kpiL2 * (xn[2]-ym))
 			end
 			#ck[k1+1, k2+1] = fk_sum / (hk * N)
@@ -39,7 +37,7 @@ function decompose(em::ErgodicManagerR2, traj::VVF, start_idx::Int=1)
 	return ck
 end
 
-function decompose(em::ErgodicManagerSE2, traj::VVF, start_idx::Int=1)
+function decompose(em::ErgodicManagerSE2, traj::VVF)
 	N = length(traj)-1
 	ck = zeros(Complex{Float64}, em.M+1, em.N+1, em.P+1)
 	for m = 0:em.M
@@ -48,7 +46,7 @@ function decompose(em::ErgodicManagerSE2, traj::VVF, start_idx::Int=1)
 				fk_sum = 0.0im
 				# now loop over time
 				for i = 0:N-1
-					xi = traj[i + start_idx + 1]
+					xi = traj[i + 1]
 					fk_sum += F_mnp(m,n,p,xi[1],xi[2],xi[3])
 				end
 				# TODO: check that this is right
@@ -59,8 +57,8 @@ function decompose(em::ErgodicManagerSE2, traj::VVF, start_idx::Int=1)
 	return ck
 end
 
-function reconstruct(em::ErgodicManager, xd::VVF, start_idx::Int=1)
-	ck = decompose(em, xd, start_idx)
+function reconstruct(em::ErgodicManager, xd::VVF)
+	ck = decompose(em, xd)
 	return reconstruct(em, ck)
 end
 
@@ -70,9 +68,8 @@ end
 
 First breaks down the trajectory into components ck.
 """
-function ergodic_score(em::ErgodicManager, traj::VVF, start_idx::Int=1)
-	start_idx = 0		# TODO: temporary
-	ck = decompose(em, traj, start_idx)
+function ergodic_score(em::ErgodicManager, traj::VVF)
+	ck = decompose(em, traj)
 	return ergodic_score(em, ck)
 end
 function ergodic_score(em::ErgodicManagerR2, ck::Matrix{Float64})
@@ -222,8 +219,8 @@ end
 """
 `all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)`
 """
-function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, start_idx::Int=1)
-	es = ergodic_score(em, xd, start_idx)
+function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)
+	es = ergodic_score(em, xd)
 	cs = control_score(ud, tm.R, tm.h)
 	ts = tm.q*es + cs
 	return es, cs, ts

@@ -8,7 +8,7 @@ using Reel
 export gif
 
 """
-`gif(em::ErgodicManager, tm::TrajectoryManager, trajectory_file::String="temp.csv"; show_score=true, fps::Int=20, right::Bool=true)`
+`gif(em::ErgodicManager, tm::TrajectoryManager, trajectory_file::String="temp.csv"; show_score=true, fps::Int=20)`
 
 Below is an example of how you might use this. You `must` set `logging` to true during the trajectory generation.
 
@@ -18,7 +18,7 @@ Below is an example of how you might use this. You `must` set `logging` to true 
 
 The gif will be saved at `temp.gif`.
 """
-function gif(em::ErgodicManager, tm::TrajectoryManager, trajectory_file::String="temp.csv"; show_score=true, fps::Int=17, right::Bool=true)
+function gif(em::ErgodicManager, tm::TrajectoryManager, trajectory_file::String="temp.csv"; show_score=true, fps::Int=17)
 	# First, let's read the trajectories in...
 	trajectories = readcsv(trajectory_file)
 
@@ -33,7 +33,7 @@ function gif(em::ErgodicManager, tm::TrajectoryManager, trajectory_file::String=
 
 	# start with the first trajectory...
 	xd = mat2traj(trajectories[1:N, :])
-	plot(em, xd, show_score=show_score, right=right)
+	plot(em, xd, show_score=show_score)
 	push!(frames, gcf())
 	close()
 

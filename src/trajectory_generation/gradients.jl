@@ -5,21 +5,21 @@
 
 # Only first two states matter for ergodic score and barrier penalty
 # Assumes ad has been initialized with zeros; that is, ad[3:end, ni] = 0.0
-function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, start_idx::Int)
+function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)
 	ni =  1
-	ck = decompose(em, xd, start_idx)
+	ck = decompose(em, xd)
 	for n = 0:(tm.N-1)
 
 		# ergodic gradients
-		an = compute_ans(em, xd, tm, n, start_idx, ck)
+		an = compute_ans(em, xd, tm, n, ck)
 		for i = 1:length(an)
 			ad[i,ni] = an[i]
 		end
 
 		# quadratic boundary
 		#if tm.barrier_cost > 0.0
-		#	xnx = xd[n+start_idx+1][1]
-		#	xny = xd[n+start_idx+1][2]
+		#	xnx = xd[n+1][1]
+		#	xny = xd[n+1][2]
 		#	if (xnx > em.L) || (xnx < 0.0)
 		#		ad[1,ni] += tm.barrier_cost * (2.0*xnx - em.L)
 		#	end
@@ -29,8 +29,8 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 		#end
 		# alternate way...
 		if tm.barrier_cost > 0.0
-			xnx = xd[n+start_idx+1][1]
-			xny = xd[n+start_idx+1][2]
+			xnx = xd[n+1][1]
+			xny = xd[n+1][2]
 			xmax = x_max(em)
 			xmin = x_min(em)
 			ymax = y_max(em)
@@ -54,13 +54,13 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 	end
 
 	n = tm.N
-	an = compute_ans(em, xd, tm, n, start_idx, ck)
+	an = compute_ans(em, xd, tm, n, ck)
 	for i = 1:length(an)
 		ad[i,ni] = an[i]
 	end
 	if tm.barrier_cost > 0.0
-		xnx = xd[n+start_idx+1][1]
-		xny = xd[n+start_idx+1][2]
+		xnx = xd[n+1][1]
+		xny = xd[n+1][2]
 		xmax = x_max(em)
 		xmin = x_min(em)
 		ymax = y_max(em)
@@ -78,9 +78,9 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 	end
 end
 
-function compute_ans(em::ErgodicManagerR2, xd::VVF, tm::TrajectoryManager, n::Int, start_idx::Int, ck::Matrix{Float64})
-	x = xd[n + start_idx + 1][1]
-	y = xd[n + start_idx + 1][2]
+function compute_ans(em::ErgodicManagerR2, xd::VVF, tm::TrajectoryManager, n::Int, ck::Matrix{Float64})
+	x = xd[n + 1][1]
+	y = xd[n + 1][2]
 
 	Lx = em.domain.lengths[1]
 	Ly = em.domain.lengths[2]
@@ -108,10 +108,10 @@ function compute_ans(em::ErgodicManagerR2, xd::VVF, tm::TrajectoryManager, n::In
 	return an_x, an_y
 end
 
-function compute_ans(em::ErgodicManagerSE2, xd::VVF, tm::TrajectoryManager, n::Int, start_idx::Int, ck)
-	x = xd[n + start_idx + 1][1]
-	y = xd[n + start_idx + 1][2]
-	z = xd[n + start_idx + 1][3]
+function compute_ans(em::ErgodicManagerSE2, xd::VVF, tm::TrajectoryManager, n::Int, ck)
+	x = xd[n + 1][1]
+	y = xd[n + 1][2]
+	z = xd[n + 1][3]
 
 	an_x = 0.0
 	an_y = 0.0

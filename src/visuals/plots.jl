@@ -13,7 +13,7 @@ end
 
 export plot, plot_trajectory, axis_font
 """
-`plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, right=true, lw=1.0, ms=6.0)`
+`plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, lw=1.0, ms=6.0)`
 
 `plot(em::ErgodicManager; alpha=1.0, cmap="Greys")`
 
@@ -22,13 +22,12 @@ The "gray" cmap option is light where there is most density.
 
 An `alpha` value closest to 1.0 is darker; less is more transparent.
 """
-function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::Bool=true, right::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
+function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
 	plot_trajectory(xd, lw=lw, ms=ms, onlyMarks=onlyMarks)
 	hold(true)
 	plot(em, alpha=alpha, cmap=cmap, no_domain=no_domain)
 	if show_score
-		start_idx = right ? 1 : 0
-		es = ergodic_score(em, xd, start_idx)
+		es = ergodic_score(em, xd)
 		title_string = "es = $(round(es,5))"
 		title(title_string)
 	end

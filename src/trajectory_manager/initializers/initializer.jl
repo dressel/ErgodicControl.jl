@@ -124,7 +124,6 @@ function initialize(initializer::PointInitializer, em::ErgodicManager, tm::Traje
 			ud[i+1] = zeros(2)
 		end
 	else  # single integrator
-		# TODO: can't I just make this tm.T?
 		den = tm.h * tm.N
 		u = [dx / den, dy / den]
 		for i = 1:tm.N

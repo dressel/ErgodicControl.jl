@@ -5,7 +5,6 @@
 ######################################################################
 
 function max_trajectory(tm::TrajectoryManager, mu::VF, Sigma::MF)
-	T = N*h
 
 	# initialize trajectory
 	# TODO do this correctly

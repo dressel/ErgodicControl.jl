@@ -18,7 +18,9 @@ function LQ(A::MF, B::MF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 
 	# Solely for LQ
 	r = Array(Vector{Float64}, N+1)
-	r[N+1] = zeros(size(B,1))
+	#r[N+1] = zeros(size(B,1))
+	r[N+1] = 0.5*a[:,N+1]
+	println("RARARAR")
 	C = Array(Vector{Float64}, N)
 
 	# Sweep from the back
@@ -34,6 +36,7 @@ function LQ(A::MF, B::MF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 end
 
 
+# This appears to be the one currrently in use
 function LQ(A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 	# Also needed for LQR
 	P = Array(Matrix{Float64}, N+1)
@@ -43,7 +46,7 @@ function LQ(A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 
 	# Solely for LQ
 	r = Array(Vector{Float64}, N+1)
-	r[N+1] = zeros(size(B[1],1))
+	r[N+1] = 0.5*a[:,N+1]
 	C = Array(Vector{Float64}, N)
 
 	# Sweep from the back
@@ -51,6 +54,14 @@ function LQ(A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 	#  this is annoying so I just do n = N:-1:1
 	#for n = (N-1):-1:0
 	for n = N:-1:1
+		# Temporary... only for testing example for paper
+		#h = .6
+		#A[n] = eye(4)
+		#A[n][3,1] = -h; A[n][4,2] = -h; A[n][1,3] = h; A[n][2,4] = h
+		#B[n] = zeros(4,2)
+		#B[n][3,1] = h; B[n][4,2] = h
+		# End Temporary
+
 		G[n] = R + (B[n]' * P[n+1] * B[n])
 		Ginv = inv(G[n])
 		K[n] = Ginv * B[n]' * P[n+1] * A[n]

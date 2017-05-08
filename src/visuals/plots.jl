@@ -4,8 +4,14 @@
 using PyPlot
 using PyCall
 PyCall.PyDict(matplotlib["rcParams"])["font.family"]=["Times New Roman"]
+PyCall.PyDict(matplotlib["rcParams"])["font.size"]=18
 
-export plot, plot_trajectory
+# must be called before plot
+function axis_font(af::Real)
+	PyCall.PyDict(matplotlib["rcParams"])["font.size"] = af
+end
+
+export plot, plot_trajectory, axis_font
 """
 `plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, right=true, lw=1.0, ms=6.0)`
 
@@ -39,7 +45,7 @@ function plot(em::ErgodicManagerR2; alpha=1.0, cmap="Greys",no_domain=false)
 	axis(a)
 end
 
-function plot(em::ErgodicManagerSE2; alpha=1.0, cmap="Greys")
+function plot(em::ErgodicManagerSE2; alpha=1.0, cmap="Greys", no_domain=false)
 	a = [x_min(em), x_max(em), y_min(em), y_max(em)]
 	rar = size(em.phi)
 	temp_phi = reshape(sum(em.phi,3), x_cells(em), y_cells(em))

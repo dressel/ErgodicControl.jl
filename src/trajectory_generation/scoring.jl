@@ -14,6 +14,7 @@ If `start_idx` is 0, then the left Riemann sum is used.
 function decompose(em::ErgodicManagerR2, traj::VVF, start_idx::Int=1)
 	K = em.K
 	N = length(traj)-1
+	#N = length(traj)
 	ck = zeros(K+1, K+1)
 	Lx = em.domain.lengths[1]
 	Ly = em.domain.lengths[2]
@@ -26,11 +27,13 @@ function decompose(em::ErgodicManagerR2, traj::VVF, start_idx::Int=1)
 			hk = em.hk[k1+1, k2+1]
 			fk_sum = 0.0
 			# now loop over time
-			for n = 0:N-1
+			#for n = 0:N-1
+			for n = 0:N
 				xn = traj[n + start_idx + 1]
 				fk_sum += cos(kpiL1 * (xn[1]-xm))  * cos(kpiL2 * (xn[2]-ym))
 			end
-			ck[k1+1, k2+1] = fk_sum / (hk * N)
+			#ck[k1+1, k2+1] = fk_sum / (hk * N)
+			ck[k1+1, k2+1] = fk_sum / (hk * (N+1))
 		end
 	end
 	return ck

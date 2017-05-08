@@ -13,7 +13,7 @@ type ArmijoLineSearch <: Descender
 		return new(float(initial_step), float(c), 50.)
 	end
 
-	ArmijoLineSearch() = ArmijoLineSearch(10, 0.1, 50.)
+	ArmijoLineSearch() = ArmijoLineSearch(10, 0.5, 50.)
 
 end
 

@@ -67,16 +67,17 @@ end
 # basically,
 # [g_f1, g_f2]' * [u1, u2]'
 function directional_derivative(g_f1::VVF, g_f2::VVF, u1::VVF, u2::VVF)
-	N = length(g_f1)
+	N = length(g_f2)
 	dd = 0.0
 	for i = 1:N
 		dd += dot(g_f1[i], u1[i]) + dot(g_f2[i], u2[i])
 	end
+	dd += dot(g_f1[N+1], u1[n+1])
 	return dd
 end
 function directional_derivative(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1::VVF, u2::VVF)
 	#N = length(g_f1)
-	N = size(g_f1, 2)
+	N = size(g_f2, 2)
 	#n = size(u1[1])
 	#m = size(u2[1])
 	#println("N = ", N)
@@ -88,6 +89,7 @@ function directional_derivative(g_f1::Matrix{Float64}, g_f2::Matrix{Float64}, u1
 
 		dd += dot(g_f1[:,i], u1[i]) + dot(g_f2[:,i], u2[i])
 	end
+	dd += dot(g_f1[:,N+1], u1[N+1])
 	return dd
 end
 # TODO: turn this one into somepin correct for matrix{Float64} version

@@ -20,7 +20,7 @@ function new_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0
 	start_idx = right ? 1 : 0
 
 	# matrices for gradients
-	ad = zeros(tm.dynamics.n, N)
+	ad = zeros(tm.dynamics.n, N+1)
 	bd = zeros(tm.dynamics.m, N)
 
 	# prepare for logging if need be 

@@ -4,7 +4,7 @@
 # TODO: this is a wreck. clean it so it looks like clerc_trajectory.
 ######################################################################
 
-function max_trajectory(mu::Vector{Float64}, Sigma::Matrix{Float64}, N::Int, h::Float64, x0::T2F)
+function max_trajectory(tm::TrajectoryManager, mu::VF, Sigma::MF)
 	T = N*h
 
 	# initialize trajectory
@@ -41,27 +41,29 @@ function max_trajectory(mu::Vector{Float64}, Sigma::Matrix{Float64}, N::Int, h::
 	end
 
 	return xd, ud
-	#return xd, ud, zd, vd, K, ad, bd, P
 end
 
 export max_trajectory
 
 
-function compute_gradients(xd::VVF, ud::VVF, mu::Vector{Float64}, Sigma::Matrix{Float64})
+function compute_gradients(xd::VVF, ud::VVF, mu::VF, Sigma::MF)
 	N = length(xd) - 1
 
-	a = Array(Vector{Float64}, N)
-	b = Array(Vector{Float64}, N)
+	a = Array(VF, N+1)
+	b = Array(VF, N)
+
+	R = 0.01 * eye(2)
 
 	for n = 0:(N-1)
 		a[n+1] = compute_an(mu, Sigma, xd[n+1])
 		b[n+1] = compute_bn(ud[n+1])
 	end
+	a[N+1] = compute_an(mu, Sigma, xd[N+1])
 
 	return a, b
 end
 
-function compute_an(mu::Vector{Float64}, Sigma::Matrix{Float64}, x::Vector{Float64})
+function compute_an(mu::VF, Sigma::MF, x::VF)
 	xmu = x - mu
 	inv_Sigma = inv(Sigma)
 	h = 0.5

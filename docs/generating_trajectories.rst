@@ -5,7 +5,7 @@ Generating Trajectories
 Once you have created an ErgodicManager and a TrajectoryManager, you can generate a trajectory.
 ::
 
-    xd, ud = new_trajectory(em, tm)
+    xd, ud = pto_trajectory(em, tm)
 
 There are a number of optional arguments. Here they are with their default arguments:
 ::

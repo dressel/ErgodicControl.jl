@@ -17,7 +17,7 @@ Here is an example
 
     tm = TrajectoryManager(x0, h, N, ConstantInitializer([0.0,0.0]))
 
-    xd, ud = new_trajectory(em, tm)
+    xd, ud = pto_trajectory(em, tm)
     plot(em, xd)
 
 .. image:: http://stanford.edu/~dressel/gifs/ergodic/single1.png
@@ -45,7 +45,7 @@ Here is another example
 
     tm.descender = ArmijoLineSearch(1,.01)
 
-    xd, ud = new_trajectory(em, tm)
+    xd, ud = pto_trajectory(em, tm)
 
 When doing this, the solver gets stuck. We can try another descent engine.
 ::
@@ -76,7 +76,7 @@ The Dubins car is simple and often used to model cars.
     tm.R = 0.01 * eye(1)
     tm.Rn = 1 * eye(1)
 
-    xd, ud = new_trajectory(em, tm)
+    xd, ud = pto_trajectory(em, tm)
     plot(em, xd)
 
 Look at how bad this is! The vehicle leaves our domain!
@@ -85,7 +85,7 @@ Look at how bad this is! The vehicle leaves our domain!
 
 As mentioned before, the trajectory leaves the domain because the Fourier basis function is periodic. This makes sense in the context of the Dubins dynamics. Control effort is only expended when changing the vehicle's heading.
 
-We can overcome this by penalizing states outside the domain, using the barrier cost we mentioned before. This is handled with the trajectory manager's barrier_cost field, which is set to 0 by default. Let's try changing the cost to 1. We'd add the following line before the call to new_trajectory:
+We can overcome this by penalizing states outside the domain, using the barrier cost we mentioned before. This is handled with the trajectory manager's barrier_cost field, which is set to 0 by default. Let's try changing the cost to 1. We'd add the following line before the call to :code:`pto_trajectory`:
 ::
 
     tm.barrier_cost = 1

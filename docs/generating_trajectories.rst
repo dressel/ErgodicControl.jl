@@ -7,7 +7,7 @@ Once you have created an ErgodicManager and a TrajectoryManager, you can generat
 
     xd, ud = pto_trajectory(em, tm)
 
-There are a number of optional arguments. Here they are with their default arguments:
+There are a number of optional keyword arguments. Here they are with their default arguments:
 ::
 
     verbose::Bool = true
@@ -15,7 +15,6 @@ There are a number of optional arguments. Here they are with their default argum
     max_iters::Int = 100
     es_crit::Float64 = 0.003
     dd_crit::Float64 = 1e-6
-    right::Bool = false
 
 When the :code:`verbose` tag is set to :code:`true`, progress is presented at each descent iteration. You can turn this to false if you are running trajectory generation as an inner component of a larger algorithm.
 
@@ -25,4 +24,6 @@ The :code:`max_iters` tag is the maximum number of descent iterations allowed.
 
 The :code:`es_crit` and :code:`dd_crit` tags are termination conditions based on the ergodic score and directional derivative, respectively. A lot of research suggests using a directional derivative criterion.
 
-The :code:`right` tag determines if right or left-Riemann sums are used when generating trajectories. Right now, only the :code:`false` option works (that is, using left-Riemann sums).
+An example using some of these tags is shown below:
+::
+    pto_trajectory(em, tm, max_iters=1000, dd_crit=1e-4, verbose=false)

@@ -12,7 +12,7 @@ To plot the spatial distribution of an ErgodicManager, just use plot.
 
 Optional arguments customize the distribution's appearance. The code :code:`alpha` argument controls opaqueness; when :code:`alpha=1`, the distribution is fully opaque and when :code:`alpha=0`, the distribution is fully transparent. The default value is 1.
 
-The :code:`cmap` argument controls the colormap used. The default value is :code:`Greys`, which uses black for the densest areas and white for the least dense areas. An alternative is the reverse, "Greys_r", which uses white for the densest areas and black elsewhere.
+The :code:`cmap` argument controls the colormap used. The default value is :code:`"Greys"`, which uses black for the densest areas and white for the least dense areas. An alternative is the reverse, :code:`"Greys_r"`, which uses white for the densest areas and black elsewhere.
 
 An example using these optional arguments is shown below:
 ::

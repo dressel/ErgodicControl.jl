@@ -9,12 +9,13 @@ gaussian(domain::Domain, dm::VF, ds::MF) = gaussian(domain, [dm], [ds])
 
 
 # TODO: check that provided dimensions are correct
-function gaussian(domain::Domain, means::VVF, covs::VMF, weights::VF=ones(length(means)))
+function gaussian{T<:Real}(domain::Domain, means::VVF, covs::VMF, weights::Vector{T}=ones(length(means)))
+	w = float(weights)
 	n = domain.num_dims
 	if n == 2
-		return gaussian2D(domain, means, covs, weights)
+		return gaussian2D(domain, means, covs, w)
 	elseif n == 3
-		return gaussian3D(domain, means, covs, weights)
+		return gaussian3D(domain, means, covs, w)
 	end
 end
 

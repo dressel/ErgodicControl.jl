@@ -65,3 +65,19 @@ The provided :code:`gaussian` functions make it easy to generate distributions o
     plot(d, phi)
 
 To learn more about plotting, check out the `Visuals` section of this readme.
+
+The :code:`gaussian` function can also do multi-gaussians. In this case the function argument is :code:`gaussian(domain, means, Sigmas, weights)`. The :code:`means` argument is a vector of mean vectors; the :code:`Sigmas` argument is a vector of covariance matrices; the :code:`weights` describes argument is This argument is optional and the default value weights matrices equally.
+::
+
+    d = Domain([1,1], 100)
+
+    means = [[.3,.7], [.7,.3]]
+    Sigmas = [.025*eye(2), .025*eye(2)]
+    weights = [1,2]
+    phi = gaussian(d, means, Sigmas, weights)
+
+    plot(d, phi)
+    xlabel("x")
+    ylabel("y")
+
+.. image:: http://stanford.edu/~dressel/pics/multi_domain.png

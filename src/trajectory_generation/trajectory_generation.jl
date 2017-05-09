@@ -2,92 +2,18 @@
 # trajectory_generation.jl
 ######################################################################
 
-#include("lqr.jl")
-#include("lq.jl")
+# helper files
 include("gradients.jl")
 include("scoring.jl")
+include("projection.jl")
 include("printing.jl")
+
+# actual methods
 include("pto.jl")
 include("smc.jl")
-#include("clerc_trajectory.jl")
-#include("cerc_trajectory.jl")
 include("max.jl")
 include("kmeans.jl")
 
-# returns xdn and udn, the feasible projected trajectory
-function project(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)
-	xdn = [xd[1]]
-	udn = Array(Vector{Float64}, 0)
-
-	# perform descent
-	alpha = VVF(tm.N + 1)
-	for n = 0:tm.N
-		alpha[n+1] = xd[n+1] + step_size * zd[n+1]
-	end
-
-	# perform the projection
-	for n = 1:tm.N
-		push!(udn, ud[n] + step_size*vd[n] + K[n]*(alpha[n] - xdn[n]))
-		push!(xdn, integrate(tm, xdn[n], udn[n]) )
-		#push!(xdn, symplectic_euler(tm, xdn[n], udn[n]) )
-	end
-	return xdn, udn
-end
-
-# This is really just for linear stuff
-function project2(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)
-	xdn = [xd[1]]
-	udn = Array(Vector{Float64}, 0)
-
-	xdn = VVF(0)
-	udn = VVF(0)
-
-	# perform the projection
-	# Shouldn't need to even integrate...
-	for n = 1:tm.N
-		push!(udn, ud[n] + step_size*vd[n])
-		push!(xdn, xd[n] + step_size*zd[n])
-		#push!(xdn, integrate(tm, xdn[n], udn[n]) )
-		#push!(xdn, symplectic_euler(tm, xdn[n], udn[n]) )
-	end
-	push!(xdn, xd[tm.N+1] + step_size*zd[tm.N+1])
-	return xdn, udn
-end
-
-
-# modifies (xd,ud) by moving step_size in direction (zd,vd)
-function descend!(xd::VVF, ud::VVF, zd::Matrix{Float64}, vd::Matrix{Float64}, step_size::Float64, N::Int)
-	num_u = length(ud[1])
-	num_x = length(xd[1])
-	for i = 0:(N-1)
-		for j = 1:num_u
-			ud[i+1][j] += step_size*vd[j,i+1]
-		end
-		for j = 1:num_x
-			xd[i+1][j] += step_size*zd[j,i+1]
-		end
-	end
-	for j = 1:num_x
-		xd[N+1][j] += step_size*zd[j,N+1]
-	end
-end
-
-# This one actually get's called
-function descend!(xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64, N::Int)
-	num_u = length(ud[1])
-	num_x = length(xd[1])
-	for i = 0:(N-1)
-		for j = 1:num_u
-			ud[i+1][j] += step_size*vd[i+1][j]
-		end
-		for j = 1:num_x
-			xd[i+1][j] += step_size*zd[i+1][j]
-		end
-	end
-	for j = 1:num_x
-		xd[N+1][j] += step_size*zd[N+1][j]
-	end
-end
 
 
 function check_convergence(es::Float64, es_crit::Float64, i::Int, max_iters::Int, dd::Float64, dd_crit::Float64, verbose::Bool, es_count::Int)

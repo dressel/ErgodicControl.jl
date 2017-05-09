@@ -11,7 +11,9 @@ function axis_font(af::Real)
 	PyCall.PyDict(matplotlib["rcParams"])["font.size"] = af
 end
 
+# Export my functions and export PyPlot functions
 export plot, plot_trajectory, axis_font
+export figure, savefig, xlabel, ylabel, title
 """
 `plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, lw=1.0, ms=6.0)`
 

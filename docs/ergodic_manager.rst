@@ -33,7 +33,7 @@ An ergodic manager for :math:`\mathbb{R}^2` can be constructed with a :code:`Dom
 
 Updating Spatial Distribution
 ==============================
-The :code:`decompose!` function decomposes an ergodic manager's spatial distribution :code:`phi` into Fourier coefficients, updating the managers :code:`phik`field:
+The :code:`decompose!` function decomposes an ergodic manager's spatial distribution :code:`phi` into Fourier coefficients, updating the managers :code:`phik` field:
 ::
 
     decompose!(em::ErgodicManager)
@@ -46,7 +46,7 @@ Sometimes we want to reconstruct a spatial distribution from the Fourier coeffic
 
     phi = reconstruct(em::ErgodicManager)
 
-If you have your own set of coefficients `ck`, you can use that instead of `em.phik`:
+If you have your own set of coefficients :code:`ck`, you can use that instead of :code:`em.phik`:
 ::
 
     phi = reconstruct(em::ErgodicManager, ck::Matrix{Float64})

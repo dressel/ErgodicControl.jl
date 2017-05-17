@@ -8,8 +8,17 @@ export gaussian
 gaussian(domain::Domain, dm::VF, ds::MF) = gaussian(domain, [dm], [ds])
 
 
-# TODO: check that provided dimensions are correct
+"""
+`gaussian(domain, means, covs, weights)`
+
+Generates a distribution over `domain` from a weighted collection of Gaussians. The `means` argument is a vector of mean vectors; `covs` is a vector of covariance matrices; `weights` is a vector of real-valued numbers weighting each Gaussian. The weights need not add to 1, and the argument is optional; if `weights` is not provided, all Gaussians are weighted equally.
+
+The resulting distribution is normalized.
+
+The simple constructor `gaussian(domain, mean, cov)` allows you to construct a distribution from a single Gaussian.
+"""
 function gaussian{T<:Real}(domain::Domain, means::VVF, covs::VMF, weights::Vector{T}=ones(length(means)))
+	# TODO: check that provided dimensions are correct
 	w = float(weights)
 	n = domain.num_dims
 	if n == 2

@@ -11,12 +11,17 @@ function my_pdf(x::NTuple{2,Float64},m::Vector{Float64},S::Matrix{Float64})
 	return det(sqrtm(Si)) * exp(-0.5 * e_stuff) / (2.0 * pi)
 end
 
-# for 3-d variables
-# No reason you couldn't just make this general louis...
 function my_pdf(x::VF, m::VF, S::MF)
 	k = length(x)
 	xm = x - m
-	return exp(-0.5 * dot(xm, inv(S)*xm)) / sqrt((2pi)^3 * det(S))
+	return exp(-0.5 * dot(xm, inv(S)*xm)) / sqrt((2pi)^k * det(S))
+end
+
+# In order to be faster, precompute inverse and denominator.
+# That way, I don't have to recompute them for every cell in domain.
+function fast_pdf(x::VF, m::VF, inv_S::MF, den::Float64)
+	xm = x - m
+	return exp(-0.5 * dot(xm, inv_S*xm)) / den
 end
 
 

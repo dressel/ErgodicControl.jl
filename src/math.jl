@@ -169,3 +169,18 @@ function mat2traj(mat::Matrix{Float64})
 	end
 	return traj
 end
+
+"""
+`traj2mat(traj::VVF)`
+
+Converts vector of vector of floats into `N x n` matrix, where `N` is the number of points in trajectory and `n` is the dimensionality of the state.
+"""
+function traj2mat(traj::VVF)
+	N = length(traj)
+	n = length(traj[1])
+	mat = zeros(N, n)
+	for i = 1:N
+		mat[i,:] = traj[i]
+	end
+	return mat
+end

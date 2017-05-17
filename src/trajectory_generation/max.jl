@@ -4,20 +4,26 @@
 # TODO: this is a wreck. clean it so it looks like clerc_trajectory.
 ######################################################################
 
-function max_trajectory(tm::TrajectoryManager, mu::VF, Sigma::MF)
+function max_trajectory(em::ErgodicManager, tm::TrajectoryManager, mu::VF, Sigma::MF)
+	return max_trajectory(em, tm, [mu], [Sigma])
+end
+
+function max_trajectory(em::ErgodicManager, tm::TrajectoryManager, mus::VVF, Sigmas::VMF, weights::VF=ones(length(mus)); max_iters=100)
 
 	# initialize trajectory
-	# TODO do this correctly
-	xd, ud = initialize_trajectory(N, h, x0)
-	xd0, ud0 = initialize(tm.initializer, em, tm)
-
-	# generate linearized dynamics (assumed constant)
+	xd, ud = initialize(tm.initializer, em, tm)
 
 	# TODO: really a termination condition
-	for i = 1:100
-		ad, bd = compute_gradients(tm, xd, ud, mu, Sigma)
-		zd, vd = convex_descent(A, B, ad, bd, N)
+	for i = 1:max_iters
+
+		ad, bd = compute_gradients(tm, xd, ud, mus, Sigmas, weights)
+		A, B = linearize(tm.dynamics, xd, ud, tm.h)
+		K, C = LQ(A, B, ad, bd, tm.Qn, tm.Rn, tm.N)
+
+		#zd, vd = convex_descent(A, B, ad, bd, N)
+		zd, vd = apply_LQ_gains(A, B, K, C)
 		step_size = .15 / sqrt(i)
+		#step_size = .25 / sqrt(i)
 
 		# printing statistics for testing
 		println("i = ",i) 
@@ -34,7 +40,7 @@ function max_trajectory(tm::TrajectoryManager, mu::VF, Sigma::MF)
 		#println("alpha = ", step_size)
 		println("##################################")
 
-		project3!(xd, ud, zd, vd, step_size)
+		descend!(xd, ud, zd, vd, step_size)
 	end
 
 	return xd, ud
@@ -44,36 +50,32 @@ export max_trajectory
 
 
 # TODO: should really take in a bunch of gaussians here
-function compute_gradients(tm::TrajectoryManager, xd::VVF, ud::VVF, mu::VF, Sigma::MF)
-	N = length(xd) - 1
+# returns a and b, each of which is an array of vectors
+function compute_gradients(tm::TrajectoryManager, xd::VVF, ud::VVF, mus::VVF, Sigmas::VMF, weights::VF)
+	#a = Array(VF, tm.N+1)
+	#b = Array(VF, tm.N)
+	a = zeros(tm.dynamics.n, tm.N+1)
+	b = zeros(tm.dynamics.m, tm.N)
 
-	a = Array(VF, N+1)
-	b = Array(VF, N)
-
-	for ni = 1:N
-		a[ni] = compute_an(mu, Sigma, xd[ni], tm.h)
-		b[ni] = tm.h * tm.R * ud[ni]
+	for ni = 1:tm.N
+		a[1:2, ni] = compute_an(mus, Sigmas, weights, xd[ni], tm.h, tm.q)
+		b[:, ni] = tm.h * tm.R * ud[ni]
 	end
-	a[N+1] = compute_an(mu, Sigma, xd[N+1], tm.h)
+	a[1:2,tm.N+1] = compute_an(mus, Sigmas, weights, xd[tm.N+1], tm.h, tm.q)
 
 	return a, b
 end
 
-function compute_an(mu::VF, Sigma::MF, x::VF, h::Float64)
-	xmu = x - mu
-	inv_Sigma = inv(Sigma)
-	q = 1.0
-	c = q*h*exp(-.5dot(xmu, inv_Sigma*xmu)) / (2*pi*sqrt(det(Sigma)))
-	return c*inv_Sigma*xmu
-end
-
-
-
-function project3!(xd::VVF, ud::VVF, zd::VVF,vd::VVF,step_size::Float64)
-	N = length(ud) - 1
-	for i = 0:(N-1)
-		ud[i+1] += step_size*vd[i+1]
-		xd[i+1] += step_size*zd[i+1]
+function compute_an(mus::VVF, Sigmas::VMF, weights::VF, x::VF, h::Float64, q::Float64)
+	num_gauss = length(weights)
+	an = zeros(2)
+	for i = 1:num_gauss
+		mu = mus[i]
+		Sigma = Sigmas[i]
+		xmu = x[1:2] - mu
+		inv_Sigma = inv(Sigma)
+		c = q*h*exp(-.5dot(xmu, inv_Sigma*xmu)) / (2*pi*sqrt(det(Sigma)))
+		an += weights[i]*c*inv_Sigma*xmu
 	end
-	ud[N+1] = ud[N]
+	return an
 end

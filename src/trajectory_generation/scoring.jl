@@ -10,28 +10,74 @@ Decomposes a set of positions into a set of `ck` Fourier coefficients.
 
 """
 function decompose(em::ErgodicManagerR2, traj::VVF)
-	K = em.K
+
+	# trajectory is really of length N+1
 	N = length(traj)-1
-	#N = length(traj)
-	ck = zeros(K+1, K+1)
+
+	# create matrix to hold trajectory's Fourier coefficients
+	ck = zeros(em.K+1, em.K+1)
+
+	# lengths of each dimension
 	Lx = em.domain.lengths[1]
 	Ly = em.domain.lengths[2]
-	xm = x_min(em)
-	ym = y_min(em)
-	for k1 = 0:K
+
+	# minimum values in each dimension
+	xmin = x_min(em)
+	ymin = y_min(em)
+
+	for k1 = 0:em.K
 		kpiL1 = k1 * pi / Lx
-		for k2 = 0:K
+		for k2 = 0:em.K
 			kpiL2 = k2 * pi / Ly
 			hk = em.hk[k1+1, k2+1]
 			fk_sum = 0.0
 			# now loop over time
-			#for n = 0:N-1
 			for n = 0:N
 				xn = traj[n + 1]
-				fk_sum += cos(kpiL1 * (xn[1]-xm))  * cos(kpiL2 * (xn[2]-ym))
+				c1 = cos(kpiL1 * (xn[1]-xmin))
+				c2 = cos(kpiL2 * (xn[2]-ymin))
+				fk_sum += c1*c2
 			end
-			#ck[k1+1, k2+1] = fk_sum / (hk * N)
 			ck[k1+1, k2+1] = fk_sum / (hk * (N+1))
+		end
+	end
+	return ck
+end
+
+function decompose(em::ErgodicManagerR3, traj::VVF)
+	N = length(traj)-1
+
+	# Array to hold trajectory's Fourier coefficients
+	ck = zeros(em.K+1, em.K+1, em.K+1)
+
+	# length of each dimension
+	Lx = em.domain.lengths[1]
+	Ly = em.domain.lengths[2]
+	Lz = em.domain.lengths[3]
+
+	# minimum values in each dimension
+	xmin = x_min(em)
+	ymin = y_min(em)
+	zmin = z_min(em)
+
+	for k1 = 0:em.K
+		kpiL1 = k1 * pi / Lx
+		for k2 = 0:em.K
+			kpiL2 = k2 * pi / Ly
+			for k3 = 0:em.K
+				kpiL3 = k3 * pi / Lz
+				hk = em.hk[k1+1, k2+1, k3+1]
+				fk_sum = 0.0
+				# now loop over time
+				for n = 0:N
+					xn = traj[n + 1]
+					c1 = cos(kpiL1 * (xn[1] - xmin))
+					c2 = cos(kpiL2 * (xn[2] - ymin))
+					c3 = cos(kpiL3 * (xn[3] - zmin))
+					fk_sum += c1*c2*c3
+				end
+				ck[k1+1, k2+1, k3+1] = fk_sum / (hk * (N+1))
+			end
 		end
 	end
 	return ck
@@ -78,6 +124,19 @@ function ergodic_score(em::ErgodicManagerR2, ck::Matrix{Float64})
 		for k2 = 0:em.K
 			d = em.phik[k1+1,k2+1] - ck[k1+1,k2+1]
 			val += em.Lambda[k1+1,k2+1] * d * d
+		end
+	end
+	return val
+end
+
+function ergodic_score(em::ErgodicManagerR3, ck::Array{Float64,3})
+	val = 0.0
+	for k1 = 0:em.K
+		for k2 = 0:em.K
+			for k3 = 0:em.K
+				d = em.phik[k1+1,k2+1,k3+1] - ck[k1+1,k2+1,k3+1]
+				val += em.Lambda[k1+1,k2+1,k3+1] * d * d
+			end
 		end
 	end
 	return val

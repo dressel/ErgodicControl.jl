@@ -33,6 +33,7 @@ include("ergodic_manager/domain.jl")
 include("ergodic_manager/gaussian.jl")
 include("ergodic_manager/ergodic_manager.jl")
 include("ergodic_manager/r2.jl")
+include("ergodic_manager/r3.jl")
 include("ergodic_manager/se2.jl")
 
 # trajectory manager stuff

@@ -49,7 +49,6 @@ function pto_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0
 
 		# descend and project
 		xd, ud = project(em, tm, K, xd, ud, zd, vd, step_size)
-		#descend!(xd, ud, zd, vd, step_size, N)
 
 		# compute statistics and report
 		es, cs, ts = all_scores(em, tm, xd, ud)
@@ -128,7 +127,6 @@ function new2_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud
 		# descend and project
 		#xd, ud = project(em, tm, K, xd, ud, zd, vd, step_size)
 		xd, ud = project2(em, tm, K, xd, ud, zd, vd, step_size)
-		#descend!(xd, ud, zd, vd, step_size, N)
 
 		# compute statistics and report
 		es, cs, ts = all_scores(em, tm, xd, ud, start_idx)

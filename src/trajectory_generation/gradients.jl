@@ -108,6 +108,49 @@ function compute_ans(em::ErgodicManagerR2, xd::VVF, tm::TrajectoryManager, n::In
 	return an_x, an_y
 end
 
+function compute_ans(em::ErgodicManagerR3, xd::VVF, tm::TrajectoryManager, n::Int, ck::Array{Float64,3})
+	x = xd[n + 1][1]
+	y = xd[n + 1][2]
+	z = xd[n + 1][3]
+
+	Lx = em.domain.lengths[1]
+	Ly = em.domain.lengths[2]
+	Lz = em.domain.lengths[3]
+
+	an_x = 0.0
+	an_y = 0.0
+	an_z = 0.0
+	 
+	xm = x_min(em)
+	ym = y_min(em)
+	zm = z_min(em)
+
+	for k1 = 0:em.K
+		for k2 = 0:em.K
+			for k3 = 0:em.K
+				hk = em.hk[k1+1,k2+1,k3+1]
+
+				c1 = cos(k1*pi*(x-xm)/Ly)
+				c2 = cos(k2*pi*(y-ym)/Ly)
+				c3 = cos(k3*pi*(z-zm)/Lz)
+
+				dFk_dxn1 = -k1*pi* sin(k1*pi*(x-xm)/Lx)*c2*c3 / (hk*Lx)
+				dFk_dxn2 = -k2*pi*c1* sin(k2*pi*(y-ym)/Ly)*c3 / (hk*Ly)
+				dFk_dxn3 = -k3*pi*c1*c2* sin(k3*pi*(z-zm)/Lz) / (hk*Lz)
+
+				c = em.Lambda[k1+1,k2+1,k3+1] * (ck[k1+1,k2+1,k3+1] - em.phik[k1+1,k2+1,k3+1])
+				an_x += c*dFk_dxn1
+				an_y += c*dFk_dxn2
+				an_z += c*dFk_dxn3
+			end
+		end
+	end
+	an_x *= 2.0/(tm.N+1)
+	an_y *= 2.0/(tm.N+1)
+	an_z *= 2.0/(tm.N+1)
+	return an_x, an_y, an_z
+end
+
 function compute_ans(em::ErgodicManagerSE2, xd::VVF, tm::TrajectoryManager, n::Int, ck)
 	x = xd[n + 1][1]
 	y = xd[n + 1][2]

@@ -13,7 +13,8 @@ end
 
 # Export my functions and export PyPlot functions
 export plot, plot_trajectory, axis_font
-export figure, savefig, xlabel, ylabel, title
+export figure, savefig, xlabel, ylabel, zlabel, title
+export xlim, ylim, zlim
 """
 `plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, lw=1.0, ms=6.0)`
 
@@ -25,9 +26,21 @@ The "gray" cmap option is light where there is most density.
 An `alpha` value closest to 1.0 is darker; less is more transparent.
 """
 function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
-	plot_trajectory(xd, lw=lw, ms=ms, onlyMarks=onlyMarks)
+
+	# If it is in R3, let the trajectory know
+	dims = 2
+	if typeof(em) == ErgodicManagerR3
+		dims = 3
+	end
+
+	# plot the trajectory
+	plot_trajectory(xd, lw=lw, ms=ms, onlyMarks=onlyMarks, dims=dims)
+
+	# hold and plot domain
 	hold(true)
 	plot(em, alpha=alpha, cmap=cmap, no_domain=no_domain)
+
+	# determines if ergodic score should be shown
 	if show_score
 		es = ergodic_score(em, xd)
 		title_string = "es = $(round(es,5))"
@@ -44,6 +57,19 @@ function plot(em::ErgodicManagerR2; alpha=1.0, cmap="Greys",no_domain=false)
 		imshow(em.phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
 	end
 	axis(a)
+end
+
+# TODO: this is not ready to go yet
+function plot(em::ErgodicManagerR3; alpha=1.0, cmap="Greys",no_domain=false)
+	#if no_domain
+	#	rar = zeros(size(em.phi'))
+	#	imshow(rar, interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+	#else
+	#	imshow(em.phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+	#end
+	xlim(x_min(em), x_max(em))
+	ylim(y_min(em), y_max(em))
+	zlim(z_min(em), z_max(em))
 end
 
 function plot(em::ErgodicManagerSE2; alpha=1.0, cmap="Greys", no_domain=false)
@@ -72,16 +98,30 @@ end
 
 # what other stuff do we need here?
 # only marks, colors, etc
-function plot_trajectory(xd::VVF; lw::Real=1.0, ms::Real=6, onlyMarks=false)
+function plot_trajectory(xd::VVF; lw::Real=1.0, ms::Real=6, onlyMarks=false, dims::Int=2)
 	N = length(xd)
 	xvals = zeros(N)
 	yvals = zeros(N)
+	zvals = zeros(N)
 	for i = 1:N
 		xvals[i] = xd[i][1]
 		yvals[i] = xd[i][2]
 	end
 	ls = onlyMarks? "None" : "-"
 	m = onlyMarks ? "o" : "."
+
+	# if in 3 dimensions
+	if dims == 3
+		for i = 1:N
+			zvals[i] = xd[i][3]
+		end
+		plot3D(xvals, yvals, zvals, ls=ls, marker=m, ms=ms, lw=lw)
+		xlabel(L"x")
+		ylabel(L"y")
+		zlabel(L"z")
+		return
+	end
+
 	#PyPlot.plot(xvals, yvals, ".-", lw=lw, ms=ms)
 	if onlyMarks
 		#PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms, mfc="none")

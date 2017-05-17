@@ -20,8 +20,8 @@ A discrete trajectory is simply a set of states. Each state is represented a a v
 
 A trajectory is a vector of state vectors (so :code:`VVF` according to the aliases above). 
 This might seem tedious, and a simpler representation might have been a 2D array, where each row represents a single state.
-The reason for using the :code:`VVF` representation is that slicing vectors out of a 2D array slows Julia code down.
-I'm not sure if it has a noticeable effect, but it might.
+The reasoning behind the :code:`VVF` representation is that slicing vectors out of a 2D array slows Julia code down.
+I'm not sure if it has a noticeable effect (if any), but that was the thought process.
 
 To convert between these representations, the :code:`traj2mat` and :code:`mat2traj` functions have been included.
 

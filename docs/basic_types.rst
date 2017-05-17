@@ -3,8 +3,27 @@ Basic Types
 =========================
 
 
+Type Aliases
+=========================
+Type aliases are used to simplify tedious code. For example, the type corresponding to a vector of vector of floats is :code:`Vector{Vector{Float64}}`. To make function arguments easier to read, this is type aliased to the simpler :code:`VVF`. Below is a list of type aliases used throughout the code and documentation.
+::
+
+    typealias MF  Matrix{Float64}
+    typealias VMF Vector{MF}
+    typealias VF  Vector{Float64}
+    typealias VVF Vector{VF}
+
+
 Trajectory
 =========================
+A discrete trajectory is simply a set of states. Each state is represented a a vector. For example, a point in 2D space is represented with a vector of length 2.
+
+A trajectory is a vector of state vectors (so :code:`VVF` according to the aliases above). 
+This might seem tedious, and a simpler representation might have been a 2D array, where each row represents a single state.
+The reason for using the :code:`VVF` representation is that slicing vectors out of a 2D array slows Julia code down.
+I'm not sure if it has a noticeable effect, but it might.
+
+To convert between these representations, the :code:`traj2mat` and :code:`mat2traj` functions have been included.
 
 
 Domain

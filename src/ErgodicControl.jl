@@ -17,10 +17,10 @@ export cerc_trajectory
 # to make some things easier
 typealias T2F      NTuple{2, Float64}    # x, y
 
-typealias MF Matrix{Float64}
+typealias MF  Matrix{Float64}
 typealias VMF Vector{MF}
-typealias VF   Vector{Float64}   # vector of vector of floats
-typealias VVF   Vector{VF}   # vector of vector of floats
+typealias VF  Vector{Float64}
+typealias VVF Vector{VF}
 
 # math-type stuff I might need
 include("math.jl")

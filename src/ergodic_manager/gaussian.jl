@@ -28,7 +28,7 @@ function gaussian{T<:Real}(domain::Domain, means::VVF, covs::VMF, weights::Vecto
 	end
 end
 
-function gaussian2D(domain::Domain, means::VVF, covs::VMF, weights::VF=ones(length(means)))
+function gaussian2D(domain::Domain, means::VVF, covs::VMF, weights::VF)
 	d = zeros(x_cells(domain), y_cells(domain))
 	d_sum = 0.0
 	num_gaussians = length(means)
@@ -49,7 +49,7 @@ function gaussian2D(domain::Domain, means::VVF, covs::VMF, weights::VF=ones(leng
 	return d
 end
 
-function gaussian3D(domain::Domain, means::VVF, covs::VMF, weights::VF=ones(length(means)))
+function gaussian3D(domain::Domain, means::VVF, covs::VMF, weights::VF)
 	d = zeros(x_cells(domain), y_cells(domain), z_cells(domain))
 	d_sum = 0.0
 	num_gaussians = length(means)

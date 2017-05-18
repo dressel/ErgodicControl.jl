@@ -48,6 +48,19 @@ function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::
 	end
 end
 
+# special plotting function for R2T
+function plot(em::ErgodicManagerR2T, xd::VVF, n::Int; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
+
+	# plotting the trajectory
+	dims = 2
+	plot_trajectory(xd[1:n], lw=lw, ms=ms, onlyMarks=onlyMarks, dims=dims)
+
+	# plotting the distribution
+	a = [x_min(em), x_max(em), y_min(em), y_max(em)]
+	imshow(em.phi[:,:,n]', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+end
+
+
 function plot(em::ErgodicManagerR2; alpha=1.0, cmap="Greys",no_domain=false)
 	a = [x_min(em), x_max(em), y_min(em), y_max(em)]
 	if no_domain

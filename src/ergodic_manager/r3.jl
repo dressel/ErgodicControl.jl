@@ -7,17 +7,8 @@
 
 export ErgodicManagerR3
 
-# kpixl is a (K+1 x bins) matrix, each entry storing cos(k*pi*x / L)
-#  this assumes some discretization
 """
-`ErgodicManager(d::Domain, phi::Matrix{Float64}, K::Int)`
-
-`ErgodicManager(example_name::String; K::Int=5, bins::Int=100)`
-
-Valid `example_name` entries are:
-
-* "single gaussian"
-* "double gaussian"
+`ErgodicManagerR3(d::Domain, phi::Matrix{Float64}, K::Int)`
 """
 type ErgodicManagerR3 <: ErgodicManager
 	domain::Domain				# spatial domain
@@ -51,29 +42,6 @@ type ErgodicManagerR3 <: ErgodicManager
 		hk!(em)
 		decompose!(em)
 		return em
-	end
-
-
-	function ErgodicManagerR3(example_name::String; K::Int=5, bins::Int=100)
-		L = 1.0
-		d = Domain([0.,0.], [L, L], [bins,bins])
-
-		if example_name == "single gaussian"
-			mu = [L/2.0, L/2.0]
-			Sigma = 0.03 * eye(2)
-			phi = gaussian(d, mu, Sigma)
-			return ErgodicManagerR3(d, phi, K)
-		elseif example_name == "double gaussian"
-			mu1 = [0.3, 0.7]
-			Sigma1 = 0.025 * eye(2)
-			mu2 = [0.7, 0.3]
-			Sigma2 = 0.025 * eye(2)
-			#phi = gaussian(d, [mu1,mu2], [Sigma1, Sigma2], [.5,.5])
-			phi = gaussian(d, [mu1,mu2], [Sigma1, Sigma2])
-			return ErgodicManagerR3(d, phi, K)
-		else
-			error("example name not recognized")
-		end
 	end
 end
 

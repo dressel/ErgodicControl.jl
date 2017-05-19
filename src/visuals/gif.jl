@@ -50,8 +50,9 @@ function gif(em::ErgodicManager, tm::TrajectoryManager, trajectory_file::String=
 	write("temp.gif", frames)
 end
 
-# special version for time-dependent distribution
-function gif(em::ErgodicManagerR2T, xd::VVF; show_score=true, fps::Int=5)
+
+# watch vehicle progress
+function gif(em::ErgodicManager, xd::VVF; show_score=true, fps::Int=5)
 
 	frames = Frames(MIME("image/png"), fps=fps)
 

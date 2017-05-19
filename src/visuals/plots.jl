@@ -49,6 +49,16 @@ function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::
 end
 
 # special plotting function for R2T
+function plot(em::ErgodicManager, xd::VVF, n::Int; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
+
+	# plotting the trajectory
+	dims = 2
+	plot_trajectory(xd[1:n], lw=lw, ms=ms, onlyMarks=onlyMarks, dims=dims)
+
+	# plotting the distribution
+	a = [x_min(em), x_max(em), y_min(em), y_max(em)]
+	imshow(em.phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+end
 function plot(em::ErgodicManagerR2T, xd::VVF, n::Int; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
 
 	# plotting the trajectory
@@ -80,9 +90,46 @@ function plot(em::ErgodicManagerR3; alpha=1.0, cmap="Greys",no_domain=false)
 	#else
 	#	imshow(em.phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
 	#end
+
+	# this is super sketch but let's try it
+	x_temp, y_temp, z_temp = get_pts2(em)
+	scatter3D(x_temp,y_temp,z_temp)
 	xlim(x_min(em), x_max(em))
 	ylim(y_min(em), y_max(em))
 	zlim(z_min(em), z_max(em))
+end
+
+function get_pts2(em::ErgodicManagerR3)
+	w = WeightVec(vec(em.phi))
+	nx,ny,nz = x_cells(em), y_cells(em), z_cells(em)
+	x_temp, y_temp, z_temp = Float64[], Float64[], Float64[]
+	xs,ys,zs = x_size(em), y_size(em), z_size(em)
+
+	for i = 1:1000
+		xi, yi, zi = ind2sub(size(em.phi), sample(w))
+		push!(x_temp, (xi-.5) * xs)
+		push!(y_temp, (yi-.5) * ys)
+		push!(z_temp, (zi-.5) * zs)
+	end
+	return x_temp, y_temp, z_temp
+end
+
+function get_pts(em::ErgodicManagerR3)
+	x_temp = Float64[]
+	y_temp = Float64[]
+	z_temp = Float64[]
+	for xi = 1:x_cells(em)
+		for yi = 1:y_cells(em)
+			for zi = 1:z_cells(em)
+				if em.phi[xi,yi,zi] > 0.5
+					push!(x_temp, (xi - .5)*x_size(em))
+					push!(y_temp, (yi - .5)*y_size(em))
+					push!(z_temp, (zi - .5)*z_size(em))
+				end
+			end
+		end
+	end
+	return x_temp, y_temp, z_temp
 end
 
 function plot(em::ErgodicManagerSE2; alpha=1.0, cmap="Greys", no_domain=false)

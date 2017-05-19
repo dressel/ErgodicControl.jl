@@ -12,7 +12,6 @@ The :code:`TrajectoryManager` type has the following fields:
 	N::Int                      # trajectory length
 	h::Float64                  # time step
 	x0::Vector{Float64}         # initial state
-	T::Float64                  # time horizon (N * h)
 	
 	# cost functions
 	q::Float64                  # ergodic cost multiplier, default = 1

@@ -17,7 +17,6 @@ type TrajectoryManager
 	N::Int
 	h::Float64
 	x0::Vector{Float64}
-	T::Float64
 	
 	# Cost functions
 	q::Float64
@@ -38,7 +37,6 @@ type TrajectoryManager
 		# needed for all trajectories
 		tm.N = N
 		tm.h = h
-		tm.T = N*h
 		tm.x0 = deepcopy(x0)
 
 		# needed for ergodic trajectories

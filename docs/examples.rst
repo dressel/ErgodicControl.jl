@@ -93,3 +93,11 @@ We can overcome this by penalizing states outside the domain, using the barrier 
 With this modification, trajectory generation reaches the directional derivative criterion after 155 iterations. The trajectory stays within the domain.
 
 .. image:: http://stanford.edu/~dressel/gifs/ergodic/dubins2.png
+
+
+Distributions in Three Dimensions
+==================================
+
+
+Time-evolving Spatial Distribution
+========================================

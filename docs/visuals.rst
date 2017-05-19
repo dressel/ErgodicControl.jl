@@ -28,8 +28,13 @@ In addition to the optional arguments above, there are some additional optional 
 
 GIFs
 ===========
-You can create gifs of ergodic trajectory generation. Below is an example of how to generate gifs and change the frame rate.
+You can create GIFs of the trajectory generation process. This allows you to see the trajectory at the end of each iteration as it is iteratively improved into the final version. To make such a GIF, you must enable logging when generating the trajectory. You can then call the :code:`gif` function on the :code:`ErgodicManager` and :code:`TrajectoryManager` used. The optional keyword argument :code:`fps` controls the frames per second. I've found 17 to be enjoyable but you can change it if you want.
 ::
     
-    xd, ud = new_trajectory(em, tm, max_iters=100, logging=true)
+    xd, ud = pto_trajectory(em, tm, max_iters=100, logging=true)
     gif(em, tm, fps=17)
+
+You can also make a GIF of the final trajectory, which shows the agent moving along the trajectory. In most cases, this is not particularly interesting, as a simple line can capture the trajectory. However, it is more intersting if the spatial distribution evolves with time (see examples). The function call requires only the :code:`ErgodicManager` and the trajectory; the optional :code:`logging` keyword is not needed while generating the trajectory. You can also set the optional keyword argument :code:`fps` here. It is defaulted to 5.
+::
+    
+    gif(em, xd)

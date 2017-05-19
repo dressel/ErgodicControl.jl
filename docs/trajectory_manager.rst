@@ -20,7 +20,7 @@ The :code:`TrajectoryManager` type has the following fields:
 	Rn::Matrix{Float64}         # LQ control cost, default = eye(2)
 	barrier_cost::Float64       # penalizes leaving domain, def = 0
 
-    # needed for trajectory generation
+	# needed for trajectory generation
 	initializer::Initializer
 	descender::Descender        # default is ArmijoLineSearch(10,.1)
 	dynamics::Dynamics          # default is single integrator

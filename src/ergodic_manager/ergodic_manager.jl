@@ -39,3 +39,35 @@ z_size(em::ErgodicManager) = em.domain.cell_lengths[3]
 x_cells(em::ErgodicManager) = em.domain.cells[1]
 y_cells(em::ErgodicManager) = em.domain.cells[2]
 z_cells(em::ErgodicManager) = em.domain.cells[3]
+
+
+# decomposition on a group of trajectories
+function decompose(em::ErgodicManager, xds::VVVF)
+	num_agents = length(xds)
+
+	ck = decompose(em, xds[1])
+	for i = 2:num_agents
+		ck += decompose(em, xds[i])
+	end
+
+	return ck / num_agents
+end
+
+
+"""
+`ergodic_score(em, traj::VVF)`
+
+First breaks down the trajectory into components ck.
+"""
+function ergodic_score(em::ErgodicManager, traj::VVF)
+	ck = decompose(em, traj)
+	return ergodic_score(em, ck)
+end
+function ergodic_score(em::ErgodicManager, ck)
+	val = 0.0
+	for (i, L) in enumerate(em.Lambda)
+		d = em.phik[i] - ck[i]
+		val += L * d * d
+	end
+	return val
+end

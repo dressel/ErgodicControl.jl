@@ -164,27 +164,39 @@ function phi_ij(em::ErgodicManagerR2T, k1::Int, k2::Int, k3::Int, d::Array{Float
 	return val / em.hk[k1+1,k2+1,k3+1]
 end
 
+function decompose(em::ErgodicManagerR2T, traj::VVF)
+	N = length(traj)-1
 
-# reconstructs from Fourier coefficients in ck
-#function reconstruct(em::ErgodicManagerR2, ck::Matrix{Float64})
-#	# iterate over all bins
-#	half_size = em.cell_size / 2.0
-#	cs2 = em.cell_size * em.cell_size
-#
-#	vals = zeros(em.bins, em.bins)
-#
-#	for xi = 1:em.bins
-#		x = (xi-1)*em.cell_size + half_size
-#		for yi = 1:em.bins
-#			y = (yi-1)*em.cell_size + half_size
-#			for k1 = 0:em.K
-#				cx = em.kpixl[k1+1,xi]
-#				for k2 = 0:em.K
-#					cy = em.kpixl[k2+1,yi]
-#					vals[xi,yi] += ck[k1+1,k2+1]*cx*cy/em.hk[k1+1,k2+1]
-#				end
-#			end
-#		end
-#	end
-#	return vals
-#end
+	# Array to hold trajectory's Fourier coefficients
+	ck = zeros(em.K+1, em.K+1, em.K+1)
+
+	# length of each dimension
+	Lx = em.domain.lengths[1]
+	Ly = em.domain.lengths[2]
+
+	# minimum values in each dimension
+	xmin = x_min(em)
+	ymin = y_min(em)
+
+	for k1 = 0:em.K
+		kpiL1 = k1 * pi / Lx
+		for k2 = 0:em.K
+			kpiL2 = k2 * pi / Ly
+			for k3 = 0:em.K
+				kpiL3 = k3 * pi / N
+				hk = em.hk[k1+1, k2+1, k3+1]
+				fk_sum = 0.0
+				# now loop over time
+				for n = 0:N
+					xn = traj[n + 1]
+					c1 = cos(kpiL1 * (xn[1] - xmin))
+					c2 = cos(kpiL2 * (xn[2] - ymin))
+					c3 = cos(kpiL3 * n)
+					fk_sum += c1*c2*c3
+				end
+				ck[k1+1, k2+1, k3+1] = fk_sum / (hk * (N+1))
+			end
+		end
+	end
+	return ck
+end

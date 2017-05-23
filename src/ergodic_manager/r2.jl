@@ -167,6 +167,47 @@ function phi_ij(em::ErgodicManagerR2, k1::Int, k2::Int, d::Matrix{Float64})
 	return val / em.hk[k1+1,k2+1]
 end
 
+"""
+`decompose(em, traj::VVF)`
+
+Decomposes a set of positions into a set of `ck` Fourier coefficients.
+
+"""
+function decompose(em::ErgodicManagerR2, traj::VVF)
+
+	# trajectory is really of length N+1
+	N = length(traj)-1
+
+	# create matrix to hold trajectory's Fourier coefficients
+	ck = zeros(em.K+1, em.K+1)
+
+	# lengths of each dimension
+	Lx = em.domain.lengths[1]
+	Ly = em.domain.lengths[2]
+
+	# minimum values in each dimension
+	xmin = x_min(em)
+	ymin = y_min(em)
+
+	for k1 = 0:em.K
+		kpiL1 = k1 * pi / Lx
+		for k2 = 0:em.K
+			kpiL2 = k2 * pi / Ly
+			hk = em.hk[k1+1, k2+1]
+			fk_sum = 0.0
+			# now loop over time
+			for n = 0:N
+				xn = traj[n + 1]
+				c1 = cos(kpiL1 * (xn[1]-xmin))
+				c2 = cos(kpiL2 * (xn[2]-ymin))
+				fk_sum += c1*c2
+			end
+			ck[k1+1, k2+1] = fk_sum / (hk * (N+1))
+		end
+	end
+	return ck
+end
+
 
 # reconstructs from Fourier coefficients in ck
 #function reconstruct(em::ErgodicManagerR2, ck::Matrix{Float64})

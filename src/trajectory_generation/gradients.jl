@@ -78,6 +78,9 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 	end
 end
 
+# computes a_n, derivative of c_k wrt x_n
+# returns tuple containing elements of an
+# TODO: I shouldn't need to use tm
 function compute_ans(em::ErgodicManagerR2, xd::VVF, tm::TrajectoryManager, n::Int, ck::Matrix{Float64})
 	x = xd[n + 1][1]
 	y = xd[n + 1][2]

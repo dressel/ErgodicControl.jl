@@ -21,6 +21,7 @@ typealias MF  Matrix{Float64}
 typealias VMF Vector{MF}
 typealias VF  Vector{Float64}
 typealias VVF Vector{VF}
+typealias VVVF Vector{VVF}
 
 # math-type stuff I might need
 include("math.jl")

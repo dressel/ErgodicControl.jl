@@ -166,28 +166,22 @@ function F_mnp(m::Int, n::Int, p::Int, x::Float64, y::Float64, z::Float64)
 end
 
 
-
-# reconstructs from Fourier coefficients in ck
-# TODO: not nearly complete
-function reconstruct(em::ErgodicManagerSE2, ck::Matrix{Float64})
-	# iterate over all bins
-	half_size = em.cell_size / 2.0
-	cs2 = em.cell_size * em.cell_size
-
-	vals = zeros(em.bins, em.bins)
-
-	for xi = 1:em.bins
-		x = (xi-1)*em.cell_size + half_size
-		for yi = 1:em.bins
-			y = (yi-1)*em.cell_size + half_size
-			for k1 = 0:em.K
-				cx = em.kpixl[k1+1,xi]
-				for k2 = 0:em.K
-					cy = em.kpixl[k2+1,yi]
-					vals[xi,yi] += ck[k1+1,k2+1]*cx*cy/em.hk[k1+1,k2+1]
+function decompose(em::ErgodicManagerSE2, traj::VVF)
+	N = length(traj)-1
+	ck = zeros(Complex{Float64}, em.M+1, em.N+1, em.P+1)
+	for m = 0:em.M
+		for n = 0:em.N
+			for p = 0:em.P
+				fk_sum = 0.0im
+				# now loop over time
+				for i = 0:N-1
+					xi = traj[i + 1]
+					fk_sum += F_mnp(m,n,p,xi[1],xi[2],xi[3])
 				end
+				# TODO: check that this is right
+				ck[m+1, n+1, p+1] = fk_sum / N
 			end
 		end
 	end
-	return vals
+	return ck
 end

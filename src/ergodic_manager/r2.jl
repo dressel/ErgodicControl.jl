@@ -50,30 +50,8 @@ type ErgodicManagerR2 <: ErgodicManager
 		decompose!(em)
 		return em
 	end
-
-
-	function ErgodicManagerR2(example_name::String; K::Int=5, bins::Int=100)
-		L = 1.0
-		d = Domain([0.,0.], [L, L], [bins,bins])
-
-		if example_name == "single gaussian"
-			mu = [L/2.0, L/2.0]
-			Sigma = 0.03 * eye(2)
-			phi = gaussian(d, mu, Sigma)
-			return ErgodicManagerR2(d, phi, K)
-		elseif example_name == "double gaussian"
-			mu1 = [0.3, 0.7]
-			Sigma1 = 0.025 * eye(2)
-			mu2 = [0.7, 0.3]
-			Sigma2 = 0.025 * eye(2)
-			#phi = gaussian(d, [mu1,mu2], [Sigma1, Sigma2], [.5,.5])
-			phi = gaussian(d, [mu1,mu2], [Sigma1, Sigma2])
-			return ErgodicManagerR2(d, phi, K)
-		else
-			error("example name not recognized")
-		end
-	end
 end
+
 
 # fills each entry Lambda[k1,k2] in the Lambda matrix
 function Lambda!(em::ErgodicManagerR2)
@@ -121,7 +99,6 @@ end
 
 # computes the coefficients for a specific value of k1 and k2
 # called by hk!
-# TODO: this is wrecked by domain
 function hk_ij(em::ErgodicManagerR2, k1::Int, k2::Int)
 	val = 0.0
 	for xi = 1:x_cells(em)

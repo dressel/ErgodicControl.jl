@@ -1,6 +1,10 @@
 ######################################################################
 # gradients.jl
 # generation of gradients
+#
+# TODO: this whole file needs work
+#  While technically correct, it is an eyesore and can probably
+#   be greatly simplified.
 ######################################################################
 
 # Only first two states matter for ergodic score and barrier penalty

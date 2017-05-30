@@ -48,6 +48,30 @@ function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::
 	end
 end
 
+# multi-agent version
+function plot(em::ErgodicManager, xd::VVF, vtm::Vector{TrajectoryManager}; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
+
+	xds = vvf2vvvf(xd, vtm)
+	num_agents = length(vtm)
+
+	# plot the trajectory
+	for j = 1:num_agents
+		xd = xds[j]
+		plot_trajectory(xd, lw=lw, ms=ms, onlyMarks=onlyMarks)
+	end
+
+	# hold and plot domain
+	hold(true)
+	plot(em, alpha=alpha, cmap=cmap, no_domain=no_domain)
+
+	# determines if ergodic score should be shown
+	#if show_score
+	#	es = ergodic_score(em, xd)
+	#	title_string = "es = $(round(es,5))"
+	#	title(title_string)
+	#end
+end
+
 # special plotting function for R2T
 function plot(em::ErgodicManager, xd::VVF, n::Int; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
 

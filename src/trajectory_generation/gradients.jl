@@ -9,9 +9,15 @@
 
 # Only first two states matter for ergodic score and barrier penalty
 # Assumes ad has been initialized with zeros; that is, ad[3:end, ni] = 0.0
-function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)
-	ni =  1
+function gradients!(ad::MF, bd::MF, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)
 	ck = decompose(em, xd)
+	gradients!(ad, bd, em, tm, xd, ud, ck)
+end
+
+
+function gradients!(ad::MF, bd::MF, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, ck::MF)
+	ni =  1
+	#ck = decompose(em, xd)
 	for n = 0:(tm.N-1)
 
 		# ergodic gradients
@@ -21,17 +27,6 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 		end
 
 		# quadratic boundary
-		#if tm.barrier_cost > 0.0
-		#	xnx = xd[n+1][1]
-		#	xny = xd[n+1][2]
-		#	if (xnx > em.L) || (xnx < 0.0)
-		#		ad[1,ni] += tm.barrier_cost * (2.0*xnx - em.L)
-		#	end
-		#	if (xny > em.L) || (xny < 0.0)
-		#		ad[2,ni] += tm.barrier_cost * (2.0*xny - em.L)
-		#	end
-		#end
-		# alternate way...
 		if tm.barrier_cost > 0.0
 			xnx = xd[n+1][1]
 			xny = xd[n+1][2]
@@ -62,6 +57,55 @@ function gradients!(ad::Matrix{Float64}, bd::Matrix{Float64}, em::ErgodicManager
 	for i = 1:length(an)
 		ad[i,ni] = an[i]
 	end
+	if tm.barrier_cost > 0.0
+		xnx = xd[n+1][1]
+		xny = xd[n+1][2]
+		xmax = x_max(em)
+		xmin = x_min(em)
+		ymax = y_max(em)
+		ymin = y_min(em)
+		if (xnx > xmax)
+			ad[1,ni] += tm.barrier_cost * 2.0 * (xnx - xmax)
+		elseif xnx < xmin
+			ad[1,ni] += tm.barrier_cost * 2.0 * (xnx - xmin)
+		end
+		if xny > ymax
+			ad[2,ni] += tm.barrier_cost * 2.0 * (xny - ymax)
+		elseif xny < ymin
+			ad[2,ni] += tm.barrier_cost * 2.0 * (xny - ymin)
+		end
+	end
+end
+
+
+# This version is for multi-agent method
+function gradients!(ad::MF, bd::MF, em::ErgodicManager, vtm::Vector{TrajectoryManager}, xd::VVF, ud::VVF)
+
+	# must first create xds, where each agent trajectory is its own vector
+	xds, uds = vvf2vvvf(xd, ud, vtm)
+
+	ck = decompose(em, xds)
+	n_idx = 1
+	m_idx = 1
+	N = length(xd) - 1
+	num_agents = length(vtm)
+	for j = 1:num_agents
+		tm = vtm[j]
+		adt = zeros(tm.dynamics.n, N+1)
+		bdt = zeros(tm.dynamics.m, N)
+		n_rows = tm.dynamics.n
+		m_rows = tm.dynamics.m
+		gradients!(adt, bdt, em, tm, xds[j], uds[j], ck)
+		ad[n_idx:(n_idx+n_rows-1), :] = adt / num_agents
+		bd[m_idx:(m_idx+m_rows-1), :] = bdt / num_agents
+		n_idx += n_rows
+		m_idx += m_rows
+	end
+end
+
+
+# TODO: make this functional
+function add_barrier_gradient!(ad::MF, em::ErgodicManager, tm::TrajectoryManager)
 	if tm.barrier_cost > 0.0
 		xnx = xd[n+1][1]
 		xny = xd[n+1][2]

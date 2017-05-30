@@ -5,6 +5,8 @@
 export Dynamics, LinearDynamics, DubinsDynamics, linearize
 export IntegrationScheme, ForwardEuler, SymplecticEuler
 export forward_euler
+export GroupDynamics
+export vvf2vvvf
 
 type LinearDynamics <: Dynamics
 	n::Int
@@ -15,6 +17,23 @@ type LinearDynamics <: Dynamics
 	function LinearDynamics(A, B)
 		n,m = size(B)
 		return new(n,m,deepcopy(A),deepcopy(B))
+	end
+end
+
+type GroupDynamics <: Dynamics
+	n::Int
+	m::Int
+	num_agents::Int
+	array
+
+	function GroupDynamics(array)
+		num_agents = length(array)
+		n = m = 0
+		for j = 1:num_agents
+			n += array[j].n
+			m += array[j].m
+		end
+		return new(n, m, num_agents, array)
 	end
 end
 
@@ -89,6 +108,30 @@ function linearize(d::Dynamics, x::VVF, u::VVF, h::Float64)
 	return A,B
 end
 
+#function linearize(vtm::Vector{TrajectoryManager}, xds::VVVF, uds::VVVF)
+#	num_agents = length(vtm)
+#	N = length(xds[1]) - 1
+#
+#	# Make A and B a matrix with N rows and num_agents cols
+#	A, B = linearize(vmt[1].dynamics, xds[1], uds[1], vmt[1].h)
+#	for j = 2:num_agents
+#		tm = vtm[j]
+#		At, Bt = linearize(vtm[j].dynamics, xds[j], uds[j], vtm[j].h)
+#		A = hcat(A, At)
+#		B = hcat(B, Bt)
+#	end
+#
+#	# now concatenate along each of the rows
+#	dims = ones(Int, num_agents)
+#	dims[1] = 1
+#	for n = 1:N
+#		push!(bigA, cat(dims, A[n]...))
+#		push!(bigB, cat(dims, B[n]...))
+#	end
+#
+#	return bigA, bigB
+#end
+
 
 function linearize(ld::LinearDynamics, x::VF, u::VF, h::Float64)
 	return ld.A, ld.B
@@ -103,6 +146,49 @@ function linearize(ld::DubinsDynamics, x::VF, u::VF, h::Float64)
 	B[3] = h/ld.r
 
 	return A, B
+end
+
+function gsplit(gd::GroupDynamics, x::VF)
+	xarr = VVF()
+	xind = 1
+	for j = 1:gd.num_agents
+		d = gd.array[j]
+		push!(xarr, x[xind + d.n - 1])
+		xind += d.n
+	end
+	return xarr
+end
+
+function gsplit(gd::GroupDynamics, x::VF, u::VF)
+	xarr = VVF()
+	uarr = VVF()
+	xind = uind = 1
+	for j = 1:gd.num_agents
+		d = gd.array[j]
+		push!(xarr, x[xind:(xind + d.n - 1)])
+		push!(uarr, u[uind:(uind + d.m - 1)])
+		xind += d.n
+		uind += d.m
+	end
+	return xarr, uarr
+end
+
+function linearize(gd::GroupDynamics, x::VF, u::VF, h::Float64)
+
+	xarr, uarr = gsplit(gd, x, u)
+
+	Aarr = VMF()
+	Barr = VMF()
+	for j = 1:gd.num_agents
+		A, B = linearize(gd.array[j], xarr[j], uarr[j], h)
+		push!(Aarr, A)
+		push!(Barr, B)
+	end
+
+	dims = 2*ones(Int, gd.num_agents)
+	dims[1] = 1
+
+	return cat(dims, Aarr...), cat(dims, Barr...)
 end
 
 
@@ -146,6 +232,16 @@ end
 function forward_euler(ld::LinearDynamics, x::VF, u::VF, h::Float64)
 	return ld.A*x + ld.B*u
 end
+function forward_euler(gd::GroupDynamics, x::VF, u::VF, h::Float64)
+	n_ind = m_ind = 1
+	xp = VVF()
+	xarr, uarr = gsplit(gd, x, u)
+	for j = 1:gd.num_agents
+		push!(xp, forward_euler(gd.array[j], xarr[j], uarr[j], h))
+	end
+	return vcat(xp...)
+end
+
 function forward_euler(dd::DubinsDynamics, x::VF, u::VF, h::Float64)
 	xp = deepcopy(x)
 	xp[1] += cos(x[3]) * dd.v0 * h
@@ -201,4 +297,72 @@ function symplectic_euler(d::Dynamics, x::VF, u::VF, h::Float64)
 
 	xp = Ase*x + Bse*u
 	return xp
+end
+
+# really only need this because of introduction of groupd dynamics
+function ergodic_score(em::ErgodicManager, traj::VVF, d::Dynamics)
+	return ergodic_score(em, traj)
+end
+# Special version for group dynamics
+function ergodic_score(em::ErgodicManager, traj::VVF, gd::GroupDynamics)
+	xds = vvf2vvvf(traj, gd)
+	ck = decompose(em, xds)
+	return ergodic_score(em, ck)
+end
+
+# split one vector per state up
+function vvf2vvvf(xd::VVF, ud::VVF, vtm::Vector{TrajectoryManager})
+	N = length(xd) - 1
+	num_agents = length(vtm)
+
+	x_start = u_start = 1
+	xds = VVVF(num_agents)
+	uds = VVVF(num_agents)
+	for j = 1:num_agents
+		x_end = x_start + vtm[j].dynamics.n - 1
+		u_end = u_start + vtm[j].dynamics.m - 1
+		xds[j] = VVF()
+		uds[j] = VVF()
+		for n = 1:N
+			push!(xds[j], xd[n][x_start:x_end])
+			push!(uds[j], ud[n][u_start:u_end])
+		end
+		push!(xds[j], xd[N+1][x_start:x_end])
+		x_start = x_end + 1
+		u_start = u_end + 1
+	end
+	return xds, uds
+end
+
+function vvf2vvvf(xd::VVF, vtm::Vector{TrajectoryManager})
+	N = length(xd) - 1
+	num_agents = length(vtm)
+
+	x_start = 1
+	xds = VVVF(num_agents)
+	for j = 1:num_agents
+		x_end = x_start + vtm[j].dynamics.n - 1
+		xds[j] = VVF()
+		for n = 1:N+1
+			push!(xds[j], xd[n][x_start:x_end])
+		end
+		x_start = x_end + 1
+	end
+	return xds
+end
+
+function vvf2vvvf(xd::VVF, gd::GroupDynamics)
+	N = length(xd) - 1
+
+	x_start = 1
+	xds = VVVF(gd.num_agents)
+	for j = 1:gd.num_agents
+		x_end = x_start + gd.array[j].n - 1
+		xds[j] = VVF()
+		for n = 1:(N+1)
+			push!(xds[j], xd[n][x_start:x_end])
+		end
+		x_start = x_end + 1
+	end
+	return xds
 end

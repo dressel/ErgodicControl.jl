@@ -28,7 +28,7 @@ function get_step_size(als::ArmijoLineSearch, em::ErgodicManager, tm::Trajectory
 
 	xdn, udn = project(em, tm, K, xd, ud, zd, vd, step_size)
 	ts = total_score(em, tm, xdn, udn)
-	armijo_index = 0.0
+	armijo_index = 0
 	while (total_score(em, tm, xdn, udn) > f_x + step_size*als.c*m) && (armijo_index < als.max_iters)
 		ts = total_score(em, tm, xdn, udn)
 		step_size *= tau
@@ -51,7 +51,7 @@ function get_step_size2(als::ArmijoLineSearch, em::ErgodicManager, tm::Trajector
 
 	xdn, udn = project2(em, tm, K, xd, ud, zd, vd, step_size)
 	ts = total_score(em, tm, xdn, udn)
-	armijo_index = 0.0
+	armijo_index = 0
 	while (total_score(em, tm, xdn, udn) > f_x + step_size*als.c*m) && (armijo_index < als.max_iters)
 		ts = total_score(em, tm, xdn, udn)
 		step_size *= tau

@@ -50,6 +50,7 @@ function decompose(em::ErgodicManager, xds::VVVF)
 		ck += decompose(em, xds[i])
 	end
 
+	# divide by the number of agents (that is, length(xds))
 	return ck / num_agents
 end
 
@@ -63,6 +64,8 @@ function ergodic_score(em::ErgodicManager, traj::VVF)
 	ck = decompose(em, traj)
 	return ergodic_score(em, ck)
 end
+
+
 function ergodic_score(em::ErgodicManager, ck)
 	val = 0.0
 	for (i, L) in enumerate(em.Lambda)

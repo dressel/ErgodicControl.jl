@@ -101,3 +101,11 @@ Distributions in Three Dimensions
 
 Time-evolving Spatial Distribution
 ========================================
+
+
+Multi-agent Trajectories
+===============================
+
+
+Distribution over SE(2)
+===============================

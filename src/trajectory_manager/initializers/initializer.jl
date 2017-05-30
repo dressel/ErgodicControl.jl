@@ -21,6 +21,17 @@ Runs `tm`'s initializer to return a trajectory.
 function initialize(em::ErgodicManager, tm::TrajectoryManager)
 	initialize(tm.initializer, em, tm)
 end
+function initialize(em::ErgodicManager, vtm::Vector{TrajectoryManager})
+	num_agents = length(vtm)
+	xd0s = VVVF()
+	ud0s = VVVF()
+	for j = 1:num_agents
+		xd0, ud0 = initialize(em, vtm[j])
+		push!(xd0s, xd0)
+		push!(ud0s, ud0)
+	end
+	return vvvf2vvf(xd0s, ud0s)
+end
 
 
 

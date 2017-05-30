@@ -184,3 +184,20 @@ function traj2mat(traj::VVF)
 	end
 	return mat
 end
+
+
+
+export vvvf2vvf
+function vvvf2vvf(xd::VVVF, ud::VVVF)
+	N = length(ud[1])
+	xdcat = hcat(xd...)
+	udcat = hcat(ud...)
+	x = VVF(N+1)
+	u = VVF(N)
+	for n = 1:N
+		x[n] = vcat(xdcat[n,:]...)
+		u[n] = vcat(udcat[n,:]...)
+	end
+	x[N+1] = vcat(xdcat[N+1,:]...)
+	return x,u
+end

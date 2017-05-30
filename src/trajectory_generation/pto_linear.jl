@@ -1,17 +1,17 @@
 ######################################################################
 # pto_linear.jl
 #
-# like pto, but for linear systems
+# like pto, but for linear systems. Should be faster
 ######################################################################
 
 export pto_linear
 
-function pto_linear(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
+function pto_linear(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.0, dd_crit::Float64=1e-6, right::Bool=false)
 	xd0, ud0 = initialize(tm.initializer, em, tm)
 	pto_linear(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit, right=right)
 end
 
-function pto_linear(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
+function pto_linear(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.0, dd_crit::Float64=1e-6, right::Bool=false)
 
 	# let's not overwrite the initial trajectories
 	xd = deepcopy(xd0)

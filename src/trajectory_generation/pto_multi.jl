@@ -4,12 +4,12 @@
 # for multi-agent stuff
 ######################################################################
 
-function pto_trajectory(em::ErgodicManager, vtm::Vector{TrajectoryManager}; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6)
+function pto_trajectory(em::ErgodicManager, vtm::Vector{TrajectoryManager}; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.0, dd_crit::Float64=1e-6)
 	xd0,ud0 = initialize(em, vtm)
 	pto_trajectory(em, vtm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit)
 end
 
-function pto_trajectory(em::ErgodicManager, vtm::Vector{TrajectoryManager}, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6)
+function pto_trajectory(em::ErgodicManager, vtm::Vector{TrajectoryManager}, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.0, dd_crit::Float64=1e-6)
 
 	# creating a special trajectory manager with group dynamics
 	num_agents = length(vtm)

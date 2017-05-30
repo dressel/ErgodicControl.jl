@@ -144,6 +144,55 @@ This works
 
 .. image:: http://stanford.edu/~dressel/gifs/ergodic/multi.png
 
+Multi-agent Trajectory for Time-evolving Distribution
+========================================================
+This works
+::
+
+    using ErgodicControl
+
+    # Generate the distribution
+    N = 80
+    dt = 0.5
+    T = N*dt
+    d = Domain([1,1], [100,100])
+    cov = 0.020 * eye(2)
+    phi = zeros(100,100,N+1)
+    for i = 1:N+1
+        mui = (.7*(i-1)/N + .15) * ones(2)
+        phi[:,:,i] = gaussian(d, mui, cov)
+    end
+    ErgodicControl.normalize!(phi, d.cell_size / (N+1))
+
+    # Now let's create the ergodic manager in R2T
+    K = 5
+    em = ErgodicManagerR2T(d, phi, K)
+
+    # trajectory params
+    x0 = [0.49, 0.01, 0., 0.]
+    tm = TrajectoryManager(x0, dt, N, ConstantInitializer([0.,0.]))
+    tm.R = .01*eye(2)
+    tm.descender = ArmijoLineSearch(1,1e-4)
+    dynamics!(tm, DoubleIntegrator(2,dt))
+
+    # create a vector of trajectory managers
+    tm2 = deepcopy(tm)
+    tm2.x0 = [.3,.9, 0., 0.]
+    vtm = [tm, tm2]
+
+    # trajectory generation and plotting
+    mi = 1000
+    ddc = 1e-5
+    v = true
+    xd,ud = pto_trajectory(em, vtm, dd_crit=ddc, max_iters=mi, verbose=v)
+    gif(em, xd, vtm)
+
+The resulting gif is shown below:
+
+.. image:: http://stanford.edu/~dressel/gifs/ergodic/multitime.gif
+
 
 Distribution over SE(2)
 ===============================
+
+

@@ -67,7 +67,7 @@ function pto_trajectory(em::ErgodicManager, vtm::Vector{TrajectoryManager}, xd0:
 		xd, ud = project(em, tm, K, xd, ud, zd, vd, step_size)
 
 		# compute statistics and report
-		es, cs, ts = all_scores(em, tm, xd, ud, tm.dynamics)
+		es, cs, ts = all_scores(em, tm, xd, ud)
 		dd = directional_derivative(ad, bd, zd, vd)
 		if verbose; step_report(i, es, cs, ts, dd, step_size); end
 		if logging; save(outfile, xd); end

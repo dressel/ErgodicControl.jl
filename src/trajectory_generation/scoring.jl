@@ -154,10 +154,3 @@ function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)
 	ts = es + cs
 	return es, cs, ts
 end
-# TODO: can this be combined with above?
-function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, d::Dynamics)
-	es = tm.q * ergodic_score(em, xd, d)
-	cs = control_score(ud, tm.R, tm.h)
-	ts = es + cs
-	return es, cs, ts
-end

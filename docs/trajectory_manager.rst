@@ -15,8 +15,8 @@ The :code:`TrajectoryManager` type has the following fields:
 	
 	# cost functions
 	q::Float64                  # ergodic cost multiplier, default = 1
-	Qn::Matrix{Float64}         # LQ ergodic cost, default = eye(2)
 	R::Matrix{Float64}          # control cost multiplier, def = .01*eye(2)
+	Qn::Matrix{Float64}         # LQ ergodic cost, default = eye(2)
 	Rn::Matrix{Float64}         # LQ control cost, default = eye(2)
 	barrier_cost::Float64       # penalizes leaving domain, def = 0
 

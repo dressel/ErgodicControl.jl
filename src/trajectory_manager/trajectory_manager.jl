@@ -21,8 +21,8 @@ type TrajectoryManager
 	
 	# Cost functions
 	q::Float64
-	Qn::Matrix{Float64}
 	R::Matrix{Float64}
+	Qn::Matrix{Float64}
 	Rn::Matrix{Float64}
 	barrier_cost::Float64
 

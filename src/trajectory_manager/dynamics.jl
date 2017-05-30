@@ -299,16 +299,6 @@ function symplectic_euler(d::Dynamics, x::VF, u::VF, h::Float64)
 	return xp
 end
 
-# really only need this because of introduction of groupd dynamics
-function ergodic_score(em::ErgodicManager, traj::VVF, d::Dynamics)
-	return ergodic_score(em, traj)
-end
-# Special version for group dynamics
-function ergodic_score(em::ErgodicManager, traj::VVF, gd::GroupDynamics)
-	xds = vvf2vvvf(traj, gd)
-	ck = decompose(em, xds)
-	return ergodic_score(em, ck)
-end
 
 # split one vector per state up
 function vvf2vvvf(xd::VVF, ud::VVF, vtm::Vector{TrajectoryManager})

@@ -9,6 +9,23 @@ function reconstruct(em::ErgodicManager, xd::VVF)
 end
 
 
+# These are required because multi-agent is different
+function ergodic_score(em::ErgodicManager, traj::VVF, d::Dynamics)
+	return ergodic_score(em, traj)
+end
+function ergodic_score(em::ErgodicManager, traj::VVF, gd::GroupDynamics)
+	xds = vvf2vvvf(traj, gd)
+	ck = decompose(em, xds)
+	return ergodic_score(em, ck)
+end
+function ergodic_score(em::ErgodicManager, traj::VVF, vtm::VTM)
+	xds = vvf2vvvf(traj, vtm)
+	ck = decompose(em, xds)
+	return ergodic_score(em, ck)
+end
+
+
+
 
 
 # TODO: uncomment and test for time, comparing to new method in
@@ -86,24 +103,6 @@ function control_effort(ud::VVF, N::Int=length(ud))
 	return cs
 end
 
-
-# if anyone is outside the domain...
-#function barrier_score(em::ErgodicManager, xd::VVF, c::Float64)
-#	if c == 0.0; return 0.0; end
-#
-#	bs = 0.0
-#	for xi in xd
-#		if (xi[1] > em.L) || (xi[1] < 0.0)
-#			dx = (xi[1] - 0.5*em.L)
-#			bs += c * dx * dx
-#		end
-#		if (xi[2] > em.L) || (xi[2] < 0.0)
-#			dy = (xi[2] - 0.5*em.L)
-#			bs += c * dy * dy
-#		end
-#	end
-#	return bs
-#end
 
 function barrier_score(em::ErgodicManager, xd::VVF, c::Float64)
 	if c == 0.0; return 0.0; end

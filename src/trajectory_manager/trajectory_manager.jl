@@ -11,6 +11,7 @@ abstract Initializer
 abstract Descender
 abstract IntegrationScheme
 
+
 type TrajectoryManager
 
 	# needed for all trajectories
@@ -55,6 +56,8 @@ type TrajectoryManager
 		return tm
 	end
 end
+
+typealias VTM Vector{TrajectoryManager}
 
 
 

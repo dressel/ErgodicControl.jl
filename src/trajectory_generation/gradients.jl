@@ -15,7 +15,7 @@ function gradients!(ad::MF, bd::MF, em::ErgodicManager, tm::TrajectoryManager, x
 end
 
 
-function gradients!(ad::MF, bd::MF, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, ck::MF)
+function gradients!(ad::MF, bd::MF, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, ck)
 	ni =  1
 	#ck = decompose(em, xd)
 	for n = 0:(tm.N-1)

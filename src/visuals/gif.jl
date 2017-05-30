@@ -67,3 +67,21 @@ function gif(em::ErgodicManager, xd::VVF; show_score=true, fps::Int=5)
 
 	write("temp.gif", frames)
 end
+
+# watch vehicle progress
+function gif(em::ErgodicManager, xd::VVF, vtm::VTM; show_score=true, fps::Int=5)
+
+
+	frames = Frames(MIME("image/png"), fps=fps)
+
+	N = length(xd) - 1
+
+	# plot ever-increasing pieces of the trajectory
+	for n = 1:(N+1)
+		plot(em, xd, n, vtm, show_score=show_score)
+		push!(frames, gcf())
+		close()
+	end
+
+	write("temp.gif", frames)
+end

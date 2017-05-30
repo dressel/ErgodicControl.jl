@@ -73,6 +73,7 @@ function plot(em::ErgodicManager, xd::VVF, vtm::Vector{TrajectoryManager}; alpha
 end
 
 # special plotting function for R2T
+# input n is a Julia index; it goes from 1 to N+1 (instead of 0 to N)
 function plot(em::ErgodicManager, xd::VVF, n::Int; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
 
 	# plotting the trajectory
@@ -88,6 +89,16 @@ function plot(em::ErgodicManagerR2T, xd::VVF, n::Int; alpha=1.0, cmap="Greys", s
 	# plotting the trajectory
 	dims = 2
 	plot_trajectory(xd[1:n], lw=lw, ms=ms, onlyMarks=onlyMarks, dims=dims)
+
+	# plotting the distribution
+	a = [x_min(em), x_max(em), y_min(em), y_max(em)]
+	imshow(em.phi[:,:,n]', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
+end
+function plot(em::ErgodicManagerR2T, xd::VVF, n::Int, vtm::VTM; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
+
+	# plotting the trajectory
+	dims = 2
+	plot_trajectory(xd[1:n], vtm, lw=lw, ms=ms, onlyMarks=onlyMarks, dims=dims)
 
 	# plotting the distribution
 	a = [x_min(em), x_max(em), y_min(em), y_max(em)]
@@ -216,3 +227,12 @@ function plot_trajectory(xd::VVF; lw::Real=1.0, ms::Real=6, onlyMarks=false, dim
 	#PyPlot.plot(xvals, yvals, line_style, lw=lw, ms=ms)
 end
 
+function plot_trajectory(xd::VVF, vtm::VTM; lw::Real=1.0, ms::Real=6, onlyMarks=false, dims::Int=2)
+
+	num_agents = length(vtm)
+	xds = vvf2vvvf(xd, vtm)
+	hold(true)
+	for j = 1:num_agents
+		plot_trajectory(xds[j], lw=lw, ms=ms,onlyMarks=onlyMarks,dims=dims)
+	end
+end

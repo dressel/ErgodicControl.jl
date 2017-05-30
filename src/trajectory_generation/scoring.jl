@@ -149,7 +149,7 @@ end
 `all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)`
 """
 function all_scores(em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF)
-	es = tm.q * ergodic_score(em, xd)
+	es = tm.q * ergodic_score(em, xd, tm.dynamics)
 	cs = control_score(ud, tm.R, tm.h)
 	ts = es + cs
 	return es, cs, ts

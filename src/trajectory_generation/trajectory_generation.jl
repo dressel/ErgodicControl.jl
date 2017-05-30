@@ -11,6 +11,7 @@ include("printing.jl")
 # actual methods
 include("pto.jl")
 include("pto_multi.jl")
+include("pto_linear.jl")
 include("smc.jl")
 include("max.jl")
 include("kmeans.jl")

@@ -4,6 +4,8 @@
 # for multi-agent stuff
 ######################################################################
 
+# TODO: this actually doesn't work
+#  I've just been giving xd0 and ud0
 function pto_trajectory(em::ErgodicManager, vtm::Vector{TrajectoryManager}; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6)
 	xd0, ud0 = initialize(tm.initializer, em, tm)
 	pto_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit)

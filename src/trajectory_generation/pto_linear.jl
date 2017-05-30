@@ -1,25 +1,26 @@
 ######################################################################
-# pto_trajectory.jl
+# pto_linear.jl
 #
-# Here I try to apply the original way of doing it.
+# like pto, but for linear systems
 ######################################################################
 
-export pto_trajectory
+export pto_linear
 
-function pto_trajectory(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6)
+function pto_linear(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
 	xd0, ud0 = initialize(tm.initializer, em, tm)
-	pto_trajectory(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit)
+	pto_linear(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit, right=right)
 end
 
-function pto_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6)
+function pto_linear(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.003, dd_crit::Float64=1e-6, right::Bool=false)
 
 	# let's not overwrite the initial trajectories
 	xd = deepcopy(xd0)
 	ud = deepcopy(ud0)
 	N = tm.N
+	start_idx = right ? 1 : 0
 
 	# matrices for gradients
-	ad = zeros(tm.dynamics.n, N+1)
+	ad = zeros(tm.dynamics.n, N)
 	bd = zeros(tm.dynamics.m, N)
 
 	# prepare for logging if need be 
@@ -34,24 +35,27 @@ function pto_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0
 	es = 0.; cs = 0.; ts = 0.; dd = 0.; step_size = 0.; es_diff=0.0
 	es_prev = 0.0
 	es_count = 1
+	A, B = linearize(tm.dynamics, xd, ud, tm.h)
+	K, Ginv = LQ2(A, B, tm.Qn, tm.Rn, tm.N)
 	while not_finished
 
 		# determine gradients used in optimization
-		gradients!(ad, bd, em, tm, xd, ud)
+		gradients!(ad, bd, em, tm, xd, ud, start_idx)
 
 		# find gains K and descent direction (zd, vd) using LQ
-		A, B = linearize(tm.dynamics, xd, ud, tm.h)
-		K, C = LQ(A, B, ad, bd, tm.Qn, tm.Rn, tm.N)
+		#A, B = linearize(tm.dynamics, xd, ud, tm.h)
+		C = LQ(K, Ginv, A, B, ad, bd, tm.Qn, tm.Rn, tm.N)
 		zd, vd = apply_LQ_gains(A, B, K, C)
 
 		# determine step size and descend
-		step_size = get_step_size(tm.descender, em, tm, xd, ud, zd, vd, ad, bd, K, i)
+		step_size = get_step_size2(tm.descender, em, tm, xd, ud, zd, vd, ad, bd, K, i)
 
 		# descend and project
-		xd, ud = project(em, tm, K, xd, ud, zd, vd, step_size)
+		#xd, ud = project(em, tm, K, xd, ud, zd, vd, step_size)
+		xd, ud = project2(em, tm, K, xd, ud, zd, vd, step_size)
 
 		# compute statistics and report
-		es, cs, ts = all_scores(em, tm, xd, ud)
+		es, cs, ts = all_scores(em, tm, xd, ud, start_idx)
 		dd = directional_derivative(ad, bd, zd, vd)
 		if verbose; step_report(i, es, cs, ts, dd, step_size); end
 		if logging; save(outfile, xd); end

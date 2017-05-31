@@ -42,15 +42,6 @@ function compute_B(em::ErgodicManagerR2, xd::VVF, n::Int, h::Float64, ck::Matrix
 			cy = cos(k2*pi*dyn/Ly)
 
 			# compute ck
-			#fk = 0.0
-			#for i = 1:n
-			#	dx = xd[i][1] - x_min(em)
-			#	dy = xd[i][2] - y_min(em)
-			#	fk += cos(k1*pi*dx/Lx) * cos(k2*pi*dy/Ly)
-			#end
-			#fk /= (hk*n)
-
-			# new method to compute ck
 			fk = ( (n-1)*ck[k1+1,k2+1] + cx*cy/hk ) / n
 			ck[k1+1, k2+1] = fk
 

@@ -6,21 +6,20 @@
 
 export pto_linear
 
-function pto_linear(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.0, dd_crit::Float64=1e-6, right::Bool=false)
+function pto_linear(em::ErgodicManager, tm::TrajectoryManager; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.0, dd_crit::Float64=1e-6)
 	xd0, ud0 = initialize(tm.initializer, em, tm)
-	pto_linear(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit, right=right)
+	pto_linear(em, tm, xd0, ud0; verbose=verbose, logging=logging, max_iters=max_iters, es_crit=es_crit, dd_crit = dd_crit)
 end
 
-function pto_linear(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.0, dd_crit::Float64=1e-6, right::Bool=false)
+function pto_linear(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VVF; verbose::Bool=true, logging::Bool=false, max_iters::Int=100, es_crit::Float64=0.0, dd_crit::Float64=1e-6)
 
 	# let's not overwrite the initial trajectories
 	xd = deepcopy(xd0)
 	ud = deepcopy(ud0)
 	N = tm.N
-	start_idx = right ? 1 : 0
 
 	# matrices for gradients
-	ad = zeros(tm.dynamics.n, N)
+	ad = zeros(tm.dynamics.n, N+1)
 	bd = zeros(tm.dynamics.m, N)
 
 	# prepare for logging if need be 
@@ -40,7 +39,7 @@ function pto_linear(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VV
 	while not_finished
 
 		# determine gradients used in optimization
-		gradients!(ad, bd, em, tm, xd, ud, start_idx)
+		gradients!(ad, bd, em, tm, xd, ud)
 
 		# find gains K and descent direction (zd, vd) using LQ
 		#A, B = linearize(tm.dynamics, xd, ud, tm.h)
@@ -55,7 +54,7 @@ function pto_linear(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0::VV
 		xd, ud = project2(em, tm, K, xd, ud, zd, vd, step_size)
 
 		# compute statistics and report
-		es, cs, ts = all_scores(em, tm, xd, ud, start_idx)
+		es, cs, ts = all_scores(em, tm, xd, ud)
 		dd = directional_derivative(ad, bd, zd, vd)
 		if verbose; step_report(i, es, cs, ts, dd, step_size); end
 		if logging; save(outfile, xd); end

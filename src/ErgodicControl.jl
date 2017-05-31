@@ -37,6 +37,7 @@ include("ergodic_manager/r2.jl")
 include("ergodic_manager/r3.jl")
 include("ergodic_manager/r2t.jl")
 include("ergodic_manager/se2.jl")
+include("ergodic_manager/examples.jl")
 
 # trajectory manager stuff
 include("trajectory_manager/trajectory_manager.jl")

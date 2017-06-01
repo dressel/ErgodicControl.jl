@@ -187,25 +187,23 @@ end
 
 
 # reconstructs from Fourier coefficients in ck
-#function reconstruct(em::ErgodicManagerR2, ck::Matrix{Float64})
-#	# iterate over all bins
-#	half_size = em.cell_size / 2.0
-#	cs2 = em.cell_size * em.cell_size
-#
-#	vals = zeros(em.bins, em.bins)
-#
-#	for xi = 1:em.bins
-#		x = (xi-1)*em.cell_size + half_size
-#		for yi = 1:em.bins
-#			y = (yi-1)*em.cell_size + half_size
-#			for k1 = 0:em.K
-#				cx = em.kpixl[k1+1,xi]
-#				for k2 = 0:em.K
-#					cy = em.kpixl[k2+1,yi]
-#					vals[xi,yi] += ck[k1+1,k2+1]*cx*cy/em.hk[k1+1,k2+1]
-#				end
-#			end
-#		end
-#	end
-#	return vals
-#end
+function reconstruct(em::ErgodicManagerR2, ck::Matrix{Float64})
+	# iterate over all bins
+	v = em.domain.cell_size
+	vals = zeros(x_cells(em), y_cells(em))
+
+	for xi = 1:x_cells(em)
+		x = x_min(em) + (xi-0.5)*x_size(em)
+		for yi = 1:y_cells(em)
+			y = y_min(em) + (yi-0.5)*y_size(em)
+			for k1 = 0:em.K
+				cx = em.kpixl[k1+1,xi]
+				for k2 = 0:em.K
+					cy = em.kpixl[k2+1,yi]
+					vals[xi,yi] += ck[k1+1,k2+1]*cx*cy/em.hk[k1+1,k2+1]
+				end
+			end
+		end
+	end
+	return vals
+end

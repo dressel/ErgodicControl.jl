@@ -97,6 +97,34 @@ With this modification, trajectory generation reaches the directional derivative
 
 Distributions in Three Dimensions
 ==================================
+An example if we have a distribution over three dimensions. The agent is a single integrator:
+::
+
+    using ErgodicControl
+
+    # domain, distribution, and ergodic manager
+    d = Domain([1,1,1], 100)
+    means = [[.2,.2,.2], [.8,.8,.2], [.5,.5,.8]]
+    covs = [0.01*eye(3), 0.01*eye(3), .01*eye(3)]
+    phi = gaussian(d, means, covs)
+    K = 5
+    em = ErgodicManagerR3(d, phi, K)
+
+    # trajectory params
+    x0 = [0.49, 0.01, 0.01]
+    dt = 0.5
+    N = 80
+    tm = TrajectoryManager(x0, dt, N, ConstantInitializer([0.0,0.0,0.0]))
+    dynamics!(tm, SingleIntegrator(3,dt))
+    tm.descender = ArmijoLineSearch(1,1e-4)
+
+    # trajectory generation and plotting
+    xd,ud = pto_trajectory(em, tm, dd_crit=1e-4, max_iters=1000)
+    plot(em, xd, show_score=false)
+
+Plotting is a bit trickier, and is not finished for three dimensions. The tough part is plotting the distribution. Ideally, you'd just plot some isosurfaces for the distribution, but Matplotlib wasn't made to do such things. I could try Mayavi, but that sounds like a pain. In the following image, I used a scatter plot with points sample from the distribution as a rough representation of the distribution.
+
+.. image:: http://stanford.edu/~dressel/gifs/ergodic/three.png
 
 
 Time-evolving Spatial Distribution

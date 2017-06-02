@@ -22,6 +22,9 @@ The value at `phi[xi,yi]` gives the value at the cell index `xi,yi`.
 Reconstructs from trajectory `xd`.
 """
 reconstruct(em::ErgodicManager) = reconstruct(em, em.phik)
+function reconstruct(em::ErgodicManager, xd::VVF)
+	reconstruct(em, decompose(em, xd))
+end
 
 
 x_min(em::ErgodicManager) = em.domain.mins[1]

@@ -3,12 +3,6 @@
 # Computes ergodic, total, and control scores
 ######################################################################
 
-function reconstruct(em::ErgodicManager, xd::VVF)
-	ck = decompose(em, xd)
-	return reconstruct(em, ck)
-end
-
-
 # These are required because multi-agent is different
 function ergodic_score(em::ErgodicManager, traj::VVF, d::Dynamics)
 	return ergodic_score(em, traj)

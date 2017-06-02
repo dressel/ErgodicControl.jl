@@ -229,6 +229,50 @@ The resulting gif is shown below:
 
 .. image:: http://stanford.edu/~dressel/gifs/ergodic/multitime.gif
 
+The following example is also cool. The multi-agent system consists of a Dubins vehcile and a double integrator.
+::
+
+    using ErgodicControl
+
+    # Generate the distribution
+    N = 80
+    dt = 0.5
+    T = N*dt
+    d = Domain([1,1], [100,100])
+    cov = 0.020 * eye(2)
+    phi = zeros(100,100,N+1)
+    for i = 1:N+1
+        mui = (.7*(i-1)/N + .15) * ones(2)
+        phi[:,:,i] = gaussian(d, mui, cov)
+    end
+    ErgodicControl.normalize!(phi, d.cell_size / (N+1))
+
+    # Now let's create the ergodic manager
+    K = 5
+    em = ErgodicManagerR2T(d, phi, K)
+
+    # trajectory params
+    x0 = [0.5, 0.9, 0., 0.]
+    tm1 = TrajectoryManager(x0, dt, N, ConstantInitializer([0.,0.]))
+    tm1.R = .01*eye(2)
+    dynamics!(tm1, DoubleIntegrator(2,dt))
+    tm1.barrier_cost = 1.
+
+    tm2 = deepcopy(tm1)
+    dynamics!(tm2, DubinsDynamics(.05, .1))
+    tm2.initializer = ConstantInitializer([0.05])
+    tm2.x0 = [.1,.1, .0]
+
+    vtm = [tm1, tm2]
+
+    # trajectory generation and plotting
+    xd,ud = pto_trajectory(em, vtm, dd_crit=1e-5, max_iters=1000)
+    gif(em, xd, vtm)
+
+The resulting gif is shown below
+
+.. image:: http://stanford.edu/~dressel/gifs/ergodic/dubins_doubleintegrator.gif
+
 
 Distribution over SE(2)
 ===============================

@@ -17,6 +17,8 @@ include("smc_multi.jl")
 include("max.jl")
 include("kmeans.jl")
 
+# some additional helpers
+include("info.jl")
 
 
 function check_convergence(es::Float64, es_crit::Float64, i::Int, max_iters::Int, dd::Float64, dd_crit::Float64, verbose::Bool, es_count::Int)

@@ -51,6 +51,11 @@ If you have your own set of coefficients :code:`ck`, you can use that instead of
 
     phi = reconstruct(em::ErgodicManager, ck::Matrix{Float64})
 
+You could also pass in a trajectory and :code:`reconstruct` will take care of decomposing it into coefficients and using these to generate a spatial distribution.
+::
+
+    phi = reconstruct(em::ErgodicManager, xd::VVF)
+
 
 
 Example Managers

@@ -60,6 +60,9 @@ If you wanted to create the unit square with each dimension discretized into 100
     d = Domain([1,1], [100,100])
     d = Domain([1,1], 100)
 
+    # Unit square in R^2 with 100 cells per side
+    d = Domain(100)
+
 To generate domains in SE(2), just ensure there are three dimensions and that the last one covers the entire angular space.
 ::
     

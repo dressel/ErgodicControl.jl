@@ -58,6 +58,9 @@ type Domain
 		return Domain(zeros(length(maxes)), maxes, num_cells)
 	end
 
+	# allow user to only specify discretization (unit cell is assumed)
+	Domain(num_cells::Int) = Domain([0,0], [1,1], [num_cells,num_cells])
+
 end
 
 

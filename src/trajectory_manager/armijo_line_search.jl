@@ -1,6 +1,16 @@
 ######################################################################
 # armijo_descender.jl
 ######################################################################
+"""
+type `ArmijoLineSearch <: Descender`
+
+`ArmijoLineSearch(initial_step, c)`
+
+Defaults are:
+* `initial_step` = 10
+* `c` = 0.5
+* `max_iters` = 50
+"""
 type ArmijoLineSearch <: Descender
 	initial_step::Float64
 	c::Float64		# just a constant between 0 and 1

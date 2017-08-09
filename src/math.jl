@@ -1,6 +1,7 @@
 ######################################################################
 # includes stuff I don't want to need distributions for...
 ######################################################################
+export traj2mat
 
 function my_pdf(x::NTuple{2,Float64},m::Vector{Float64},S::Matrix{Float64})
 	dx = x[1] - m[1]

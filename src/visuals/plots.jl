@@ -13,7 +13,7 @@ end
 
 # Export my functions and export PyPlot functions
 export plot, plot_trajectory, axis_font
-export figure, savefig, xlabel, ylabel, zlabel, title
+export figure, savefig, xlabel, ylabel, zlabel, title, hold
 export xlim, ylim, zlim
 """
 `plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, lw=1.0, ms=6.0)`

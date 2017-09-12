@@ -7,7 +7,7 @@
 # returns xdn and udn, the feasible projected trajectory
 function project(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)
 	xdn = [xd[1]]
-	udn = Array(VF, 0)
+	udn = Array{VF}(0)
 
 	# perform descent
 	alpha = VVF(tm.N + 1)

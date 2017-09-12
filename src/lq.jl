@@ -39,15 +39,15 @@ end
 # This appears to be the one currrently in use
 function LQ(A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 	# Also needed for LQR
-	P = Array(Matrix{Float64}, N+1)
-	G = Array(Matrix{Float64}, N)
-	K = Array(Matrix{Float64}, N)
+	P = Array{Matrix{Float64}}(N+1)
+	G = Array{Matrix{Float64}}(N)
+	K = Array{Matrix{Float64}}(N)
 	P[N+1] = Q
 
 	# Solely for LQ
-	r = Array(Vector{Float64}, N+1)
+	r = Array{Vector{Float64}}(N+1)
 	r[N+1] = 0.5*a[:,N+1]
-	C = Array(Vector{Float64}, N)
+	C = Array{Vector{Float64}}(N)
 
 	# Sweep from the back
 	# really n = (N-1):-1:0, but then all indices need an extra +1
@@ -136,7 +136,7 @@ function apply_LQ_gains(A::VMF, B::VMF, K::VMF, C::VVF)
 	N = length(K)
 
 	z = [zeros(size(B[1],1))]
-	v = Array(Vector{Float64}, 0)
+	v = Vector{Float64}[]
 	for n = 1:N
 		push!(v, -K[n]*z[n] - C[n])
 		push!(z, A[n]*z[n] + B[n]*v[n])

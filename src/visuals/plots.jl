@@ -37,7 +37,7 @@ function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::
 	plot_trajectory(xd, lw=lw, ms=ms, onlyMarks=onlyMarks, dims=dims)
 
 	# hold and plot domain
-	hold(true)
+	#hold(true) # deprecated, default behavior is true anyway
 	plot(em, alpha=alpha, cmap=cmap, no_domain=no_domain)
 
 	# determines if ergodic score should be shown
@@ -61,7 +61,7 @@ function plot(em::ErgodicManager, xd::VVF, vtm::Vector{TrajectoryManager}; alpha
 	end
 
 	# hold and plot domain
-	hold(true)
+	#hold(true) # deprecated, default is true anyway
 	plot(em, alpha=alpha, cmap=cmap, no_domain=no_domain)
 
 	# determines if ergodic score should be shown
@@ -231,7 +231,7 @@ function plot_trajectory(xd::VVF, vtm::VTM; lw::Real=1.0, ms::Real=6, onlyMarks=
 
 	num_agents = length(vtm)
 	xds = vvf2vvvf(xd, vtm)
-	hold(true)
+	#hold(true) # deprecated, default behavior is like true anyway
 	for j = 1:num_agents
 		plot_trajectory(xds[j], lw=lw, ms=ms,onlyMarks=onlyMarks,dims=dims)
 	end

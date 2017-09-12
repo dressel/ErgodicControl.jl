@@ -135,7 +135,7 @@ function plot(em::ErgodicManagerR3; alpha=1.0, cmap="Greys",no_domain=false)
 end
 
 function get_pts2(em::ErgodicManagerR3)
-	w = WeightVec(vec(em.phi))
+	w = Weights(vec(em.phi))
 	nx,ny,nz = x_cells(em), y_cells(em), z_cells(em)
 	x_temp, y_temp, z_temp = Float64[], Float64[], Float64[]
 	xs,ys,zs = x_size(em), y_size(em), z_size(em)

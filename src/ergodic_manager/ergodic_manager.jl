@@ -1,7 +1,7 @@
 ######################################################################
 # ergodic_manager.jl
 ######################################################################
-abstract ErgodicManager
+abstract type ErgodicManager end
 
 decompose!(em::ErgodicManager) = decompose!(em, em.phi)
 

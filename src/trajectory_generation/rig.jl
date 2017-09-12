@@ -7,7 +7,8 @@
 
 export rig_trajectory, Node, tree2traj
 
-typealias Loc Tuple{Float64, Float64}
+#typealias Loc Tuple{Float64, Float64}
+const Loc = Tuple{Float64, Float64}
 
 immutable Node
 	x::Loc			# location

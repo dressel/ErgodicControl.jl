@@ -4,12 +4,12 @@
 # handles the trajectory manager
 ######################################################################
 
-using StatsBase: WeightVec, sample
+using StatsBase: Weights, sample
 
-abstract Dynamics
-abstract Initializer
-abstract Descender
-abstract IntegrationScheme
+abstract type Dynamics end
+abstract type Initializer end
+abstract type Descender end
+abstract type IntegrationScheme end
 
 
 type TrajectoryManager
@@ -57,7 +57,8 @@ type TrajectoryManager
 	end
 end
 
-typealias VTM Vector{TrajectoryManager}
+#typealias VTM Vector{TrajectoryManager}
+const VTM = Vector{TrajectoryManager}
 
 
 

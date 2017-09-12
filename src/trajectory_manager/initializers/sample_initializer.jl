@@ -18,7 +18,7 @@ function initialize(si::SampleInitializer, em::ErgodicManager, tm::TrajectoryMan
 	bin_size = (em.bins, em.bins)
 
 	# first sample N points from e.phi
-	weights = WeightVec(vec(em.phi))
+	weights = Weights(vec(em.phi))
 	for n = 1:tm.N
 		xi, yi = ind2sub(bin_size, sample(weights))
 		points[n] = [em.cell_size*(xi-.5), em.cell_size*(yi-.5)]

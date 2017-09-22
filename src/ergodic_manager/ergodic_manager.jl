@@ -77,3 +77,5 @@ function ergodic_score(em::ErgodicManager, ck)
 	end
 	return val
 end
+
+normalize!(em::ErgodicManager) = normalize!(em.phi, em.domain.cell_size)

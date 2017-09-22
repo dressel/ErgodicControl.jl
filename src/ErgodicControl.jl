@@ -1,5 +1,7 @@
 module ErgodicControl
 
+import Base.normalize!
+
 # export functions I've made
 export ErgodicManager, decompose!, reconstruct, decompose
 export ergodic_score, control_score, total_score

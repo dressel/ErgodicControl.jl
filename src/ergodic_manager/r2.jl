@@ -50,6 +50,24 @@ type ErgodicManagerR2 <: ErgodicManager
 		decompose!(em)
 		return em
 	end
+
+	function ErgodicManagerR2(d::Domain, K::Int=5)
+		em = new()
+		em.domain = deepcopy(d)
+		em.K = K
+		em.hk = zeros(K+1,K+1)
+		#em.phi = deepcopy(phi)
+		em.phik = zeros(K+1,K+1)
+		em.Lambda = zeros(K+1,K+1)
+		em.kpixl = zeros(K+1, d.cells[1])
+		em.kpiyl = zeros(K+1, d.cells[2])
+
+		Lambda!(em)
+		kpixl!(em)
+		hk!(em)
+		#decompose!(em)
+		return em
+	end
 end
 
 

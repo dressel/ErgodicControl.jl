@@ -40,6 +40,19 @@ type ErgodicManagerSE2 <: ErgodicManager
 		decompose!(em)
 		return em
 	end
+
+	function ErgodicManagerSE2(d::Domain, K::Int=5)
+		em = new()
+		em.domain = deepcopy(d)
+		em.M = K
+		em.N = K
+		em.P = K
+		em.phik = zeros(em.M+1, em.N+1, em.P+1)
+		em.Lambda = zeros(em.M+1, em.N+1, em.P+1)
+
+		Lambda!(em)
+		return em
+	end
 end
 
 

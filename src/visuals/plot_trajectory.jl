@@ -6,12 +6,12 @@
 
 # what other stuff do we need here?
 # only marks, colors, etc
-function plot_trajectory(xd::VVF; 
-						 ls::String="-",
-						 lw::Real=1.0,
-						 mfc::String="w",
-						 ms::Real=9,
-						 dims::Int=2)
+function plot_trajectory(xd::VVF;
+                         ls::String="-",
+                         lw::Real=1.0,
+                         mfc::String="w",
+                         ms::Real=9,
+                         dims::Int=2)
 
 	N = length(xd)
 	xvals = zeros(N)

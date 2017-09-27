@@ -4,7 +4,11 @@
 using PyPlot
 import PyPlot.plot
 
+# ensures the fonts will be Type 1 if we save as pdf
+# if not, fonts might be Type 3, which most conferences don't allow
 rc("text", usetex=true)
+
+# specifying font family and size desires
 rc("font", family="Times New Roman", size=18)
 
 # must be called before plot
@@ -22,6 +26,7 @@ export plot, plot_trajectory, axis_font
 export figure, savefig, xlabel, ylabel, zlabel, title, hold
 export xlim, ylim, zlim
 
+
 """
 `plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, lw=1.0, ms=9)`
 
@@ -36,9 +41,11 @@ function plot(em::ErgodicManager, xd::VVF;
               alpha=1.0,
               cmap="Greys",
               show_score::Bool=true,
-              lw::Real=1,
-              ms::Real=9,
+              ls::String="-",
+              lw::Real=1.5,
+              mew::Real=1,
               mfc::String="w",
+              ms::Real=10,
               no_domain::Bool=false
              )
 
@@ -49,10 +56,9 @@ function plot(em::ErgodicManager, xd::VVF;
     end
 
     # plot the trajectory
-    plot_trajectory(xd, lw=lw, ms=ms, mfc=mfc, dims=dims)
+    plot_trajectory(xd, ls="-", lw=lw, mew=mew, mfc=mfc, ms=ms, dims=dims)
 
-    # hold and plot domain
-    #hold(true) # deprecated, default behavior is true anyway
+    # plot domain
     plot(em, alpha=alpha, cmap=cmap, no_domain=no_domain)
 
     # determines if ergodic score should be shown
@@ -64,7 +70,8 @@ function plot(em::ErgodicManager, xd::VVF;
 end
 
 # multi-agent version
-function plot(em::ErgodicManager, xd::VVF, vtm::Vector{TrajectoryManager};
+# vtm is a vector of trajectory managers
+function plot(em::ErgodicManager, xd::VVF, vtm::VTM;
               alpha=1.0,
               cmap="Greys",
               show_score::Bool=true,

@@ -8,9 +8,10 @@
 # only marks, colors, etc
 function plot_trajectory(xd::VVF;
                          ls::String="-",
-                         lw::Real=1.0,
+                         lw::Real=1.5,
+                         mew::Real=1,
                          mfc::String="w",
-                         ms::Real=9,
+                         ms::Real=10,
                          dims::Int=2
                         )
 

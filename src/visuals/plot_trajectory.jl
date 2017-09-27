@@ -13,14 +13,14 @@ function plot_trajectory(xd::VVF;
                          ms::Real=9,
                          dims::Int=2)
 
-	N = length(xd)
-	xvals = zeros(N)
-	yvals = zeros(N)
-	zvals = zeros(N)
-	for i = 1:N
-		xvals[i] = xd[i][1]
-		yvals[i] = xd[i][2]
-	end
+    N = length(xd)
+    xvals = zeros(N)
+    yvals = zeros(N)
+    zvals = zeros(N)
+    for i = 1:N
+        xvals[i] = xd[i][1]
+        yvals[i] = xd[i][2]
+    end
 
 	# if in 3 dimensions
 	if dims == 3

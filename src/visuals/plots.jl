@@ -2,21 +2,28 @@
 # plots.jl
 ######################################################################
 using PyPlot
-using PyCall
-PyCall.PyDict(matplotlib["rcParams"])["font.family"]=["Times New Roman"]
-PyCall.PyDict(matplotlib["rcParams"])["font.size"]=18
+import PyPlot.plot
+
+rc("text", usetex=true)
+rc("font", family="Times New Roman", size=18)
 
 # must be called before plot
 function axis_font(af::Real)
-	PyCall.PyDict(matplotlib["rcParams"])["font.size"] = af
+	rc("font", size=af)
 end
 
-# Export my functions and export PyPlot functions
+# include helper files
+include("plot_trajectory.jl")
+
+# export my functions
 export plot, plot_trajectory, axis_font
+
+# export PyPlot functions user might want
 export figure, savefig, xlabel, ylabel, zlabel, title, hold
 export xlim, ylim, zlim
+
 """
-`plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, lw=1.0, ms=6.0)`
+`plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score=true, lw=1.0, ms=9)`
 
 `plot(em::ErgodicManager; alpha=1.0, cmap="Greys")`
 
@@ -25,7 +32,7 @@ The "gray" cmap option is light where there is most density.
 
 An `alpha` value closest to 1.0 is darker; less is more transparent.
 """
-function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Float64=1.0, ms::Float64=6.0, onlyMarks::Bool=false, no_domain::Bool=false)
+function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::Bool=true, lw::Real=1, ms::Real=9, mfc::String="w", onlyMarks::Bool=false, no_domain::Bool=false)
 
 	# If it is in R3, let the trajectory know
 	dims = 2
@@ -34,7 +41,7 @@ function plot(em::ErgodicManager, xd::VVF; alpha=1.0, cmap="Greys", show_score::
 	end
 
 	# plot the trajectory
-	plot_trajectory(xd, lw=lw, ms=ms, onlyMarks=onlyMarks, dims=dims)
+	plot_trajectory(xd, lw=lw, ms=ms, mfc=mfc, onlyMarks=onlyMarks, dims=dims)
 
 	# hold and plot domain
 	#hold(true) # deprecated, default behavior is true anyway
@@ -60,8 +67,6 @@ function plot(em::ErgodicManager, xd::VVF, vtm::Vector{TrajectoryManager}; alpha
 		plot_trajectory(xd, lw=lw, ms=ms, onlyMarks=onlyMarks)
 	end
 
-	# hold and plot domain
-	#hold(true) # deprecated, default is true anyway
 	plot(em, alpha=alpha, cmap=cmap, no_domain=no_domain)
 
 	# determines if ergodic score should be shown
@@ -115,6 +120,7 @@ function plot(em::ErgodicManagerR2; alpha=1.0, cmap="Greys",no_domain=false)
 		imshow(em.phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
 	end
 	axis(a)
+	tick_params(direction="in")
 end
 
 # TODO: this is not ready to go yet
@@ -175,64 +181,10 @@ function plot(em::ErgodicManagerSE2; alpha=1.0, cmap="Greys", no_domain=false)
 	axis(a)
 end
 
-# assumes L = 1.0
-# TODO: do I even use this anymore?
-#function plot(mat::Matrix{Float64}; alpha=1.0, cmap="Greys")
-#	L = 1.0
-#	a = [0,L,0,L]
-#	imshow(mat', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
-#	#labels()	# from an old package
-#	axis(a)
-#end
 
 function plot(d::Domain, phi::Matrix{Float64}; alpha=1.0, cmap="Greys")
 	a = [x_min(d), x_max(d), y_min(d), y_max(d)]
 	imshow(phi', interpolation="none",cmap=cmap,origin="lower",extent=a,vmin=0, alpha=alpha)
 	axis(a)
-end
-
-# what other stuff do we need here?
-# only marks, colors, etc
-function plot_trajectory(xd::VVF; lw::Real=1.0, ms::Real=6, onlyMarks=false, dims::Int=2)
-	N = length(xd)
-	xvals = zeros(N)
-	yvals = zeros(N)
-	zvals = zeros(N)
-	for i = 1:N
-		xvals[i] = xd[i][1]
-		yvals[i] = xd[i][2]
-	end
-	ls = onlyMarks? "None" : "-"
-	m = onlyMarks ? "o" : "."
-
-	# if in 3 dimensions
-	if dims == 3
-		for i = 1:N
-			zvals[i] = xd[i][3]
-		end
-		plot3D(xvals, yvals, zvals, ls=ls, marker=m, ms=ms, lw=lw)
-		xlabel(L"x")
-		ylabel(L"y")
-		zlabel(L"z")
-		return
-	end
-
-	#PyPlot.plot(xvals, yvals, ".-", lw=lw, ms=ms)
-	if onlyMarks
-		#PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms, mfc="none")
-		PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms, alpha=.1,mfc="black")
-	else
-		PyPlot.plot(xvals, yvals, linestyle=ls, marker=m, lw=lw, ms=ms)
-	end
-	#PyPlot.plot(xvals, yvals, line_style, lw=lw, ms=ms)
-end
-
-function plot_trajectory(xd::VVF, vtm::VTM; lw::Real=1.0, ms::Real=6, onlyMarks=false, dims::Int=2)
-
-	num_agents = length(vtm)
-	xds = vvf2vvvf(xd, vtm)
-	#hold(true) # deprecated, default behavior is like true anyway
-	for j = 1:num_agents
-		plot_trajectory(xds[j], lw=lw, ms=ms,onlyMarks=onlyMarks,dims=dims)
-	end
+	tick_params(direction="in")
 end

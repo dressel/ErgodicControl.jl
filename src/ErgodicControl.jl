@@ -15,6 +15,10 @@ export CornerConstantInitializer, GreedyInitializer, PointInitializer
 export DirectionInitializer
 export clerc_trajectory
 export cerc_trajectory
+export x_min, y_min, z_min
+export x_max, y_max, z_max
+export x_size, y_size, z_size
+export x_cells, y_cells, z_cells
 
 # to make some things easier
 # deprecation

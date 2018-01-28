@@ -60,8 +60,8 @@ include("trajectory_manager/descender.jl")
 include("trajectory_generation/trajectory_generation.jl")
 
 # include visuals
-include("visuals/plots.jl")
-include("visuals/gif.jl")
+#include("visuals/plots.jl")
+#include("visuals/gif.jl")
 
 
 end # module

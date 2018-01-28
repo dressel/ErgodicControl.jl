@@ -1,6 +1,7 @@
 # ErgodicControl
 
 [![Build Status](https://travis-ci.org/dressel/ErgodicControl.jl.svg?branch=master)](https://travis-ci.org/dressel/ErgodicControl.jl)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://ergodiccontroljl.readthedocs.io/en/latest/)
 
 This package currently generates ergodic trajectories for dynamical systems.
 Currently, the distributions with with ergodicity can be measured must be either in R^2 or SE(2).

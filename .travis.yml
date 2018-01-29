@@ -11,3 +11,9 @@ notifications:
 #script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("ErgodicControl"); Pkg.test("ErgodicControl"; coverage=true)'
+#
+after_success:
+  # push coverage results to Coveralls
+  - julia -e 'cd(Pkg.dir("ErgodicControl")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+  # push voerage results to code cov
+  - julia -e 'cd(Pkg.dir("ErgodicControl")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'

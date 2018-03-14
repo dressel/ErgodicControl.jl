@@ -16,56 +16,52 @@ Valid `example_name` entries are:
 * "single gaussian"
 * "double gaussian"
 """
-type ErgodicManagerSE2 <: ErgodicManager
-	domain::Domain
-	M::Int
-	N::Int
-	P::Int
-	phi::Array{Float64,3}				# spatial distribution
-	phik::Array{Complex{Float64},3}		# spatial Fourier coefficients
-	Lambda::Array{Float64,3}			# constants 
+mutable struct ErgodicManagerSE2 <: ErgodicManager
+    domain::Domain
+    M::Int
+    N::Int
+    P::Int
+    phi::Array{Float64,3}				# spatial distribution
+    phik::Array{Complex{Float64},3}		# spatial Fourier coefficients
+    Lambda::Array{Float64,3}			# constants 
 
 
-	function ErgodicManagerSE2(d::Domain, phi::Array{Float64,3}, K::Int=5)
-		em = new()
-		em.domain = deepcopy(d)
-		em.M = K
-		em.N = K
-		em.P = K
-		em.phi = deepcopy(phi)
-		em.phik = zeros(em.M+1, em.N+1, em.P+1)
-		em.Lambda = zeros(em.M+1, em.N+1, em.P+1)
+    function ErgodicManagerSE2(d::Domain, phi::Array{Float64,3}, K::Int=5)
+        em = new()
+        em.domain = deepcopy(d)
+        em.M = K
+        em.N = K
+        em.P = K
+        em.phi = deepcopy(phi)
+        em.phik = zeros(em.M+1, em.N+1, em.P+1)
+        em.Lambda = zeros(em.M+1, em.N+1, em.P+1)
 
-		Lambda!(em)
-		decompose!(em)
-		return em
-	end
+        Lambda!(em)
+        decompose!(em)
+        return em
+    end
 
-	function ErgodicManagerSE2(d::Domain, K::Int=5)
-		em = new()
-		em.domain = deepcopy(d)
-		em.M = K
-		em.N = K
-		em.P = K
-		em.phik = zeros(em.M+1, em.N+1, em.P+1)
-		em.Lambda = zeros(em.M+1, em.N+1, em.P+1)
+    function ErgodicManagerSE2(d::Domain, K::Int=5)
+        em = new()
+        em.domain = deepcopy(d)
+        em.M = K
+        em.N = K
+        em.P = K
+        em.phik = zeros(em.M+1, em.N+1, em.P+1)
+        em.Lambda = zeros(em.M+1, em.N+1, em.P+1)
 
-		Lambda!(em)
-		return em
-	end
+        Lambda!(em)
+        return em
+    end
 end
 
 
 # fills the matrix Lambda_{m,n,p}
 function Lambda!(em::ErgodicManagerSE2)
-	for m = 0:em.M
-		for n = 0:em.N
-			for p = 0:em.P
-				den_sqrt = (1.0 + m*m + n*n + p*p)
-				em.Lambda[m+1, n+1, p+1] = 1.0 / (den_sqrt * den_sqrt)
-			end
-		end
-	end
+    for m = 0:em.M, n = 0:em.N, p = 0:em.P
+        den_sqrt = (1.0 + m*m + n*n + p*p)
+        em.Lambda[m+1, n+1, p+1] = 1.0 / (den_sqrt * den_sqrt)
+    end
 end
 
 

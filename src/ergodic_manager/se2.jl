@@ -70,11 +70,11 @@ end
 # Setting and computing phi
 ######################################################################
 function phi!(em::ErgodicManagerSE2, dm::VF, ds::MF)
-	# first, generate d
-	#d = zeros(em.bins, em.bins, em.bins)
-	d = zeros(x_cells(em), y_cells(em), z_cells(em))
-	d_sum = 0.0
-	for xi = 1:x_cells(em)
+    # first, generate d
+    #d = zeros(em.bins, em.bins, em.bins)
+    d = zeros(x_cells(em), y_cells(em), z_cells(em))
+    d_sum = 0.0
+    for xi = 1:x_cells(em)
 		x = x_min(em) + (xi-0.5)*x_size(em)
 		println("xi = ", xi)
 		for yi = 1:y_cells(em)
@@ -86,8 +86,8 @@ function phi!(em::ErgodicManagerSE2, dm::VF, ds::MF)
 			end
 		end
 	end
-	normalize!(d, em.domain.cell_size)
-	em.phi = d
+    normalize!(d, em.domain.cell_size)
+    em.phi = d
 end
 
 
@@ -98,15 +98,13 @@ end
 # Here, I assume it is discrete, but I should change this...
 # TODO: maybe I should do some bounds checking?
 function decompose!(em::ErgodicManagerSE2, d::Array{Float64,3})
-	for m = 0:em.M
-		println("m = ", m)
-		for n = 0:em.N
-			for p = 0:em.P
-				em.phik[m+1,n+1,p+1] = phi_mnp(em, m, n, p, d)
-			end
-		end
-	end
-	em.phi = d
+    for m = 0:em.M
+        #println("m = ", m)
+        for n = 0:em.N, p = 0:em.P
+            em.phik[m+1,n+1,p+1] = phi_mnp(em, m, n, p, d)
+        end
+    end
+    em.phi = d
 end
 
 
@@ -133,30 +131,26 @@ function phi_mnp(em::ErgodicManagerSE2, m::Int, n::Int, p::Int, d::Array{Float64
 end
 
 function F_mnp(m::Int, n::Int, p::Int, x::Float64, y::Float64, z::Float64)
-	# compute psi, r
-	r = sqrt(x*x + y*y)
-	psi = atan2(y,x)	# atan(y/x)
-	i = float(im)
-	return i^(n-m) * exp(i*(m*psi + (n-m)z)) * besselj(m-n, p*r)
+    # compute psi, r
+    r = sqrt(x*x + y*y)
+    psi = atan2(y,x)	# atan(y/x)
+    i = float(im)
+    return i^(n-m) * exp(i*(m*psi + (n-m)z)) * besselj(m-n, p*r)
 end
 
 
 function decompose(em::ErgodicManagerSE2, traj::VVF)
-	N = length(traj)-1
-	ck = zeros(Complex{Float64}, em.M+1, em.N+1, em.P+1)
-	for m = 0:em.M
-		for n = 0:em.N
-			for p = 0:em.P
-				fk_sum = 0.0im
-				# now loop over time
-				for i = 0:N-1
-					xi = traj[i + 1]
-					fk_sum += F_mnp(m,n,p,xi[1],xi[2],xi[3])
-				end
-				# TODO: check that this is right
-				ck[m+1, n+1, p+1] = fk_sum / N
-			end
-		end
-	end
-	return ck
+    N = length(traj)-1
+    ck = zeros(Complex{Float64}, em.M+1, em.N+1, em.P+1)
+    for m = 0:em.M, n = 0:em.N, p = 0:em.P
+        fk_sum = 0.0im
+        # now loop over time
+        for i = 0:N-1
+            xi = traj[i + 1]
+            fk_sum += F_mnp(m,n,p,xi[1],xi[2],xi[3])
+        end
+        # TODO: check that this is right
+        ck[m+1, n+1, p+1] = fk_sum / N
+    end
+    return ck
 end

@@ -154,3 +154,32 @@ function decompose(em::ErgodicManagerSE2, traj::VVF)
     end
     return ck
 end
+
+
+# reconstructs from Fourier coefficients in ck
+# This comes from last equation in chapter 10.3 of 
+#  Engineering Applications of Noncommutative Harmonic Analysis
+# TODO: This is a first cut. Things that I can/should probably change
+#  * probably compute M, N before P
+#  * p = 0 seems to add nothing, don't bother there
+#  * is the call to real() necessary?
+function reconstruct(em::ErgodicManagerSE2, ck::Array{Complex{Float64},3})
+
+    vals = zeros(x_cells(em), y_cells(em), z_cells(em))
+
+    for xi = 1:x_cells(em), yi = 1:y_cells(em), zi=1:z_cells(em)
+		x = x_min(em) + (xi-0.5)*x_size(em)
+        y = y_min(em) + (yi-0.5)*y_size(em)
+        z = z_min(em) + (zi-0.5)*z_size(em)
+        for m = 0:em.M
+            for n = 0:em.N
+                for p = 1:em.P
+                    c = ck[m+1,n+1,p+1]
+                    f = conj(F_mnp(m,n,p,x,y,z))
+                    vals[xi,yi,zi] += real(c * f * p)
+                end
+            end
+        end
+	end
+	return vals
+end

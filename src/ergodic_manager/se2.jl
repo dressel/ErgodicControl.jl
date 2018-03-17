@@ -18,88 +18,80 @@ Valid `example_name` entries are:
 * "single gaussian"
 * "double gaussian"
 """
-mutable struct ErgodicManagerSE2 <: ErgodicManager
+struct ErgodicManagerSE2{PL} <: ErgodicManager
     domain::Domain
 
     M::UnitRange{Int}               # Fourier coefficient indices
     N::UnitRange{Int}
-    P::Int
+    P::PL
 
     phi::Array{Float64,3}				# spatial distribution
     phik::Array{Complex{Float64},3}		# spatial Fourier coefficients
 
+    # user should never have to interact with these
     Lambda::Array{Float64,3}			# constants 
     cache::Array{Complex{Float64},6}    # stores values of F_mnp(x,y,z)
+end
 
+function ErgodicManagerSE2(d::Domain, K::Int=5; P=K)
+    println("P = ", P)
+    domain = deepcopy(d)
 
-    function ErgodicManagerSE2(d::Domain, phi::Array{Float64,3}, K::Int=5)
-        em = new()
-        em.domain = deepcopy(d)
-
-        em.M = 0:K
-        em.N = 0:K
-        em.P = K
-
-        em.phi = deepcopy(phi)
-        em.phik = zeros(length(em.M), length(em.N), em.P)
-        em.Lambda = zeros(length(em.M), length(em.N), em.P)
-
-        tic()
-        cache!(em)
-        println("SE2 cache time = ", round(toq(),3), " seconds")
-
-        Lambda!(em)
-        decompose!(em)
-        return em
+    M = 0:K
+    N = 0:K
+    if isa(P, Real)
+        P = 1:P
     end
 
-    function ErgodicManagerSE2(d::Domain, K::Int=5)
-        em = new()
-        em.domain = deepcopy(d)
+    phi = zeros(x_cells(d), y_cells(d), z_cells(d))
+    phik = zeros(Complex{Float64}, length(M), length(N), length(P))
 
-        em.M = 0:K
-        em.N = 0:K
-        em.P = K
+    Lambda = zeros(length(M), length(N), length(P))
+    cache = zeros(Complex{Float64}, z_cells(d), y_cells(d), x_cells(d), length(P), length(N), length(M))
 
-        em.phik = zeros(em.M+1, em.N+1, em.P)
-        em.Lambda = zeros(em.M+1, em.N+1, em.P)
+    em = ErgodicManagerSE2(domain, M, N, P, phi, phik, Lambda, cache)
 
-        Lambda!(em)
-        return em
-    end
+    Lambda!(em)
+    tic()
+    cache!(em)
+    println("SE2 cache time = ", round(toq(),3), " seconds")
+
+    return em
+end
+
+function ErgodicManagerSE2(d::Domain, phi::Array{Float64,3}, K::Int=5)
+    em = ErgodicManagerSE2(d, K)
+    copy!(em.phi, phi)
+    decompose!(em)
+    return em
 end
 
 
 # Calls to F_mnp are expensive as they rely on the bessel function.
 # Therefore, we store calls to this function in an array beforehand.
 function cache!(em::ErgodicManagerSE2)
-    n_M = length(em.M)
-    n_N = length(em.N)
-    cache = zeros(Complex{Float64}, z_cells(em), y_cells(em), x_cells(em), em.P, n_N, n_M)
-    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), p = 1:em.P
+    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), (pl,p) in enum(em.P)
         for xi = 1:x_cells(em), yi = 1:y_cells(em), zi=1:z_cells(em)
             x = x_min(em) + (xi-0.5)*x_size(em)
             y = y_min(em) + (yi-0.5)*y_size(em)
             z = z_min(em) + (zi-0.5)*z_size(em)
-            cache[zi,yi,xi,p,ni,mi] = F_mnp(m,n,p,x,y,z)
+            em.cache[zi,yi,xi,pl,ni,mi] = F_mnp(m,n,p,x,y,z)
         end
     end
-    em.cache = cache
 end
 
 
 # fills the matrix Lambda_{m,n,p}
 function Lambda!(em::ErgodicManagerSE2)
-    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), p = 1:em.P
+    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), (pl,p) in enum(em.P)
         den_sqrt = (1.0 + m*m + n*n + p*p)
-        em.Lambda[mi, ni, p] = 1.0 / (den_sqrt * den_sqrt)
+        em.Lambda[mi, ni, pl] = 1.0 / (den_sqrt * den_sqrt)
     end
 end
 
 
-######################################################################
 # Setting and computing phi
-######################################################################
+# TODO: this is a nightmare and probably doesn't work
 function phi!(em::ErgodicManagerSE2, dm::VF, ds::MF)
     # first, generate d
     d = zeros(x_cells(em), y_cells(em), z_cells(em))
@@ -127,25 +119,24 @@ end
 # update the Fourier coefficients based on some distribution
 # Here, I assume it is discrete, but I should change this...
 # TODO: maybe I should do some bounds checking?
-function decompose!(em::ErgodicManagerSE2, d::Array{Float64,3})
-    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), p = 1:em.P
-        em.phik[mi,ni,p] = phi_mnp(em, mi, ni, p, d)
+function decompose!(em::ErgodicManagerSE2, phi::Array{Float64,3})
+    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), (pl,p) in enum(em.P)
+        em.phik[mi,ni,pl] = phi_mnp(em, mi, ni, pl, phi)
     end
-    em.phi = d
 end
 
 
 # computes phi_mnp by iterating over the state space
 # uses the cache to evaluate F_mnp
-function phi_mnp(em::ErgodicManagerSE2, mi::Int, ni::Int, p::Int, d::Array{Float64,3})
+function phi_mnp(em::ErgodicManagerSE2, mi::Int, ni::Int, pl::Int, phi::Array{Float64,3})
 	val = 0.0im
 	for xi = 1:x_cells(em), yi = 1:y_cells(em), zi = 1:z_cells(em)
-        val += d[xi,yi,zi] * em.cache[zi, yi, xi, p, ni, mi]
+        val += phi[xi,yi,zi] * em.cache[zi, yi, xi, pl, ni, mi]
 	end
 	return val * em.domain.cell_size
 end
 
-function F_mnp(m::Int, n::Int, p::Int, x::Float64, y::Float64, z::Float64)
+function F_mnp(m::Int, n::Int, p::Real, x::Float64, y::Float64, z::Float64)
     # compute psi, r
     r = sqrt(x*x + y*y)
     psi = atan2(y,x)	# atan(y/x)
@@ -157,9 +148,9 @@ end
 function decompose(em::ErgodicManagerSE2, traj::VVF)
     N = length(traj)-1
 
-    ck = zeros(Complex{Float64}, length(em.M), length(em.N), em.P)
+    ck = zeros(Complex{Float64}, length(em.M), length(em.N), length(em.P))
 
-    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), p = 1:em.P
+    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), (pl,p) in enum(em.P)
         fk_sum = 0.0im
         # now loop over time
         for i = 0:N-1
@@ -167,7 +158,7 @@ function decompose(em::ErgodicManagerSE2, traj::VVF)
             fk_sum += F_mnp(m, n, p, xi[1], xi[2], xi[3])
         end
         # TODO: check that this is right
-        ck[mi, ni, p] = fk_sum / N
+        ck[mi, ni, pl] = fk_sum / N
     end
     return ck
 end
@@ -185,10 +176,10 @@ function reconstruct(em::ErgodicManagerSE2, ck::Array{Complex{Float64},3})
     vals = zeros(Complex{Float64}, x_cells(em), y_cells(em), z_cells(em))
 
     # this order is much better
-    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), p = 1:em.P
-        c = ck[mi, ni, p]
+    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), (pl,p) in enum(em.P)
+        c = ck[mi, ni, pl]
         for xi = 1:x_cells(em), yi = 1:y_cells(em), zi=1:z_cells(em)
-            f = conj(em.cache[zi, yi, xi, p, ni, mi])
+            f = conj(em.cache[zi, yi, xi, pl, ni, mi])
             vals[xi,yi,zi] += c * f * p
         end
 	end

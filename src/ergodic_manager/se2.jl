@@ -33,8 +33,7 @@ struct ErgodicManagerSE2{PL} <: ErgodicManager
     cache::Array{Complex{Float64},6}    # stores values of F_mnp(x,y,z)
 end
 
-function ErgodicManagerSE2(d::Domain, K::Int=5; P=K)
-    println("P = ", P)
+function ErgodicManagerSE2(d::Domain, K::Int=5; M::Int=K, N::Int=K, P=K)
     domain = deepcopy(d)
 
     M = 0:K
@@ -69,13 +68,34 @@ end
 
 # Calls to F_mnp are expensive as they rely on the bessel function.
 # Therefore, we store calls to this function in an array beforehand.
-function cache!(em::ErgodicManagerSE2)
+function naive_cache!(em::ErgodicManagerSE2)
     for (mi,m) in enum(em.M), (ni,n) in enum(em.N), (pl,p) in enum(em.P)
         for xi = 1:x_cells(em), yi = 1:y_cells(em), zi=1:z_cells(em)
             x = x_min(em) + (xi-0.5)*x_size(em)
             y = y_min(em) + (yi-0.5)*y_size(em)
             z = z_min(em) + (zi-0.5)*z_size(em)
             em.cache[zi,yi,xi,pl,ni,mi] = F_mnp(m,n,p,x,y,z)
+        end
+    end
+end
+
+# more efficient way to cache
+# reduces calls to bessel function
+function cache!(em::ErgodicManagerSE2)
+    i = float(im)
+    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), (pl,p) in enum(em.P)
+        inm = i^(n-m)
+        for xi = 1:x_cells(em), yi = 1:y_cells(em)
+            x = x_min(em) + (xi-0.5)*x_size(em)
+            y = y_min(em) + (yi-0.5)*y_size(em)
+            r = sqrt(x*x + y*y)
+            psi = atan2(y,x)    # atan(y/x)
+            bj = besselj(m-n, p*r)
+            for zi = 1:z_cells(em)
+                z = z_min(em) + (zi-0.5)*z_size(em)
+                rar = exp(i*(m*psi + (n-m)*z))
+                em.cache[zi,yi,xi,pl,ni,mi] = inm * rar * bj
+            end
         end
     end
 end
@@ -171,6 +191,23 @@ end
 # Returns an array of complex numbers.
 # Even if you expect an array of reals, there will be small complex values
 # call real(output) if you want just the real parts
+function reconstruct2(em::ErgodicManagerSE2, ck::Array{Complex{Float64},3})
+
+    vals = zeros(Complex{Float64}, x_cells(em), y_cells(em), z_cells(em))
+
+    # this order is much more efficient
+    for (mi,m) in enum(em.M), (ni,n) in enum(em.N), (pl,p) in enum(em.P)
+        c = ck[mi, ni, pl]
+        for xi = 1:x_cells(em), yi = 1:y_cells(em), zi=1:z_cells(em)
+            f = conj(em.cache[zi, yi, xi, pl, ni, mi])
+            vals[xi,yi,zi] += c * f * p
+        end
+	end
+	return vals
+end
+
+# This is a test... multiplying coefficients when M\neq0,N\neq0 by 2
+# Doing this because negatives end up being conjugates
 function reconstruct(em::ErgodicManagerSE2, ck::Array{Complex{Float64},3})
 
     vals = zeros(Complex{Float64}, x_cells(em), y_cells(em), z_cells(em))
@@ -180,8 +217,15 @@ function reconstruct(em::ErgodicManagerSE2, ck::Array{Complex{Float64},3})
         c = ck[mi, ni, pl]
         for xi = 1:x_cells(em), yi = 1:y_cells(em), zi=1:z_cells(em)
             f = conj(em.cache[zi, yi, xi, pl, ni, mi])
-            vals[xi,yi,zi] += c * f * p
+            vals[xi,yi,zi] += 2*c * f * p
         end
 	end
+    for (pl,p) in enum(em.P)
+    c = ck[1, 1, pl]
+        for xi = 1:x_cells(em), yi = 1:y_cells(em), zi=1:z_cells(em)
+            f = conj(em.cache[zi, yi, xi, pl, 1, 1])
+            vals[xi,yi,zi] -= c * f * p
+        end
+    end
 	return vals
 end

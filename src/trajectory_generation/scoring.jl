@@ -28,13 +28,18 @@ end
 #  complex numbers and stuff?
 function ergodic_score(em::ErgodicManagerSE2, ck::Array{Complex{Float64},3})
 	val = 0.0
-	for m = 0:em.M
-		for n = 0:em.N
-			for p = 0:em.P
-				d = em.phik[m+1,n+1,p+1] - ck[m+1,n+1,p+1]
+
+    # TODO: Must be scrubbed since em.M became range and not int
+	#for m = 0:em.M
+	#	for n = 0:em.N
+	#		for p = 0:em.P
+    for (mi,m) in enumerate(em.M)
+        for (ni,n) in enumerate(em.N)
+            for (pl,p) in enumerate(em.P)
+				d = em.phik[mi,ni,pl] - ck[mi,ni,pl]
 				dr = real(d)
 				di = imag(d)
-				val += em.Lambda[m+1,n+1,p+1] * (dr*dr + di*di)
+				val += em.Lambda[mi,ni,pl] * (dr*dr + di*di)
 			end
 		end
 	end

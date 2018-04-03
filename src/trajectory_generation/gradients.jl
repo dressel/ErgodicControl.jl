@@ -257,12 +257,17 @@ function compute_ans(em::ErgodicManagerSE2, xd::VVF, tm::TrajectoryManager, n::I
 	r = sqrt(r2)
 	psi = atan2(y, x)
 	 
-	for m = 0:em.M
-		for n = 0:em.N
+    # TODO: this needs to be scrubbed real well, especially since I changed
+    #        from em.M being an integer to a range
+	#for m = 0:em.M
+    #    for n = 0:em.N
+    for (mi,m) in enumerate(em.M)
+        for (ni,n) in enumerate(em.N)
 			# commonly used values
 			inm = i^(n-m)
 			expi = exp(i * (m*psi + (n-m)*z) )
-			for p = 0:em.P
+			#for p = 0:em.P
+            for (pl,p) in enumerate(em.P)
 
 				pr = p*r	# commonly used
 				bjmn = besselj(m-n, pr)
@@ -280,7 +285,8 @@ function compute_ans(em::ErgodicManagerSE2, xd::VVF, tm::TrajectoryManager, n::I
 				dF_dz = inm * bjmn * expi * i * (n-m)
 
 
-				c = em.Lambda[m+1,n+1,p+1] * (ck[m+1,n+1,p+1] - em.phik[m+1,n+1,p+1])
+				#c = em.Lambda[m+1,n+1,p+1] * (ck[m+1,n+1,p+1] - em.phik[m+1,n+1,p+1])
+				c = em.Lambda[mi,ni,pl] * (ck[mi,ni,pl] - em.phik[mi,ni,pl])
 				c_r = real(c)
 				c_i = imag(c)
 

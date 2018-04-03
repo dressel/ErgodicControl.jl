@@ -5,9 +5,7 @@
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://ergodiccontroljl.readthedocs.io/en/latest/)
 
 This package currently generates ergodic trajectories for dynamical systems.
-Currently, the distributions with with ergodicity can be measured must be either in R^2 or SE(2).
-
-In the future, I will add additional dimensions.
+Currently, there are two trajectory generation methods supported: projection-based optimization and spectral multiscale coverage.
 
 Check out the [complete documentation](http://ergodiccontroljl.readthedocs.io/en/latest/index.html).
 

@@ -65,12 +65,13 @@ The Dubins car is simple and often used to model cars.
 
     using ErgodicControl
 
+    # ergodic manager
     em = ErgodicManagerR2("double gaussian", K=5, bins=100)
 
+    # trajectory manager
     x0 = [0.5,0.01,pi/4]
     N = 40
     h = 0.1
-
     tm = TrajectoryManager(x0, h, N, ConstantInitializer([0.0000]))
 
     # things needed for dynamics
@@ -79,7 +80,11 @@ The Dubins car is simple and often used to model cars.
     tm.R = 0.01 * eye(1)
     tm.Rn = 1 * eye(1)
 
+    # generate trajectory
     xd, ud = pto_trajectory(em, tm)
+
+    # plotting
+    using ErgodicControlPlots
     plot(em, xd)
 
 Look at how bad this is! The vehicle leaves our domain!

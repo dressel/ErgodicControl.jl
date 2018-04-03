@@ -9,31 +9,31 @@ export InverseRootStep
 export ArmijoLineSearch
 export ConstantStep
 
-type InverseStep <: Descender
-	alpha::Float64
+struct InverseStep <: Descender
+    alpha::Float64
 end
 
 function get_step_size(ir::InverseStep, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, zd::VVF, vd::VVF, ad::MF, bd::MF, K::Vector{MF}, i::Int)
-	return ir.alpha / i
+    return ir.alpha / i
 end
 
 
-type InverseRootStep <: Descender
-	alpha::Float64
+struct InverseRootStep <: Descender
+    alpha::Float64
 end
 
 #get_step_size(ir::InverseRootStep, i::Int) = ir.alpha / sqrt(i)
 function get_step_size(ir::InverseRootStep, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, zd::VVF, vd::VVF, ad::MF, bd::MF, K::Vector{MF}, i::Int)
-	return ir.alpha / sqrt(i)
+    return ir.alpha / sqrt(i)
 end
 
 
-type ConstantStep <: Descender
-	alpha::Float64
+struct ConstantStep <: Descender
+    alpha::Float64
 end
 
 function get_step_size(cs::ConstantStep, em::ErgodicManager, tm::TrajectoryManager, xd::VVF, ud::VVF, zd::VVF, vd::VVF, ad::MF, bd::MF, K::Vector{MF}, i::Int)
-	return cs.alpha
+    return cs.alpha
 end
 
 

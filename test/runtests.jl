@@ -13,3 +13,5 @@ tm = TrajectoryManager(x0, h, N, ConstantInitializer([0.0,0.0]))
 xd, ud = pto_trajectory(em, tm)
 
 include("dubins.jl")
+
+include("r2t.jl")

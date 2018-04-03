@@ -5,7 +5,7 @@ Examples
 Single Integrator
 ==================
 Here is an example
-::
+code-block:: julia
 
     using ErgodicControl
 
@@ -18,6 +18,9 @@ Here is an example
     tm = TrajectoryManager(x0, h, N, ConstantInitializer([0.0,0.0]))
 
     xd, ud = pto_trajectory(em, tm)
+
+    # plotting
+    using ErgodicControlPlots
     plot(em, xd)
 
 .. image:: http://stanford.edu/~dressel/gifs/ergodic/single1.png

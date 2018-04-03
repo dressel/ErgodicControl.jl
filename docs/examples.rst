@@ -23,7 +23,7 @@ Here is an example
     using ErgodicControlPlots
     plot(em, xd)
 
-.. image:: http://stanford.edu/~dressel/gifs/ergodic/single1.png
+.. image:: http://stanford.edu/~dressel/gifs/ergodic/example1.png
 
 
 

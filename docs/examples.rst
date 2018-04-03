@@ -4,7 +4,7 @@ Examples
 
 Single Integrator
 ==================
-Here is an example
+
 ::
 
     using ErgodicControl
@@ -29,7 +29,7 @@ Here is an example
 
 Double Integrator
 ===================
-Here is another example
+This example needs to be redone
 ::
 
     using ErgodicControl

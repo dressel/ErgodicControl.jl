@@ -12,3 +12,11 @@ normalize!(em)
 decompose!(em)
 
 phi2 = reconstruct(em, em.phik)
+
+x0 = [0.49, 0.01, 0.01]
+dt = 0.5
+N = 80
+tm = TrajectoryManager(x0, dt, N, ConstantInitializer([0.0,0.0,0.0]))
+dynamics!(tm, SingleIntegrator(3,dt))
+
+xd, ud = pto_trajectory(em, tm)

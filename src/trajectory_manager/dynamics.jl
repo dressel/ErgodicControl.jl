@@ -9,15 +9,15 @@ export GroupDynamics
 export vvf2vvvf
 
 type LinearDynamics <: Dynamics
-	n::Int
-	m::Int
-	A::Matrix{Float64}
-	B::Matrix{Float64}
+    n::Int
+    m::Int
+    A::Matrix{Float64}
+    B::Matrix{Float64}
 
-	function LinearDynamics(A, B)
-		n,m = size(B)
-		return new(n,m,deepcopy(A),deepcopy(B))
-	end
+    function LinearDynamics(A, B)
+        n,m = size(B)
+        return new(n,m,deepcopy(A),deepcopy(B))
+    end
 end
 
 type GroupDynamics <: Dynamics

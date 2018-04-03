@@ -221,7 +221,7 @@ function reconstruct(em::ErgodicManagerSE2, ck::Array{Complex{Float64},3})
         end
 	end
     for (pl,p) in enum(em.P)
-    c = ck[1, 1, pl]
+        c = ck[1, 1, pl]
         for xi = 1:x_cells(em), yi = 1:y_cells(em), zi=1:z_cells(em)
             f = conj(em.cache[zi, yi, xi, pl, 1, 1])
             vals[xi,yi,zi] -= c * f * p

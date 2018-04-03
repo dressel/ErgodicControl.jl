@@ -29,7 +29,7 @@ Single Integrator
 
 Double Integrator
 ===================
-This example needs to be redone
+This example needs to be redone.
 ::
 
     using ErgodicControl
@@ -181,7 +181,6 @@ Time-evolving Spatial Distribution
 
 Multi-agent Trajectories
 ===============================
-This works
 ::
 
     using ErgodicControl
@@ -215,6 +214,9 @@ This works
     # Generate the trajectories
     ddc = 1e-4
     xd, ud = pto_trajectory(em, vtm, dd_crit=ddc)
+
+    # plotting
+    using ErgodicControlPlots
     plot(em, xd, vtm)
 
 

@@ -79,9 +79,9 @@ end
 function LQ(K::VMF, Ginv::VMF, A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 
 	# Solely for LQ
-	r = Array(Vector{Float64}, N+1)
+    r = Array{Vector{Float64}}(N+1)
 	r[N+1] = 0.5*a[:,N+1]
-	C = Array(Vector{Float64}, N)
+    C = Array{Vector{Float64}}(N)
 
 	# Sweep from the back
 	# really n = (N-1):-1:0, but then all indices need an extra +1
@@ -98,10 +98,10 @@ end
 # used in linear pto
 function LQ2(A::VMF, B::VMF, Q::MF, R::MF, N::Int)
 	# Also needed for LQR
-	P = Array(Matrix{Float64}, N+1)
-	G = Array(Matrix{Float64}, N)
-	Ginv = Array(Matrix{Float64}, N)
-	K = Array(Matrix{Float64}, N)
+    P = Array{Matrix{Float64}}(N+1)
+    G = Array{Matrix{Float64}}(N)
+    Ginv = Array{Matrix{Float64}}(N)
+    K = Array{Matrix{Float64}}(N)
 	P[N+1] = Q
 
 	# Sweep from the back
@@ -124,7 +124,7 @@ function apply_LQ_gains(A::MF, B::MF, K::Vector{MF}, C::VVF)
 	N = length(K)
 
 	z = [zeros(size(B,1))]
-	v = Array(Vector{Float64}, 0)
+    v = Array{Vector{Float64}}(0)
 	for n = 1:N
 		push!(v, -K[n]*z[n] - C[n])
 		push!(z, A*z[n] + B*v[n])

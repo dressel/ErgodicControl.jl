@@ -26,7 +26,7 @@ end
 # A projection for LTI systems
 function project2(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)
 	xdn = [xd[1]]
-	udn = Array(VF, 0)
+    udn = Array{VF}(0)
 
 	xdn = VVF(0)
 	udn = VVF(0)

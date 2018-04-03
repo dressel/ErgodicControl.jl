@@ -5,7 +5,7 @@ Examples
 Single Integrator
 ==================
 Here is an example
-code-block:: julia
+::
 
     using ErgodicControl
 

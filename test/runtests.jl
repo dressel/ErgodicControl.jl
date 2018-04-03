@@ -25,3 +25,5 @@ include("smc.jl")
 include("se2.jl")
 
 include("linear.jl")
+
+include("max.jl")

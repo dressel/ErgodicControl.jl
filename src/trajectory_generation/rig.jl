@@ -10,31 +10,31 @@ export rig_trajectory, Node, tree2traj
 #typealias Loc Tuple{Float64, Float64}
 const Loc = Tuple{Float64, Float64}
 
-immutable Node
-	x::Loc			# location
-	c::Int			# cost (really closer to depth)
-	ig::Float64		# info gathered
+struct Node
+    x::Loc			# location
+    c::Int			# cost (really closer to depth)
+    ig::Float64		# info gathered
 
-	id::Int			# id of the node
-	pnid::Int		# id of the parent node
+    id::Int			# id of the node
+    pnid::Int		# id of the parent node
 
-	closed::Bool
-	cx::Int
-	cy::Int
+    closed::Bool
+    cx::Int
+    cy::Int
 end
 
 get_pnid(n::Node) = n.pnid
 
 # returns the distance between location x1 and location x2
 function get_dist(x1::Loc, x2::Loc)
-	dx = x1[1] - x2[1]
-	dy = x1[2] - x2[2]
-	return sqrt(dx*dx + dy*dy)
+    dx = x1[1] - x2[1]
+    dy = x1[2] - x2[2]
+    return sqrt(dx*dx + dy*dy)
 end
 function get_dist2(x1::Loc, x2::Loc)
-	dx = x1[1] - x2[1]
-	dy = x1[2] - x2[2]
-	return dx*dx + dy*dy
+    dx = x1[1] - x2[1]
+    dy = x1[2] - x2[2]
+    return dx*dx + dy*dy
 end
 
 # returns node nearest to x_samp
@@ -53,12 +53,12 @@ function nearest(x_samp::Loc, V::Vector{Node})
 	return nearest_node
 end
 
-# fuuuuck, I don't want to bounds check...
+# I don't want to bounds check...
 function steer(x_start::Loc, x_goal::Loc, td::Float64)
-	dx = x_goal[1] - x_start[1]
-	dy = x_goal[2] - x_start[2]
-	d = sqrt(dx*dx + dy*dy)
-	return x_start[1] + td*dx/d, x_start[2] + td*dy/d
+    dx = x_goal[1] - x_start[1]
+    dy = x_goal[2] - x_start[2]
+    d = sqrt(dx*dx + dy*dy)
+    return x_start[1] + td*dx/d, x_start[2] + td*dy/d
 end
 
 
@@ -103,13 +103,13 @@ end
 # suppose there are 10 cells per side (10 x 10 grid)
 # return values for each dimension will be within 1:10
 function get_cell(x::Loc, cell_length::Float64)
-	x1 = round(Int, x[1] / cell_length, RoundDown) + 1
-	x2 = round(Int, x[2] / cell_length, RoundDown) + 1
-	return x1, x2
+    x1 = round(Int, x[1] / cell_length, RoundDown) + 1
+    x2 = round(Int, x[2] / cell_length, RoundDown) + 1
+    return x1, x2
 end
 
 function prune(n::Node)
-	return false
+    return false
 end
 
 # eid is expected information density

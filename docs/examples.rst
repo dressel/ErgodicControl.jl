@@ -137,7 +137,6 @@ Plotting is a bit trickier, and is not finished for three dimensions. The tough 
 
 Time-evolving Spatial Distribution
 ========================================
-This works
 ::
 
     using ErgodicControl
@@ -172,6 +171,9 @@ This works
     ddc = 1e-5
     v = true
     xd,ud = pto_trajectory(em, tm, dd_crit=ddc, max_iters=mi, verbose=v)
+
+    # generating the gif
+    using ErgodicControlPlots
     gif(em, xd)
 
 .. image:: http://stanford.edu/~dressel/gifs/ergodic/time.gif

@@ -10,3 +10,5 @@ phi = gaussian(d, [0.5,0.5,pi], 0.03*eye(3))
 copy!(em.phi, phi)
 normalize!(em)
 decompose!(em)
+
+phi2 = reconstruct(em, em.phik)

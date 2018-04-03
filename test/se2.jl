@@ -19,4 +19,4 @@ N = 80
 tm = TrajectoryManager(x0, dt, N, ConstantInitializer([0.0,0.0,0.0]))
 dynamics!(tm, SingleIntegrator(3,dt))
 
-xd, ud = pto_trajectory(em, tm)
+xd, ud = pto_trajectory(em, tm, max_iters=20)

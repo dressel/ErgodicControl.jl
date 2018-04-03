@@ -23,3 +23,5 @@ include("r3.jl")
 include("smc.jl")
 
 include("se2.jl")
+
+include("linear.jl")

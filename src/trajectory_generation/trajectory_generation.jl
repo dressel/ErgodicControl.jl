@@ -10,6 +10,7 @@ include("printing.jl")
 
 # actual methods
 include("pto.jl")
+include("rrt.jl")
 include("pto_multi.jl")
 include("pto_linear.jl")
 include("smc.jl")

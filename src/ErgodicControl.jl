@@ -3,6 +3,7 @@ __precompile__()
 module ErgodicControl
 
 import Base.normalize!
+using SpecialFunctions
 
 # export functions I've made
 export ErgodicManager, decompose!, reconstruct, decompose

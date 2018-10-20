@@ -140,12 +140,10 @@ end
 # Here, I assume it is discrete, but I should change this...
 # TODO: maybe I should do some bounds checking?
 function decompose!(em::ErgodicManagerR2, d::Matrix{Float64})
-	for k1 = 0:em.K
-		for k2 = 0:em.K
-			em.phik[k1+1,k2+1] = phi_ij(em, k1, k2, d)
-		end
-	end
-	em.phi = d
+    for k1 = 0:em.K, k2 = 0:em.K
+        em.phik[k1+1,k2+1] = phi_ij(em, k1, k2, d)
+    end
+    em.phi = d
 end
 
 

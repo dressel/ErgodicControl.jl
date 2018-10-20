@@ -73,12 +73,10 @@ end
 
 # fills each entry Lambda[k1,k2] in the Lambda matrix
 function Lambda!(em::ErgodicManagerR2)
-	for k1 = 0:em.K
-		for k2 = 0:em.K
-			den = (1.0 + k1*k1 + k2*k2) ^ 1.5
-			em.Lambda[k1+1, k2+1] = 1.0 / den
-		end
-	end
+    for k1 = 0:em.K, k2 = 0:em.K
+        den = (1.0 + k1*k1 + k2*k2) ^ 1.5
+        em.Lambda[k1+1, k2+1] = 1.0 / den
+    end
 end
 
 

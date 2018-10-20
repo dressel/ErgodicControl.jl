@@ -106,11 +106,9 @@ end
 # generates the hk coefficients for the ergodic manager
 # these coefficients only need to be computed once
 function hk!(em::ErgodicManagerR2)
-	for k1 = 0:em.K
-		for k2 = 0:em.K
-			em.hk[k1+1,k2+1] = hk_ij(em, k1, k2)
-		end
-	end
+    for k1 = 0:em.K, k2 = 0:em.K
+        em.hk[k1+1,k2+1] = hk_ij(em, k1, k2)
+    end
 end
 
 # computes the coefficients for a specific value of k1 and k2

@@ -22,7 +22,7 @@ function pto_trajectory(em::ErgodicManager, tm::TrajectoryManager, xd0::VVF, ud0
 	ad = zeros(tm.dynamics.n, N+1)
 	bd = zeros(tm.dynamics.m, N)
 
-	# prepare for logging if need be 
+	# prepare for logging if need be
 	if logging
 		outfile = open("temp.csv", "w")
 		save(outfile, xd)

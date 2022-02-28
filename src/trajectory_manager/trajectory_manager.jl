@@ -12,13 +12,13 @@ abstract type Descender end
 abstract type IntegrationScheme end
 
 
-type TrajectoryManager
+mutable struct TrajectoryManager
 
 	# needed for all trajectories
 	N::Int
 	h::Float64
 	x0::Vector{Float64}
-	
+
 	# Cost functions
 	q::Float64
 	R::Matrix{Float64}
@@ -41,16 +41,16 @@ type TrajectoryManager
 		tm.x0 = deepcopy(x0)
 
 		# needed for ergodic trajectories
-		tm.Qn = eye(2)
+		tm.Qn = [1 0; 0 1]
 		tm.q = 1.0
-		tm.R = 0.01 * eye(2)
-		tm.Rn = eye(2)
+		tm.R = 0.01 * [1 0; 0 1]
+		tm.Rn = [1 0; 0 1]
 		tm.barrier_cost = 0.
 		tm.initializer = i
 		tm.descender = ArmijoLineSearch()
 
 		# dynamics stuff
-		tm.dynamics = LinearDynamics(eye(2), tm.h*eye(2))
+		tm.dynamics = LinearDynamics([1 0; 0 1], tm.h*[1 0; 0 1])
 		tm.int_scheme = ForwardEuler()
 
 		return tm
@@ -72,7 +72,7 @@ function compute_controls(xd::VVF, h::Float64)
 	for n = 1:N
 		ud[n] = (xd[n+1] - xd[n]) / h
 	end
-	
+
 	return ud
 end
 

@@ -6,10 +6,11 @@
 
 export smc_trajectory
 
-function smc_trajectory(em::ErgodicManagerR2, tm::TrajectoryManager; verbose::Bool=true, umax::Float64=1.0) 
+function smc_trajectory(em::ErgodicManagerR2, tm::TrajectoryManager; verbose::Bool=true, umax::Float64=1.0)
 
-    ud = VVF(tm.N)
-    xd = VVF(tm.N+1)
+
+    ud = Array{Vector{Float64}}(undef, tm.N)#VVF(tm.N)
+    xd = Array{Vector{Float64}}(undef, tm.N+1)#VVF(tm.N+1)
     xd[1] = deepcopy(tm.x0)
     ck = zeros(em.K+1, em.K+1)
     for n = 1:tm.N
@@ -56,7 +57,7 @@ function compute_B(em::ErgodicManagerR2, xd::VVF, n::Int, h::Float64, ck::Matrix
 end
 
 
-function smc_trajectory(em::ErgodicManagerR3, tm::TrajectoryManager; verbose::Bool=true, umax::Float64=1.0) 
+function smc_trajectory(em::ErgodicManagerR3, tm::TrajectoryManager; verbose::Bool=true, umax::Float64=1.0)
 
     ud = VVF(tm.N)
     xd = VVF(tm.N+1)

@@ -7,7 +7,7 @@
 
 Random selection of points.
 """
-type RandomInitializer <: Initializer end
+mutable struct RandomInitializer <: Initializer end
 
 
 function initialize(ri::RandomInitializer, em::ErgodicManager, tm::TrajectoryManager)

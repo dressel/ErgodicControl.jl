@@ -7,10 +7,11 @@
 # returns xdn and udn, the feasible projected trajectory
 function project(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)
 	xdn = [xd[1]]
-	udn = Array{VF}(0)
+
+	udn = Array{Vector{Float64}}(undef, 0)#Array{VF}(0)
 
 	# perform descent
-	alpha = VVF(tm.N + 1)
+	alpha = Vector{Vector{Float64}}(undef, tm.N+1)#VVF(tm.N + 1)
 	for n = 0:tm.N
 		alpha[n+1] = xd[n+1] + step_size * zd[n+1]
 	end
@@ -26,7 +27,7 @@ end
 # A projection for LTI systems
 function project2(em::ErgodicManager, tm::TrajectoryManager, K::VMF, xd::VVF, ud::VVF, zd::VVF, vd::VVF, step_size::Float64)
 	xdn = [xd[1]]
-    udn = Array{VF}(0)
+    udn = Array{VF}(undef, 0)#Array{VF}(0)
 
 	xdn = VVF(0)
 	udn = VVF(0)

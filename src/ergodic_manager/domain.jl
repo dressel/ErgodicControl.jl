@@ -1,11 +1,11 @@
 ######################################################################
 # domain.jl
 #
-# TODO: allow creation from tuples as well 
+# TODO: allow creation from tuples as well
 ######################################################################
 export Domain
 
-type Domain
+mutable struct Domain
 	# user provided
 	mins::Vector{Float64}			# minimum value per dimension
 	maxes::Vector{Float64}			# maximum value per dimension
@@ -50,11 +50,11 @@ type Domain
 	end
 
 	# Allow user to only give maxes
-	function Domain(maxes, bins::Vector{Int}) 
+	function Domain(maxes, bins::Vector{Int})
 		return Domain(zeros(length(maxes)), maxes, bins)
 	end
 
-	function Domain(maxes, num_cells::Int) 
+	function Domain(maxes, num_cells::Int)
 		return Domain(zeros(length(maxes)), maxes, num_cells)
 	end
 

@@ -19,7 +19,7 @@ Valid `example_name` entries are:
 * "single gaussian"
 * "double gaussian"
 """
-type ErgodicManagerR2 <: ErgodicManager
+mutable struct ErgodicManagerR2 <: ErgodicManager
 	domain::Domain				# spatial domain
 	K::Int						# number of Fourier coefficients
 	phi::Matrix{Float64}		# spatial distribution

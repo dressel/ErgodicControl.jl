@@ -46,6 +46,32 @@ function gradients!(ad::MF, bd::MF, em::ErgodicManager, tm::TrajectoryManager, x
 			end
 		end
 
+		# Repeat for Pointset Boundary
+		if tm.barrier_cost > 0.0
+			if em.xy_points_boundary != PointsBoundary(Tuple{Float64, Float64}[])
+				xnx = xd[n+1][1]
+				xny = xd[n+1][2]
+
+				if in_boundary([xnx, xny], em.xy_points_boundary)
+					closest_point = find_closest_boundary([xnx, xny], em.xy_points_boundary)
+
+					if (xnx > closest_point[1])
+						ad[1,ni] += tm.barrier_cost * 2.0 * (xnx - closest_point[1])
+					elseif (xnx < closest_point[1])
+						ad[1,ni] += tm.barrier_cost * 2.0 * (xnx - closest_point[1])
+					end
+					if (xny > closest_point[2])
+						ad[2,ni] += tm.barrier_cost * 2.0 * (xny - closest_point[2])
+					elseif xny < closest_point[2]
+						ad[2,ni] += tm.barrier_cost * 2.0 * (xny - closest_point[2])
+					end
+
+					# ad[1,ni] += tm.barrier_cost * 2.0 * min_dx
+					# ad[2,ni] += tm.barrier_cost * 2.0 * min_dy
+				end
+			end
+		end
+
 		# control gradients
 		bd[:,ni] = tm.h * tm.R * ud[ni]
 

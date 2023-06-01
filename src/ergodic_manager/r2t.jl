@@ -12,7 +12,7 @@ export ErgodicManagerR2T
 """
 `ErgodicManagerR2T(d::Domain, phi::Matrix{Float64}, K::Int)`
 """
-type ErgodicManagerR2T <: ErgodicManager
+mutable struct ErgodicManagerR2T <: ErgodicManager
 	domain::Domain				# spatial domain
 	K::Int						# number of Fourier coefficients
 	phi::Array{Float64,3}		# spatial distribution

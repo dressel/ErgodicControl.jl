@@ -127,6 +127,37 @@ function barrier_score(em::ErgodicManager, xd::VVF, c::Float64)
 			dy = xi[2] - ymin
 			bs += c * dy * dy
 		end
+
+		# Repeat for PointsBoundary
+		if em.xy_points_boundary != PointsBoundary(Tuple{Float64, Float64}[])
+			if in_boundary([xi[1], xi[2]], em.xy_points_boundary)
+				closest_point = find_closest_boundary([xi[1], xi[2]], em.xy_points_boundary)
+				xmax = closest_point[1]
+				xmin = closest_point[1]
+				ymax = closest_point[2]
+				ymin = closest_point[2]
+				min_dx = abs(xi[1] - closest_point[1])
+				min_dy = abs(xi[2] - closest_point[2])
+
+				bs += c * min_dx * min_dx
+				bs += c * min_dy * min_dy
+
+				if (xi[1] > xmax)
+					dx = xi[1] - xmax
+					bs += c * dx * dx
+				elseif (xi[1] < xmin)
+					dx = xi[1] - xmin
+					bs += c * dx * dx
+				end
+				if (xi[2] > ymax)
+					dy = xi[2] - ymax
+					bs += c * dy * dy
+				elseif (xi[2] < ymin)
+					dy = xi[2] - ymin
+					bs += c * dy * dy
+				end
+			end
+		end
 	end
 	return bs
 end

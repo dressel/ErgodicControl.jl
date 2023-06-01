@@ -7,7 +7,7 @@
 
 Samples points from a distribution.
 """
-type SampleInitializer <: Initializer end
+mutable struct SampleInitializer <: Initializer end
 
 
 function initialize(si::SampleInitializer, em::ErgodicManager, tm::TrajectoryManager)

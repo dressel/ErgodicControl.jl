@@ -19,8 +19,9 @@ Valid `example_name` entries are:
 * "single gaussian"
 * "double gaussian"
 """
-type ErgodicManagerR2 <: ErgodicManager
+mutable struct ErgodicManagerR2 <: ErgodicManager
 	domain::Domain				# spatial domain
+	xy_points_boundary::PointsBoundary 
 	K::Int						# number of Fourier coefficients
 	phi::Matrix{Float64}		# spatial distribution
 	phik::Matrix{Float64}		# distribution's Fourier coefficients
@@ -33,9 +34,10 @@ type ErgodicManagerR2 <: ErgodicManager
 	kpixl::Matrix{Float64}
 	kpiyl::Matrix{Float64}
 
-	function ErgodicManagerR2(d::Domain, phi::MF, K::Int=5)
+	function ErgodicManagerR2(d::Domain, phi::MF, K::Int=5, xy_points_boundary::PointsBoundary=PointsBoundary([]))
 		em = new()
 		em.domain = deepcopy(d)
+		em.xy_points_boundary = xy_points_boundary
 		em.K = K
 		em.hk = zeros(K+1,K+1)
 		em.phi = deepcopy(phi)
@@ -51,9 +53,10 @@ type ErgodicManagerR2 <: ErgodicManager
 		return em
 	end
 
-	function ErgodicManagerR2(d::Domain, K::Int=5)
+	function ErgodicManagerR2(d::Domain, K::Int=5, xy_points_boundary::PointsBoundary=PointsBoundary([]))
 		em = new()
 		em.domain = deepcopy(d)
+		em.xy_points_boundary = xy_points_boundary
 		em.K = K
 		em.hk = zeros(K+1,K+1)
 		#em.phi = deepcopy(phi)

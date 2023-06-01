@@ -44,6 +44,7 @@ include("lqr.jl")
 
 # ergodic manager
 include("ergodic_manager/domain.jl")
+include("ergodic_manager/boundary.jl")
 include("ergodic_manager/gaussian.jl")
 include("ergodic_manager/circle.jl")
 include("ergodic_manager/ergodic_manager.jl")

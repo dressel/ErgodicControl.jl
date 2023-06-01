@@ -3,6 +3,8 @@
 #
 # Creates gaussian distributions over domains
 ######################################################################
+using LinearAlgebra
+
 export gaussian
 
 gaussian(domain::Domain, dm::VF, ds::MF) = gaussian(domain, [dm], [ds])
@@ -17,8 +19,21 @@ The resulting distribution is normalized.
 
 The simple constructor `gaussian(domain, mean, cov)` allows you to construct a distribution from a single Gaussian.
 """
-function gaussian{T<:Real}(domain::Domain, means::VVF, covs::VMF, weights::Vector{T}=ones(length(means)))
+# function gaussian{T<:Real}(domain::Domain, means::VVF, covs::VMF, weights::Vector{T}=ones(length(means)))
+# 	# TODO: check that provided dimensions are correct
+# 	w = float(weights)
+# 	n = domain.num_dims
+# 	if n == 2
+# 		return gaussian2D(domain, means, covs, w)
+# 	elseif n == 3
+# 		return gaussian3D(domain, means, covs, w)
+# 	end
+# end
+function gaussian(domain::Domain, means::VVF, covs::VMF, weights::VF=ones(length(means)))
 	# TODO: check that provided dimensions are correct
+	if isempty(weights)
+		weights=ones(length(means))
+	end
 	w = float(weights)
 	n = domain.num_dims
 	if n == 2

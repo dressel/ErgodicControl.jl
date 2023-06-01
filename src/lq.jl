@@ -39,15 +39,17 @@ end
 # This appears to be the one currrently in use
 function LQ(A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 	# Also needed for LQR
-	P = Array{Matrix{Float64}}(N+1)
-	G = Array{Matrix{Float64}}(N)
-	K = Array{Matrix{Float64}}(N)
+	#Array{Vector{Float64}}(undef, tm.N+1)
+
+	P = Array{Matrix{Float64}}(undef, N+1)
+	G = Array{Matrix{Float64}}(undef, N)
+	K = Array{Matrix{Float64}}(undef, N)
 	P[N+1] = Q
 
 	# Solely for LQ
-	r = Array{Vector{Float64}}(N+1)
+	r = Array{Vector{Float64}}(undef, N+1)
 	r[N+1] = 0.5*a[:,N+1]
-	C = Array{Vector{Float64}}(N)
+	C = Array{Vector{Float64}}(undef, N)
 
 	# Sweep from the back
 	# really n = (N-1):-1:0, but then all indices need an extra +1
@@ -79,9 +81,9 @@ end
 function LQ(K::VMF, Ginv::VMF, A::VMF, B::VMF, a::MF, b::MF, Q::MF, R::MF, N::Int)
 
 	# Solely for LQ
-    r = Array{Vector{Float64}}(N+1)
+    r = Array{Vector{Float64}}(undef, N+1)
 	r[N+1] = 0.5*a[:,N+1]
-    C = Array{Vector{Float64}}(N)
+    C = Array{Vector{Float64}}(undef, N)
 
 	# Sweep from the back
 	# really n = (N-1):-1:0, but then all indices need an extra +1

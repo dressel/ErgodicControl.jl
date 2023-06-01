@@ -7,7 +7,7 @@
 
 Takes a trajectory to the farthest corner.
 """
-type CornerInitializer <: Initializer end
+mutable struct CornerInitializer <: Initializer end
 
 
 # Assumes we our domain is 2d

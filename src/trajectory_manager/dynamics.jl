@@ -2,13 +2,15 @@
 # dynamics.jl
 # Each trajectory manager will have a type of dynamics
 ######################################################################
+using LinearAlgebra
+
 export Dynamics, LinearDynamics, DubinsDynamics, linearize
 export IntegrationScheme, ForwardEuler, SymplecticEuler
 export forward_euler
 export GroupDynamics
 export vvf2vvvf
 
-type LinearDynamics <: Dynamics
+mutable struct LinearDynamics <: Dynamics
     n::Int
     m::Int
     A::Matrix{Float64}
@@ -20,7 +22,7 @@ type LinearDynamics <: Dynamics
     end
 end
 
-type GroupDynamics <: Dynamics
+mutable struct GroupDynamics <: Dynamics
 	n::Int
 	m::Int
 	num_agents::Int
@@ -37,7 +39,7 @@ type GroupDynamics <: Dynamics
 	end
 end
 
-type DubinsDynamics <: Dynamics
+mutable struct DubinsDynamics <: Dynamics
 	n::Int
 	m::Int
 
@@ -49,15 +51,15 @@ type DubinsDynamics <: Dynamics
 	DubinsDynamics(v0::Real, r::Real) = new(3, 1, v0, r)
 end
 
-# Not really types, 
+# Not really types,
 export SingleIntegrator, DoubleIntegrator
 function SingleIntegrator(n::Int, h::Float64)
-	A = eye(n)
-	B = h*eye(n)
+	A = diagm(ones(n,))
+	B = h*diagm(ones(n,))
 	return LinearDynamics(A, B)
 end
 function DoubleIntegrator(n::Int, h::Float64)
-	A = eye(2*n)
+	A = diagm(ones(2*n,))
 	for i = 1:n
 		A[i, n+i] = h
 	end
@@ -85,9 +87,9 @@ Not only sets `tm.dynamics = d`, but also sets reward matrices `tm.Qn`, `tm.R`, 
 """
 function dynamics!(tm::TrajectoryManager, d::Dynamics)
 	tm.dynamics = d
-	tm.Qn = eye(d.n)
-	tm.R = 0.01 * eye(d.m)
-	tm.Rn = eye(d.m)
+	tm.Qn = diagm(ones(d.n,))
+	tm.R = 0.01 * diagm(ones(d.m,))
+	tm.Rn = diagm(ones(d.m,))
 end
 
 
@@ -138,7 +140,7 @@ function linearize(ld::LinearDynamics, x::VF, u::VF, h::Float64)
 end
 
 function linearize(ld::DubinsDynamics, x::VF, u::VF, h::Float64)
-	A = eye(3)
+	A = diagm(ones(3,))
 	A[1,3] = -h * sin(x[3]) * ld.v0
 	A[2,3] = h * cos(x[3]) * ld.v0
 
@@ -195,8 +197,8 @@ end
 ######################################################################
 # integration
 ######################################################################
-type ForwardEuler <: IntegrationScheme end
-type SymplecticEuler <: IntegrationScheme end
+mutable struct ForwardEuler <: IntegrationScheme end
+mutable struct SymplecticEuler <: IntegrationScheme end
 
 function integrate(tm::TrajectoryManager, x::VF, u::VF)
 	integrate(tm.int_scheme, tm.dynamics, x, u, tm.h)
@@ -284,8 +286,8 @@ function symplectic_euler(d::Dynamics, x::VF, u::VF, h::Float64)
 	B2 = B[n2+1:d.n,:]
 
 	# block matrices
-	Ad22 = inv(eye(n2)-h*A22)
-	Ad11 = eye(n2) + h*A11 + h*h*A12*Ad22*A21
+	Ad22 = inv(diagm(ones(n2,))-h*A22)
+	Ad11 = diagm(ones(n2,)) + h*A11 + h*h*A12*Ad22*A21
 	Ad12 = h*A12*Ad22
 	Ad21 = h*Ad22*A21
 

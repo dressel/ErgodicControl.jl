@@ -41,7 +41,7 @@ end
 
 Just takes a constant action.
 """
-type CornerConstantInitializer <: Initializer
+mutable struct CornerConstantInitializer <: Initializer
 	magnitude::Float64
 end
 
@@ -51,7 +51,7 @@ end
 Greedily goes to spot with maximum phi.
 Assumes phi decreases at a constant rate.
 """
-type GreedyInitializer <: Initializer end
+mutable struct GreedyInitializer <: Initializer end
 
 
 """
@@ -59,7 +59,7 @@ type GreedyInitializer <: Initializer end
 
 Moves to point `xd`.
 """
-type PointInitializer <: Initializer
+mutable struct PointInitializer <: Initializer
 	xd::Vector{Float64}
 end
 
@@ -68,7 +68,7 @@ end
 
 Moves in the direction of point `xd` with magnitude `mag`.
 """
-type DirectionInitializer <: Initializer
+mutable struct DirectionInitializer <: Initializer
 	xd::Vector{Float64}
 	mag::Float64
 end

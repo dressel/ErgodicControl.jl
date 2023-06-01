@@ -1,3 +1,10 @@
+# using ErgodicControl
+# using Test
+#
+# @testset "ErgodicControl.jl" begin
+#     # Write your tests here.
+# end
+
 using ErgodicControl
 using Base.Test
 
